@@ -4,7 +4,7 @@
   <img src="header-ethernium-v10.svg?v=510" alt="Ethernium Banner" width="90%" />
   <br/><br/>
   <p align="center">
-  <code>[ECOSYSTEM]</code> &nbsp;  &nbsp;
+  <code>[???]</code> &nbsp;  &nbsp;
   </p>
   <p align="center">
     <code>[AI TOOLS]</code> &nbsp;•&nbsp;
