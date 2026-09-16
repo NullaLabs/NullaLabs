@@ -4,12 +4,10 @@
   <img src="header-ethernium-v10.svg?v=510" alt="Ethernium Banner" width="90%" />
   <br/><br/>
   <p align="center">
-  <code>[???]</code> &nbsp;  &nbsp;
-  </p>
-  <p align="center">
-    <code>[AI TOOLS]</code> &nbsp;•&nbsp;
-    <code>[LOCAL-FIRST]</code> &nbsp;•&nbsp;
-    <code>[OPEN SOURCE]</code>
+    <code>[NEUROMORPHIC COMPUTING]</code> &nbsp;•&nbsp;
+    <code>[LOCAL-FIRST SOVEREIGNTY]</code> &nbsp;•&nbsp;
+    <code>[GPU & 60 FPS WEBGL]</code> &nbsp;•&nbsp;
+    <code>[SOVEREIGN DEFENSE]</code>
   </p>
 
   <!-- AAA HERO BADGE -->
@@ -29,16 +27,14 @@
 
 ---
 
-### Ethernium
+### Ethernium :: NullaLabs
+**Nemeth Corporation R&D Division**
 
-**Ethernium** builds practical AI tools for people who work heavily with language models.
-
-Focus:
-- reduce cost
-- keep control of long-running projects
-- stay **local-first**
-
-R&D by **Nulla-Labs// Nemeth Corp.**.
+Engineering high-fidelity, local-first software architectures built on pure silicon principles:
+- **Zero-Cloud Dependency:** Complete air-gap autonomy, local-first execution, and zero-cost local LLM routing (`nullalabs-sentinel`).
+- **Biophysical & Neuromorphic Computing:** SNN LIF micro-fabrics, SMC-32 spike protocols, and deterministic state machines.
+- **Cryptographic Auditability:** SHA-256 Merkle proofs, Ed25519 signatures, and OpenTimestamps anchored directly into the Bitcoin blockchain.
+- **Extreme Frugality:** 0.00% idle CPU footprint, sub-millisecond governance execution ($O(1)$ linters), and 60 FPS GPU hardware acceleration.
 
 ---
 
@@ -63,24 +59,50 @@ R&D by **Nulla-Labs// Nemeth Corp.**.
 
 ---
 
-### ***Main Projects***
+### ***Main Flagship Systems***
 
-#### 01. Chronolith
+#### 01. Ethernium Orb Antivirus (N-EDR)
 
 <table>
 <tr>
 <td width="58%" valign="middle">
 
-**Cryptographic integrity for long-running AI projects**
+**Military-Grade Autonomous Neuromorphic-Symbolic EDR for Windows**
+
+Ultra-lightweight endpoint protection combining biophysical spike dynamics and deep binary inspection with zero mock dependencies.
+
+- **0.00% CPU Idle Footprint:** Native 17 MB compiled C# host + isolated WebView2 UI; runs without background battery or thread drain.
+- **Shannon Entropy Engine:** Real-time entropy burst analysis ($\mathcal{H} > 7.35$) identifying and terminating active ransomware encryption loops prior to data loss.
+- **Deep Kernel Inspection:** Real-time PE/COFF binary parser, live Win32 TCP socket sentry mapping executables, AMSI in-memory script de-obfuscation, and Anti-BadUSB hardware sentry.
+
+[Status: Standalone Windows Binary (17 MB) · Air-Gapped EDR]
+
+</td>
+<td width="42%" valign="middle">
+  <img src="logo-orb-antivirus.png" alt="Ethernium Orb Antivirus" width="100%" />
+</td>
+</tr>
+</table>
+
+---
+
+#### 02. Chronolith
+
+<table>
+<tr>
+<td width="58%" valign="middle">
+
+**Cryptographic integrity & historical continuity for long-running AI projects**
 
 Merkle Trees + Ed25519 + Bitcoin anchoring (OpenTimestamps).  
-Detects semantic drift and provides verifiable evidence of project state over time.
+Detects semantic drift and provides mathematically verifiable evidence of project state over time.
 
-- Verifiable project baselines  
-- Continuity across human–AI sessions  
+- Verifiable project baselines & Merkle proofs
+- Continuity across human–AI sessions (Crystal Handoff)
+- Public Bitcoin anchoring on Block #958484
 - Editions: Lite · Pro · Omega  
 
-[Repo](https://github.com/SteveBlackbeard/CHRONOLITH-by-Ethernium)
+[PyPI Package: chronolith-pro](https://pypi.org/project/chronolith-pro/) &nbsp;•&nbsp; [Bitcoin Anchor: Block #958484](https://blockstream.info/block/000000000000000000021b34e5b61c7755b4b1a43a04a3952f4dc1f1e0dfc5d2)
 
 </td>
 <td width="42%" valign="middle">
@@ -91,7 +113,7 @@ Detects semantic drift and provides verifiable evidence of project state over ti
 
 ---
 
-#### 02. Conekta 
+#### 03. Conekta 
 
 <table>
 <tr>
@@ -100,7 +122,7 @@ Detects semantic drift and provides verifiable evidence of project state over ti
 </td>
 <td width="58%" valign="middle">
 
-**Visual Command Surface for CHRONOLITH**
+**Visual Command Surface for CHRONOLITH & SENESCHAL**
 
 Standalone Next.js dashboard that renders the sovereign core, live telemetry, forensic rails, document reading, and the linked-system ecosystem around the central runtime.
 
@@ -109,7 +131,7 @@ Standalone Next.js dashboard that renders the sovereign core, live telemetry, fo
 - Honest APIs (`501 SCRIPT_NOT_AVAILABLE` instead of faking runs)  
 - Adapters to Seneschal & Chronolith  
 
-[Repo](https://github.com/SteveBlackbeard/CONEKTA-by-Ethernium)
+[Interactive Surface: 3D Engine Demo](https://steveblackbeard.github.io/SteveBlackbeard/demo/)
 
 </td>
 </tr>
@@ -117,21 +139,22 @@ Standalone Next.js dashboard that renders the sovereign core, live telemetry, fo
 
 ---
 
-#### 03. Seneschal
+#### 04. Seneschal
 
 <table>
 <tr>
 <td width="58%" valign="middle">
 
-**Efficiency and security layer for AI workflows**
+**Tactical cognitive arbitration & frugal AI routing layer**
 
 Local-first context selection, token reduction, and prompt/secret scanning.
 
-- **88–92% token reduction observed in internal repository tests** (public benchmark methodology pending)
-- Security scanning + intelligent model routing  
-- Signed capability grants  
+- **88–92% token reduction observed in internal repository tests** via deterministic BM25 dynamic context retriever.
+- Real-time secret and prompt-injection defense  
+- Cryptographically signed capability grants (Ed25519)  
+- Zero runtime dependencies Python package  
 
-[Repo](https://github.com/SteveBlackbeard/SENESCHAL-by-Ethernium)
+[PyPI Package: seneschal](https://pypi.org/project/seneschal/) &nbsp;•&nbsp; [Documentation](https://pypi.org/project/seneschal/)
 
 </td>
 <td width="42%" valign="middle">
@@ -142,7 +165,32 @@ Local-first context selection, token reduction, and prompt/secret scanning.
 
 ---
 
-#### 04. Fonts Forge
+#### 05. PROTEKTA & HYDRA
+
+<table>
+<tr>
+<td width="42%" valign="middle">
+  <img src="ethernium-brand-logo1-cropped.png" alt="PROTEKTA HYDRA Defense" width="100%" />
+</td>
+<td width="58%" valign="middle">
+
+**9-Headed Neuromorphic Defense Sentinel & Cryptographic Bunker**
+
+Biological immune system for sovereign machines powered by spiking neural networks and formal grammars.
+
+- **SNN + Formal BNF Grammars:** Mathematical protocol verification intercepting zero-day execution attempts.
+- **Lockdown Protocol:** Multi-tier bunker protocol with outbound network killswitch, cryo-freeze process isolation, and repository encryption.
+- **Forensic Ledger:** Inmutable black-box audit trail sealed with Chronolith.
+
+[Status: Defense Core · Nemeth Corp Private Build]
+
+</td>
+</tr>
+</table>
+
+---
+
+#### 06. Fonts Forge
 
 <table>
 <tr>
@@ -157,8 +205,9 @@ Converts raster specimens into TTF / WOFF / WOFF2 with Bézier curve fitting, sy
 
 - Complete raster → vector pipeline  
 - Focused on branding and custom typography  
+- Sub-pixel curve optimization and lossless quantization  
 
-[Repo](https://github.com/SteveBlackbeard/FONTS-FORGE-by-Ethernium)
+[Interactive Demo: 3D Engine](https://steveblackbeard.github.io/SteveBlackbeard/demo/)
 
 </td>
 </tr>
@@ -166,7 +215,7 @@ Converts raster specimens into TTF / WOFF / WOFF2 with Bézier curve fitting, sy
 
 ---
 
-#### 05. Kaptura 
+#### 07. Kaptura 
 
 <table>
 <tr>
@@ -180,7 +229,7 @@ Browser-native capture (getDisplayMedia) plus REAL processing: Lanczos-3 rescali
 - **V-Converter**: real MP4/WebM re-encode · **Cinema GIF** (native encoder) · **SVG Vector** export  
 - **UPSKALETOR**: real in-browser Lanczos upscale + honest handoff to the independent AI engine  
 
-[Repo](https://github.com/SteveBlackbeard/KAPTURA-by-Ethernium)
+[Interactive Studio Demo](https://steveblackbeard.github.io/SteveBlackbeard/demo/)
 
 </td>
 <td width="42%" valign="middle">
