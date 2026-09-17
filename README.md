@@ -61,7 +61,7 @@ Engineering high-fidelity, local-first software architectures built on pure sili
 
 ### ***Main Flagship Systems***
 
-#### 01. Ethernium Orb Antivirus (N-EDR)
+#### 01. Ethernium Orb (N-EDR)
 
 <table>
 <tr>
