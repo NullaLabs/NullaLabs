@@ -119,6 +119,8 @@ assert.match(app, /periodicCells\.forEach\(cell => \{[\s\S]{0,260}elementAria/, 
 assert.match(html, /@media \(max-width: 600px\)[\s\S]{0,1800}\.nuclear-mode-bar \{[^}]*overflow-x:auto/, 'mobile nuclear controls must scroll instead of clipping');
 assert.match(app, /setDialogBackgroundInert\(dialog,true\)/, 'modal dialogs must isolate background semantics and focus');
 assert.match(app, /calibratedGeometryExportAllowed\(\)/, 'coordinate exporters must share the calibrated-geometry gate');
+assert.match(html, /src\/audio\/procedural-audio\.js\?v=101\.2/, 'procedural audio synthesizer module is absent from html');
+assert.match(app, /NULLA_AUDIO/, 'procedural tactile feedback is not integrated into runtime');
 
 const periodicSandbox = {window:{}};
 vm.runInNewContext(periodicSource, periodicSandbox);

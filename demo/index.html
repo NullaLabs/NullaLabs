@@ -3,226 +3,562 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NULLA-LABS // ETHERNIUM 3D MOLECULAR PLATFORM (v72.0 Monolithic)</title>
-  <meta name="description" content="Plataforma de síntesis molecular 3D de alta fidelidad con simulación termodinámica en tiempo real, medición interatómica y nanomateriales avanzados.">
+  <title>NULLA-LABS // IUPAC 3D MOLECULAR SYNTHESIS PLATFORM</title>
+  <meta name="description" content="Interactive educational 3D molecular and nuclear visualization platform with the 118-element periodic table, catalogued chemical products, isotope-aware reaction channels, and explicit model limitations.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html, body { width:100%; height:100%; overflow:hidden; background:#020306; font-family:'Fira Code', monospace; color:#d0e0ff; user-select:none; }
+    html, body { width:100%; height:100%; overflow:hidden; background:#020306; font-family:'Fira Code', monospace; color:#d0e0ff; }
+    body[data-experience="basic"] .experience-lab,
+    body[data-experience="basic"] .experience-science,
+    body[data-experience="lab"] .experience-science { display:none !important; }
+    .experience-mode-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; margin:-2px 0 8px; padding:4px; border:1px solid rgba(0,240,255,.22); border-radius:11px; background:rgba(3,8,16,.72); }
+    .experience-mode-btn { min-height:28px; padding:5px 4px; border-radius:8px; border:1px solid rgba(255,255,255,.2); color:#fff; background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(10,15,25,.88)); font:800 7.5px 'Orbitron',sans-serif; letter-spacing:.4px; cursor:pointer; }
+    .experience-mode-btn[aria-checked="true"] { color:#00FFCF; border-color:#00F0FF; background:linear-gradient(180deg,rgba(0,240,255,.24),rgba(8,18,28,.95)); box-shadow:0 0 14px rgba(0,240,255,.2),inset 0 1px rgba(255,255,255,.3); }
+    #experience-mode-description { min-height:25px; margin:0 0 8px; color:rgba(255,255,255,.8); font-size:8.5px; line-height:1.4; }
+    .thermal-status { width:100%; margin-top:4px; }
+    .thermal-meter { height:4px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.12); }
+    #phase-progress-fill { display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,#00A8FF,#00FF9D,#FFB000,#FF325F); transition:width .25s ease; }
+    #phase-transition-status { display:block; margin-top:3px; color:rgba(255,255,255,.72); font-size:7.5px; line-height:1.35; }
+    .tutorial-objective { margin:8px 0 12px; padding:7px 9px; border-radius:8px; font-size:8.5px; line-height:1.35; border:1px solid rgba(255,215,0,.35); background:rgba(255,215,0,.08); color:#FFE38B; }
+    .tutorial-objective[data-complete="true"] { border-color:rgba(0,255,157,.5); background:rgba(0,255,157,.1); color:#8CFFD4; }
+    .tutorial-highlight { outline:2px solid #00FF9D !important; outline-offset:4px; animation:tutorialPulse 1.2s ease-in-out infinite alternate; }
+    @keyframes tutorialPulse { from { filter:drop-shadow(0 0 4px rgba(0,255,157,.35)); } to { filter:drop-shadow(0 0 14px rgba(0,255,157,.85)); } }
+    .sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important; }
 
     #webgl-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; display:block; z-index:0; touch-action:none; }
 
-    /* ─── GLASSMORPHIC HUD CARD ─── */
-    .glass-card {
-      background: linear-gradient(145deg, rgba(14,18,26,0.90) 0%, rgba(4,6,12,0.95) 100%);
-      backdrop-filter: blur(20px) saturate(1.6);
-      -webkit-backdrop-filter: blur(20px) saturate(1.6);
-      border: 1px solid rgba(0,240,255,0.25);
-      border-radius: 14px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.2);
-    }
-
-    /* ─── 3D SHADER BUTTONS ─── */
-    .btn-3d {
-      background: linear-gradient(135deg, rgba(16, 24, 40, 0.9), rgba(6, 12, 24, 0.95));
-      border: 1px solid rgba(0, 240, 255, 0.4);
-      color: #00F0FF;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 9px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.8);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-3d::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .btn-3d:hover {
-      transform: translateY(-2px);
-      border-color: #00F0FF;
-      color: #FFFFFF;
-      box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.4);
-    }
-
-    .btn-3d:hover::before {
-      left: 100%;
-    }
-
-    .btn-3d:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 6px rgba(0, 240, 255, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.9);
-    }
-
-    .btn-3d.active {
-      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(138, 43, 226, 0.3));
-      border-color: #00FF9D;
-      color: #00FF9D;
-      box-shadow: 0 0 15px rgba(0, 255, 157, 0.5);
-    }
-
     /* ─── HEADER ─── */
     .hud-header {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; align-items: center; justify- space-between;
-      padding: 10px 22px; backdrop-filter: blur(20px);
-      background: linear-gradient(145deg, rgba(14,18,26,0.90) 0%, rgba(4,6,12,0.95) 100%);
-      border-bottom: 1px solid rgba(0,240,255,0.22);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.85);
+      position:fixed; top:0; left:0; right:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
+      padding:10px 22px; backdrop-filter:blur(20px) saturate(1.6); -webkit-backdrop-filter:blur(20px) saturate(1.6);
+      background:linear-gradient(145deg, rgba(14,18,26,0.90) 0%, rgba(4,6,12,0.95) 100%);
+      border-bottom:1px solid rgba(255,255,255,0.22);
+      box-shadow:0 8px 32px rgba(0,0,0,0.85);
     }
-    .hud-title { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #00F0FF; text-shadow: 0 0 10px rgba(0,240,255,0.6); }
+    .hud-title { font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#FFFFFF; text-shadow:0 0 10px rgba(255,255,255,0.8); }
+    .hud-badge { padding:4px 12px; border-radius:10px; font-size:9px; letter-spacing:1px; background:linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%); color:#FFFFFF; border:1px solid rgba(255,255,255,0.3); font-weight:600; box-shadow:inset 0 1px 1px rgba(255,255,255,0.3); }
 
     /* ─── TELEMETRY PANEL ─── */
     #molecular-hud {
-      position: fixed; top: 60px; left: 14px; z-index: 10; width: 320px;
-      padding: 16px; display: flex; flex-direction: column; gap: 10px;
+      position:fixed; top:60px; left:14px; z-index:10; width:310px;
+      backdrop-filter:blur(20px) saturate(1.6); -webkit-backdrop-filter:blur(20px) saturate(1.6);
+      background:linear-gradient(145deg, rgba(14,18,26,0.90) 0%, rgba(4,6,12,0.95) 100%);
+      border:1px solid rgba(255,255,255,0.22); border-radius:14px; padding:16px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.2);
     }
-    #molecular-hud h3 { font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00F0FF; letter-spacing: 1.5px; border-bottom: 1px solid rgba(0,240,255,0.25); padding-bottom: 4px; }
-    .hud-row { display: flex; font-size: 11px; margin-bottom: 4px; justify-content: space-between; }
-    .hud-label { color: rgba(255,255,255,0.65); }
-    .hud-val { color: #FFFFFF; font-weight: 600; text-align: right; }
+    #molecular-hud h3 { font-family:'Orbitron',sans-serif; font-size:10px; color:#FFFFFF; letter-spacing:2px; margin-bottom:12px; text-shadow:0 0 8px rgba(255,255,255,0.6); }
+    .hud-row { display:flex; font-size:10.5px; margin-bottom:6px; }
+    .hud-label { color:rgba(255,255,255,0.65); width:90px; flex-shrink:0; }
+    .hud-val { color:#FFFFFF; flex:1; overflow-wrap:anywhere; font-weight:600; }
+    .scientific-token { direction:ltr; unicode-bidi:isolate; }
+    #onboarding-overlay, #docs-modal, #quiz-modal, #suggestion-modal {
+      max-width:calc(100vw - 24px); max-height:calc(100dvh - 24px); overflow-y:auto;
+    }
+    #btn-reassemble, #btn-open-pt {
+      width:100%; margin-top:10px; padding:9px 0; border:1px solid rgba(255,255,255,0.35); border-radius:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%);
+      color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:700;
+      letter-spacing:2px; cursor:pointer; transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow:0 4px 14px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.6);
+      text-shadow:0 1px 3px rgba(0,0,0,0.8);
+    }
+    #btn-reassemble:hover, #btn-open-pt:hover {
+      transform:translateY(-2px);
+      background:linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 45%, rgba(28,38,56,0.95) 100%);
+      box-shadow:0 8px 22px rgba(255,255,255,0.2), inset 0 1px 2px rgba(255,255,255,0.7), inset 0 -2px 4px rgba(0,0,0,0.6);
+      border-color:rgba(255,255,255,0.6);
+    }
 
-    /* THERMAL SLIDER */
-    .thermal-control { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
-    input[type=range] { -webkit-appearance: none; width: 100%; background: rgba(0, 240, 255, 0.15); height: 6px; border-radius: 3px; outline: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #00F0FF; box-shadow: 0 0 10px #00F0FF; cursor: pointer; }
+    /* ─── FOOTER STATS ─── */
+    .hud-stats { position:fixed; bottom:14px; left:14px; z-index:10; display:flex; gap:12px; }
+    .stat-chip {
+      padding:6px 14px; border-radius:10px; font-size:9.5px; font-weight:700; letter-spacing:1px; color:#FFFFFF;
+      background:linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 45%, rgba(18,24,36,0.9) 100%);
+      border:1px solid rgba(255,255,255,0.3); backdrop-filter:blur(16px);
+      box-shadow:0 4px 12px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.4);
+    }
 
-    /* MATERIALS TOOLBAR */
-    .materials-toolbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 4px; }
-
-    /* FOOTER STATS */
-    .hud-stats { position: fixed; bottom: 14px; left: 14px; z-index: 10; display: flex; gap: 12px; }
-    .stat-chip { padding: 6px 14px; border-radius: 10px; font-size: 10px; font-weight: 700; color: #00F0FF; }
-
-    /* PERIODIC TABLE PANEL (Bottom-Right) */
+    /* ═══════════════════════════════════════════════════════════════
+       PERIODIC TABLE HUD PANEL (Bottom-Right)
+       ═══════════════════════════════════════════════════════════════ */
     #pt-hud-panel {
-      position: fixed; bottom: 14px; right: 14px; z-index: 10;
-      width: 580px; background: linear-gradient(145deg, rgba(14,18,26,0.94) 0%, rgba(4,6,12,0.98) 100%);
-      border: 1px solid rgba(0,240,255,0.25); border-radius: 16px;
-      padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
-      box-shadow: 0 14px 45px rgba(0,0,0,0.9);
+      position:fixed; bottom:14px; right:14px; z-index:10;
+      width:560px; backdrop-filter:blur(22px) saturate(1.7); -webkit-backdrop-filter:blur(22px) saturate(1.7);
+      background:linear-gradient(145deg, rgba(14,18,26,0.92) 0%, rgba(4,6,12,0.96) 100%);
+      border:1px solid rgba(255,255,255,0.25); border-radius:16px;
+      padding:12px 14px; display:flex; flex-direction:column; gap:8px;
+      box-shadow:0 14px 45px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.25);
+      box-sizing:border-box; overflow:hidden;
     }
-    .pt-grid { display: grid; grid-template-columns: repeat(18, 1fr); gap: 2px; width: 100%; }
-    .pt-el { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3px 0; border-radius: 6px; cursor: pointer; min-height: 26px; border: 1px solid rgba(0,240,255,0.2); background: rgba(16,24,40,0.8); transition: all 0.2s ease; }
-    .pt-el:hover { transform: scale(1.3); z-index: 5; border-color: #00F0FF; box-shadow: 0 0 12px #00F0FF; }
-    .pt-el-num { font-size: 6px; color: #94A3B8; }
-    .pt-el-sym { font-family: 'Orbitron', sans-serif; font-size: 9.5px; font-weight: 700; color: #FFFFFF; }
+    
+    .pt-panel-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.18); padding-bottom:5px; margin-bottom:2px; }
+    .pt-panel-title { font-family:'Orbitron',sans-serif; font-size:11px; color:#FFFFFF; letter-spacing:2px; text-transform:uppercase; text-shadow:0 0 10px rgba(255,255,255,0.7); }
 
-    .fusion-bar { display: flex; justify-content: center; align-items: center; gap: 8px; padding-top: 6px; border-top: 1px solid rgba(0,240,255,0.2); }
-    .slot-btn { width: 85px; height: 34px; border: 1px dashed rgba(0,240,255,0.4); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #94A3B8; }
-    .slot-btn.active { border: 1px solid #00F0FF; color: #00F0FF; background: rgba(0,240,255,0.1); }
+    /* Grid Layout — 18 columns for the standard IUPAC periodic table */
+    .pt-grid {
+      display:grid; grid-template-columns:repeat(18, 1fr); gap:2px;
+      width:100%; box-sizing:border-box;
+    }
+
+    .pt-el {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:3px 0px; border-radius:6px; cursor:pointer;
+      min-height:25px; border:1px solid rgba(255,255,255,0.18);
+      transition: all 0.2s ease; position:relative;
+      box-shadow:inset 0 1px 1px rgba(255,255,255,0.25);
+    }
+    .pt-el:hover { transform:scale(1.32); z-index:5; box-shadow:0 0 16px currentColor; border-color:currentColor; }
+    .pt-el:focus-visible {
+      outline:2px solid #FFFFFF; outline-offset:2px; z-index:6;
+      transform:scale(1.2); box-shadow:0 0 18px currentColor;
+    }
+    .pt-scroll { width:100%; overflow-x:hidden; overflow-y:visible; }
+    .pt-el-num { font-size:6px; color:rgba(255,255,255,0.75); line-height:1; }
+    .pt-el-sym { font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:700; line-height:1; margin-top:1px; }
+
+    /* Category Colors */
+    .cat-nonmetal   { background:rgba(0,240,255,0.18); color:#FFFFFF; }
+    .cat-noble      { background:rgba(191,0,255,0.18); color:#FFFFFF; }
+    .cat-alkali     { background:rgba(255,215,0,0.18); color:#FFFFFF; }
+    .cat-alkaline   { background:rgba(255,153,0,0.18); color:#FFFFFF; }
+    .cat-transition { background:rgba(0,212,255,0.18); color:#FFFFFF; }
+    .cat-post       { background:rgba(170,170,170,0.18); color:#FFFFFF; }
+    .cat-metalloid  { background:rgba(0,255,157,0.18); color:#FFFFFF; }
+    .cat-halogen    { background:rgba(255,0,85,0.18); color:#FFFFFF; }
+    .cat-lanthanide { background:rgba(255,105,180,0.18); color:#FFFFFF; }
+    .cat-actinide   { background:rgba(255,100,50,0.18); color:#FFFFFF; }
+
+    /* Lanthanide/Actinide separator indicator */
+    .pt-spacer { grid-column: span 18; height:4px; }
+    .pt-la-label, .pt-ac-label {
+      grid-column: 1 / 4; display:flex; align-items:center; justify-content:center;
+      font-size:7.5px; letter-spacing:0.5px; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-weight:600;
+    }
+
+    /* ─── FUSION BAR ─── */
+    .fusion-bar {
+      display:flex; align-items:center; justify-content:space-between; gap:5px;
+      padding:6px 10px; border-radius:12px; background:rgba(8,12,20,0.8); border:1px solid rgba(255,255,255,0.22);
+      margin-top:4px; box-sizing:border-box; width:100%; overflow:hidden;
+    }
+    .fusion-slot {
+      width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-family:'Orbitron',sans-serif; font-size:11.5px; font-weight:700;
+      border:1px solid rgba(255,255,255,0.32); background:linear-gradient(145deg, rgba(20,26,38,0.9) 0%, rgba(8,12,20,0.95) 100%);
+      color:#FFFFFF; box-shadow:inset 0 2px 4px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.5); flex-shrink:0;
+    }
+    .fusion-plus { font-size:13px; color:rgba(255,255,255,0.75); }
+    .fusion-btn, .fusion-btn-undo, .fusion-btn-clear {
+      padding:6px 9px; border-radius:9px; border:1px solid rgba(255,255,255,0.38);
+      background:linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.09) 45%, rgba(18,24,36,0.92) 100%);
+      color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:0.8px; cursor:pointer;
+      transition:all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink:0; white-space:nowrap;
+      box-shadow:0 4px 12px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 2px rgba(0,0,0,0.6);
+      text-shadow:0 1px 2px rgba(0,0,0,0.8);
+    }
+    .fusion-btn:hover, .fusion-btn-undo:hover, .fusion-btn-clear:hover {
+      transform:translateY(-1.5px);
+      background:linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.18) 45%, rgba(28,38,56,0.98) 100%);
+      box-shadow:0 8px 20px rgba(255,255,255,0.22), inset 0 1px 2px rgba(255,255,255,0.7);
+      border-color:rgba(255,255,255,0.65);
+    }
+    #btn-mix { border-color:rgba(112,190,255,.55); text-shadow:0 0 8px rgba(112,190,255,.8); }
+    .nuclear-mode-bar {
+      display:flex; gap:5px; margin-top:4px; padding:5px 8px; border-radius:10px;
+      background:rgba(8,12,20,.84); border:1px solid rgba(255,110,0,.26);
+    }
+    .nuclear-btn { flex:1; }
+    #nuclear-route-selector { width:168px; min-width:118px; padding:4px 5px; border-radius:7px; color:#fff; border:1px solid rgba(255,215,0,.42); background:#090D16; font:700 7.5px 'Fira Code',monospace; }
+    #btn-nuclear-fusion { border-color:rgba(0,240,255,.55); text-shadow:0 0 8px #00F0FF; }
+    #btn-nuclear-fission { border-color:rgba(255,80,0,.65); text-shadow:0 0 8px #FF5500; }
+    #language-selector { max-width:92px; padding:3px 5px; border-radius:6px; color:#fff; border:1px solid rgba(0,240,255,.4); background:#0A101A; font:700 8px 'Orbitron',sans-serif; }
+    .fusion-label { font-size:8.5px; color:#FFFFFF; letter-spacing:1px; font-weight:bold; flex-shrink:0; }
+    .fusion-label { font-size:8px; color:#FFFFFF; letter-spacing:1px; font-weight:bold; flex-shrink:0; }
+
+    /* ─── LEGEND ─── */
+    .pt-legend {
+      display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; justify-content:center;
+    }
+    .pt-legend-item { display:flex; align-items:center; gap:3px; font-size:6.5px; letter-spacing:0.3px; color:#FFFFFF; font-weight:500; }
+    .pt-legend-dot { width:6px; height:6px; border-radius:50%; box-shadow:0 0 4px currentColor; }
+
+    /* ─── HOVER TOOLTIP ─── */
+    #pt-tooltip {
+      position:fixed; z-index:100; pointer-events:none; display:none;
+      padding:10px 14px; border-radius:12px;
+      backdrop-filter:blur(20px) saturate(1.6); -webkit-backdrop-filter:blur(20px) saturate(1.6);
+      background:linear-gradient(145deg, rgba(14,18,26,0.95) 0%, rgba(4,6,12,0.98) 100%);
+      border:1px solid rgba(255,255,255,0.3);
+      box-shadow:0 8px 32px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.3);
+    }
+    .tt-header { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:#FFFFFF; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:3px; text-shadow:0 0 6px rgba(255,255,255,0.5); }
+    .tt-row { font-size:10px; color:#FFFFFF; margin-bottom:3px; display:flex; justify-content:space-between; gap:14px; }
+    .tt-label { color:rgba(255,255,255,0.65); }
+
+    /* MATERIALS LAB — same shader/glass language as the existing HUD */
+    .material-lab {
+      margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,240,255,0.25);
+    }
+    .material-lab-title {
+      margin-bottom:6px; color:#00F0FF; font:900 8.5px 'Orbitron',sans-serif;
+      letter-spacing:1.4px; text-shadow:0 0 10px rgba(0,240,255,0.65);
+    }
+    .material-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; }
+    .shader-btn {
+      position:relative; overflow:hidden; padding:6px 4px; border-radius:8px;
+      border:1px solid rgba(0,240,255,0.42);
+      background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(18,24,36,.92));
+      color:#fff; font:800 8px 'Orbitron',sans-serif; cursor:pointer;
+      box-shadow:inset 0 1px rgba(255,255,255,.32),0 4px 12px rgba(0,0,0,.35);
+      text-shadow:0 0 7px rgba(0,240,255,.65); transition:.2s ease;
+    }
+    .shader-btn::before {
+      content:""; position:absolute; inset:-60% auto -60% -45%; width:35%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+      transform:rotate(18deg); transition:left .45s ease;
+    }
+    .shader-btn:hover,.shader-btn:focus-visible {
+      transform:translateY(-1px); border-color:#00F0FF;
+      box-shadow:0 0 15px rgba(0,240,255,.24),inset 0 1px rgba(255,255,255,.42);
+    }
+    .shader-btn:hover::before,.shader-btn:focus-visible::before { left:120%; }
+    .shader-btn[aria-pressed="true"] { border-color:#00FF9D; color:#00FF9D; }
+    @media (max-width: 900px) {
+      .hud-header { flex-wrap:wrap; height:auto; min-height:42px; gap:4px; }
+      #active-synthesis-banner { display:none; }
+      #molecular-hud { width:min(320px,calc(100vw - 24px)) !important; max-height:52vh !important; }
+      #pt-hud-panel { width:calc(100vw - 24px) !important; right:12px !important; bottom:10px !important; transform:scale(.82); transform-origin:bottom right; }
+      .hud-stats { transform:scale(.86); transform-origin:bottom left; }
+    }
+    @media (max-width: 1350px) { #active-synthesis-banner { display:none; } }
+    @media (max-width: 600px) {
+      .hud-header {
+        min-height:44px; height:44px; padding:6px 8px; flex-wrap:nowrap;
+        justify-content:flex-start; gap:12px; overflow-x:auto; overflow-y:hidden;
+        scrollbar-width:thin; scrollbar-color:rgba(0,240,255,.45) transparent;
+      }
+      .hud-header > div { flex:0 0 auto; }
+      .hud-title { font-size:8.5px; letter-spacing:1.4px; white-space:nowrap; }
+      .hud-badge { display:none; }
+      #language-selector { max-width:72px; }
+      #molecular-hud {
+        top:88px; left:8px; width:calc(100vw - 16px) !important;
+        max-height:32vh !important; padding:12px;
+      }
+      #pt-hud-panel {
+        right:8px !important; bottom:8px !important; width:calc(100vw - 16px) !important;
+        max-height:44vh; padding:9px; transform:none; overflow:hidden;
+      }
+      .pt-scroll { overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; scrollbar-color:rgba(0,240,255,.45) transparent; }
+      .pt-grid, .pt-legend { min-width:540px; }
+      .hud-stats {
+        top:50px; bottom:auto; left:8px; right:8px; transform:none;
+        gap:6px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none;
+      }
+      .hud-stats::-webkit-scrollbar { display:none; }
+      .stat-chip { flex:0 0 auto; padding:4px 8px; font-size:7.5px; }
+      .pt-el { min-height:22px; padding:2px 0; }
+      .pt-el-sym { font-size:8px; }
+      #onboarding-overlay { bottom:10px !important; width:calc(100vw - 16px) !important; }
+      .pt-el-num { font-size:5.5px; }
+      .pt-legend { gap:4px; }
+      .fusion-bar { padding:5px 6px; overflow-x:auto; justify-content:flex-start; }
+      .fusion-btn, .fusion-btn-undo, .fusion-btn-clear { padding:5px 7px; font-size:7.5px; }
+      .nuclear-mode-bar { align-items:center; overflow-x:auto; scrollbar-width:thin; scrollbar-color:rgba(255,110,0,.5) transparent; }
+      #nuclear-route-selector { flex:0 0 168px; }
+      .nuclear-mode-bar .nuclear-btn { flex:0 0 auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+    }
   </style>
 </head>
-<body>
+<body data-experience="basic">
+  <canvas id="webgl-canvas" tabindex="0" data-i18n-aria-label="sceneLabel" aria-label="Interactive three-dimensional scientific scene"></canvas>
+  <output id="runtime-diagnostics" hidden aria-hidden="true"></output>
 
-  <!-- WebGL Canvas -->
-  <canvas id="webgl-canvas"></canvas>
+  <!-- TOOLTIP -->
+  <div id="pt-tooltip"></div>
 
   <!-- HEADER -->
-  <header class="hud-header glass-card">
-    <div>
-      <div class="hud-title">NULLA-LABS // ETHERNIUM 3D PLATFORM</div>
-      <div style="font-size: 9px; color: #94A3B8; margin-top: 2px;">TRANSMEDIA RESEARCH · ENTERTAINMENT · EDUCATION · AI</div>
-    </div>
-    <div style="display: flex; gap: 6px;">
-      <button id="btn-quality-low" class="btn-3d">CALIDAD: LOW</button>
-      <button id="btn-quality-med" class="btn-3d active">CALIDAD: MED</button>
-      <button id="btn-quality-ultra" class="btn-3d">CALIDAD: ULTRA</button>
-      <button id="btn-share-url" class="btn-3d">🔗 COMPARTIR</button>
-    </div>
-  </header>
-
-  <!-- TELEMETRY PANEL -->
-  <aside id="molecular-hud" class="glass-card">
-    <h3>TELEMETRÍA MOLECULAR 3D</h3>
-    
-    <div class="hud-row"><span class="hud-label">Ensamblaje:</span><span id="hud-name" class="hud-val">B-DNA Double Helix</span></div>
-    <div class="hud-row"><span class="hud-label">Fórmula:</span><span id="hud-formula" class="hud-val">DNA 130 bp</span></div>
-    <div class="hud-row"><span class="hud-label">Clasificación:</span><span id="hud-class" class="hud-val">Biológico</span></div>
-    <div class="hud-row"><span class="hud-label">Enlaces:</span><span id="hud-bonds" class="hud-val">Covalente + H-Bonds</span></div>
-    <div class="hud-row"><span class="hud-label">Estado Físico:</span><span id="hud-state" class="hud-val">Sólido Macromolécula</span></div>
-
-    <h3>TERMODINÁMICA Y POLARIDAD</h3>
-    <div class="hud-row"><span class="hud-label">Entalpía (ΔH):</span><span id="hud-enthalpy" class="hud-val">-240 kJ/mol</span></div>
-    <div class="hud-row"><span class="hud-label">Momento Dipolar:</span><span id="hud-dipole" class="hud-val">0.00 D</span></div>
-    <div class="hud-row"><span class="hud-label">Estabilidad:</span><span id="hud-stability" class="hud-val">Alta</span></div>
-
-    <!-- Thermal Physics Slider -->
-    <div class="thermal-control">
-      <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94A3B8;">
-        <span>TEMPERATURA (K)</span>
-        <span id="temp-val" style="color: #00F0FF; font-weight: 700;">298 K</span>
+  <div class="hud-header">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span class="hud-title">NULLA-LABS // IUPAC 3D SYNTHESIS</span>
+      <select id="language-selector" data-i18n-aria-label="languageLabel" aria-label="Language"></select>
+      <div class="experience-science" style="display:flex; gap:3px; margin-left:6px;">
+        <button id="btn-quality-low" style="padding:2px 5px; border-radius:5px; border:1px solid rgba(255,255,255,0.25); background:rgba(18,24,36,0.8); color:#FFFFFF; font-size:7.5px; font-weight:700; cursor:pointer;">LOW</button>
+        <button id="btn-quality-med" style="padding:2px 5px; border-radius:5px; border:1px solid rgba(0,240,255,0.6); background:rgba(0,240,255,0.2); color:#FFFFFF; font-size:7.5px; font-weight:700; cursor:pointer;">MED</button>
+        <button id="btn-quality-ultra" style="padding:2px 5px; border-radius:5px; border:1px solid rgba(255,255,255,0.25); background:rgba(18,24,36,0.8); color:#FFFFFF; font-size:7.5px; font-weight:700; cursor:pointer;">ULTRA</button>
       </div>
-      <input type="range" id="temp-slider" min="0" max="1200" value="298">
     </div>
-
-    <!-- Actions & Tools -->
-    <div style="display: flex; gap: 6px; margin-top: 4px;">
-      <button id="btn-reassemble" class="btn-3d" style="flex: 1;">🧬 ADN</button>
-      <button id="btn-measure" class="btn-3d" style="flex: 1;">📏 MEDIR 3D</button>
+    <div id="active-synthesis-banner" style="position:absolute; left:50%; transform:translateX(-50%); font-family:'Orbitron',sans-serif; font-size:13px; font-weight:900; letter-spacing:3px; color:#FFFFFF; text-transform:uppercase; background:linear-gradient(135deg, rgba(14,18,26,0.95) 0%, rgba(4,6,12,0.98) 100%); border:1px solid rgba(255,255,255,0.35); border-radius:12px; padding:6px 24px; box-shadow:0 8px 24px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow:0 0 14px rgba(255,255,255,0.9); pointer-events:none;">B-DNA DOUBLE HELIX</div>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <button id="btn-tutorial" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,255,157,0.5); background:rgba(0,255,157,0.25); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🚀 TUTORIAL</button>
+      <button id="btn-docs" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,240,255,0.4); background:rgba(0,240,255,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">📖 DOCS</button>
+      <button id="btn-quiz" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,215,0,0.4); background:rgba(255,215,0,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🎓 QUIZ EDUCATIVO</button>
+      <button class="experience-lab" id="btn-share-url" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,255,157,0.4); background:rgba(0,255,157,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🔗 SHARE</button>
+      <button class="experience-science" id="btn-webxr" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(191,0,255,0.4); background:rgba(191,0,255,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🥽 VR / WEBXR</button>
+      <span class="hud-badge experience-science" id="gpu-status-badge">▸ WEBGPU / WEBGL2 · 118 ELEMENTS</span>
     </div>
-
-    <!-- Advanced Materials Toolbar -->
-    <h3>MATERIALES Y CRISTALES</h3>
-    <div class="materials-toolbar">
-      <button id="btn-mat-nacl" class="btn-3d">🧂 NaCl</button>
-      <button id="btn-mat-diamond" class="btn-3d">💎 DIAMANTE</button>
-      <button id="btn-mat-c60" class="btn-3d">⚽ C60</button>
-      <button id="btn-mat-cnt" class="btn-3d">🧬 NANOTUBO</button>
-      <button id="btn-mat-graphene" class="btn-3d">🧊 GRAFENO</button>
-      <button id="btn-mat-solvation" class="btn-3d">💧 SOLVATACIÓN</button>
-    </div>
-
-    <!-- Video Capture -->
-    <div style="margin-top: 4px;">
-      <button id="btn-export-video" class="btn-3d" style="width: 100%;">🎥 VÍDEO HD (CAPTURE)</button>
-    </div>
-  </aside>
-
-  <!-- FOOTER STATS -->
-  <div class="hud-stats">
-    <div id="fps-val" class="glass-card stat-chip">FPS: 60</div>
-    <div id="atom-count" class="glass-card stat-chip">PARTÍCULAS: 0</div>
   </div>
 
-  <!-- PERIODIC TABLE HUD PANEL -->
-  <div id="pt-hud-panel">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,240,255,0.2); padding-bottom: 4px;">
-      <span style="font-family: 'Orbitron', sans-serif; font-size: 11px; color: #00F0FF; letter-spacing: 1.5px;">TABLA PERIÓDICA IUPAC COMPLETA (118 ELEMENTOS)</span>
+  <!-- TELEMETRY PANEL -->
+  <div id="molecular-hud" tabindex="0" data-i18n-aria-label="scientificTelemetryLabel" aria-label="Scientific telemetry" style="width:320px; max-height:calc(100vh - 110px); overflow-y:auto; scrollbar-width:thin;">
+    <h3>◆ MOLECULAR TELEMETRY</h3>
+    <div id="experience-mode-bar" class="experience-mode-bar" role="radiogroup" data-i18n-aria-label="experienceLevelLabel" aria-label="Nivel de experiencia">
+      <button class="experience-mode-btn" id="mode-basic" role="radio" data-experience-mode="basic" aria-checked="true">MODO BÁSICO</button>
+      <button class="experience-mode-btn" id="mode-lab" role="radio" data-experience-mode="lab" aria-checked="false">LABORATORIO</button>
+      <button class="experience-mode-btn" id="mode-science" role="radio" data-experience-mode="science" aria-checked="false">DATOS</button>
+    </div>
+    <p id="experience-mode-description">Explora estructuras y reacciones con la información esencial visible.</p>
+    <div class="hud-row"><span class="hud-label" data-i18n="assembly">ASSEMBLY</span><span class="hud-val" id="hud-name" aria-live="polite">B-DNA Double Helix</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="formulaLabel">FORMULA</span><span class="hud-val scientific-token" id="hud-formula">—</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="classLabel">CLASS</span><span class="hud-val" id="hud-class">—</span></div>
+    <div class="hud-row experience-lab"><span class="hud-label" data-i18n="bonding">BONDING</span><span class="hud-val" id="hud-bonds">—</span></div>
+    <div class="hud-row experience-science"><span class="hud-label" data-i18n="enthalpy">ENTHALPY</span><span class="hud-val" id="hud-enthalpy">—</span></div>
+    <div class="hud-row experience-science"><span class="hud-label" data-i18n="dipole">DIPOLE (μ)</span><span class="hud-val" id="hud-dipole">—</span></div>
+    <div class="hud-row experience-science"><span class="hud-label" data-i18n="stabilityLabel">STABILITY</span><span class="hud-val" id="hud-stability">—</span></div>
+    <div class="hud-row experience-science"><span class="hud-label" data-i18n="spectrum">SPECTRUM</span><span class="hud-val" id="hud-spectrum" style="color:#00F0FF; font-weight:700;">220 nm (UV)</span></div>
+    <div class="hud-row experience-science"><span class="hud-label" data-i18n="irStretch">IR STRETCH</span><span class="hud-val" id="hud-ir" style="font-size:8.5px;">3000 cm⁻¹</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="stateLabel">STATE</span><span class="hud-val" id="hud-epi">—</span></div>
+    <div class="hud-row experience-science"><span class="hud-label" data-i18n="compatibilityLabel">COMPATIBILITY</span><span class="hud-val" id="hud-compatibility">—</span></div>
+    <div class="hud-row experience-science"><span class="hud-label" data-i18n="conditions">CONDITIONS</span><span class="hud-val" id="hud-conditions">—</span></div>
+    
+    <!-- THERMAL KINETIC CONTROLLER (0-1000 K) -->
+    <div class="hud-row" id="thermal-controller" style="flex-direction:column; margin-top:4px; gap:2px;">
+      <div style="display:flex; justify-content:space-between; width:100%; font-size:8px; color:#FFFFFF; font-weight:bold;">
+        <span data-i18n="thermalTemp">THERMAL TEMP (T):</span>
+        <span id="temp-val" class="scientific-token" style="color:#00F0FF;">298 K (25°C)</span>
+      </div>
+      <input type="range" id="temp-slider" min="0" max="5000" value="298" data-i18n-aria-label="temperatureControlLabel" aria-label="Temperatura de la estructura en kelvin" style="width:100%; accent-color:#00F0FF; cursor:pointer; height:4px;">
+      <div class="thermal-status">
+        <div class="thermal-meter" aria-hidden="true"><span id="phase-progress-fill"></span></div>
+        <span id="phase-transition-status" aria-live="polite">Modelo educativo condicionado por los puntos de transición disponibles.</span>
+      </div>
     </div>
 
-    <!-- 18-Column IUPAC Grid -->
-    <div id="pt-grid-container" class="pt-grid"></div>
+    <div class="hud-row" style="flex-direction:column; margin-top:4px;"><span class="hud-label" data-i18n="explanation" style="width:100%;">EXPLANATION NOTE:</span><span class="hud-val" id="hud-note" style="font-size:9px; color:rgba(255,255,255,0.85); font-style:italic; margin-top:2px;">B-DNA teaching schema · repeating base-pair motif · not a TP53 sequence · scale not calibrated.</span></div>
+    
+    <div class="experience-lab" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:8px;">
+      <button id="btn-reassemble">🧬 ADN</button>
+      <button id="btn-orbitals" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">⚛️ ORBITALES</button>
+    </div>
+    <div class="experience-science" id="global-tools" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-measure" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">📏 MEDIR 3D</button>
+      <button id="btn-export-gltf" data-i18n="exportGltf" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">📱 GLTF COORDS</button>
+      <button id="btn-export-usdz" data-i18n="exportUsda" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;"> USDA SOURCE</button>
+    </div>
+    <div class="experience-science" style="display:grid; grid-template-columns: 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-export-xyz" data-i18n="exportXyz" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">💾 EXPORTAR COORDENADAS .XYZ</button>
+    </div>
 
-    <!-- Fusion Bar -->
-    <div class="fusion-bar">
-      <div id="slot-0" class="slot-btn">VACÍO [1]</div>
-      <div id="slot-1" class="slot-btn">VACÍO [2]</div>
-      <div id="slot-2" class="slot-btn">VACÍO [3]</div>
-      <div id="slot-3" class="slot-btn">VACÍO [4]</div>
-      <div id="slot-4" class="slot-btn">VACÍO [5]</div>
-      <button id="btn-fuse" class="btn-3d" disabled>💥 FUSIONAR</button>
-      <button id="btn-undo" class="btn-3d">↩ DESHACER</button>
-      <button id="btn-clear" class="btn-3d">🗑 LIMPIAR</button>
+    <div class="material-lab" data-i18n-aria-label="materialsBarLabel" aria-label="Barra de materiales">
+      <div class="material-lab-title">◆ MATERIALS LAB</div>
+      <div class="material-grid">
+        <button class="shader-btn" id="btn-nacl">🧂 NaCl FCC</button>
+        <button class="shader-btn" id="btn-diamond" data-i18n="diamond">💎 DIAMANTE</button>
+        <button class="shader-btn" id="btn-c60">⚽ C60</button>
+        <button class="shader-btn" id="btn-nanotube" data-i18n="nanotube">🧬 NANOTUBO</button>
+        <button class="shader-btn" id="btn-graphene" data-i18n="graphene">🧊 GRAFENO</button>
+        <button class="shader-btn" id="btn-solvation" data-i18n="solvation">💧 SOLVATACIÓN</button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- FOOTER STATS -->
+  <div class="hud-stats">
+    <div class="stat-chip"><span id="fps-val">0 FPS</span></div>
+    <div class="stat-chip"><span id="atom-count">0 ATOMS</span></div>
+    <button class="stat-chip" id="btn-audio" data-i18n="audioOn" style="cursor:pointer; color:#FFFFFF;">🔊 AUDIO: ON</button>
+    <button class="stat-chip" id="btn-export" data-i18n="capture" style="cursor:pointer; color:#FFFFFF;">📸 CAPTURA HD</button>
+    <button class="stat-chip" id="btn-record" style="cursor:pointer; color:#FFFFFF;">🎥 GRABAR HD</button>
+  </div>
+ 
+  <!-- ═══════════════════════════════════════════════════════════════
+       ELEMENT SELECTOR & MOLECULAR SYNTHESIS (Always Visible HUD)
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="pt-hud-panel">
+    <div class="pt-panel-header">
+      <span class="pt-panel-title">SYNTHESIS CONTROLLER</span>
+    </div>
+ 
+    <div class="pt-scroll">
+    <div class="pt-grid" id="pt-grid-container">
+      <!-- ═══ PERIOD 1 ═══ -->
+      <div class="pt-el cat-nonmetal" data-z="1" data-symbol="H" style="grid-column:1;grid-row:1"><div class="pt-el-num">1</div><div class="pt-el-sym">H</div></div>
+      <div class="pt-el cat-noble" data-z="2" data-symbol="He" style="grid-column:18;grid-row:1"><div class="pt-el-num">2</div><div class="pt-el-sym">He</div></div>
+
+      <!-- ═══ PERIOD 2 ═══ -->
+      <div class="pt-el cat-alkali" data-z="3" data-symbol="Li" style="grid-column:1;grid-row:2"><div class="pt-el-num">3</div><div class="pt-el-sym">Li</div></div>
+      <div class="pt-el cat-alkaline" data-z="4" data-symbol="Be" style="grid-column:2;grid-row:2"><div class="pt-el-num">4</div><div class="pt-el-sym">Be</div></div>
+      <div class="pt-el cat-metalloid" data-z="5" data-symbol="B" style="grid-column:13;grid-row:2"><div class="pt-el-num">5</div><div class="pt-el-sym">B</div></div>
+      <div class="pt-el cat-nonmetal" data-z="6" data-symbol="C" style="grid-column:14;grid-row:2"><div class="pt-el-num">6</div><div class="pt-el-sym">C</div></div>
+      <div class="pt-el cat-nonmetal" data-z="7" data-symbol="N" style="grid-column:15;grid-row:2"><div class="pt-el-num">7</div><div class="pt-el-sym">N</div></div>
+      <div class="pt-el cat-nonmetal" data-z="8" data-symbol="O" style="grid-column:16;grid-row:2"><div class="pt-el-num">8</div><div class="pt-el-sym">O</div></div>
+      <div class="pt-el cat-halogen" data-z="9" data-symbol="F" style="grid-column:17;grid-row:2"><div class="pt-el-num">9</div><div class="pt-el-sym">F</div></div>
+      <div class="pt-el cat-noble" data-z="10" data-symbol="Ne" style="grid-column:18;grid-row:2"><div class="pt-el-num">10</div><div class="pt-el-sym">Ne</div></div>
+
+      <!-- ═══ PERIOD 3 ═══ -->
+      <div class="pt-el cat-alkali" data-z="11" data-symbol="Na" style="grid-column:1;grid-row:3"><div class="pt-el-num">11</div><div class="pt-el-sym">Na</div></div>
+      <div class="pt-el cat-alkaline" data-z="12" data-symbol="Mg" style="grid-column:2;grid-row:3"><div class="pt-el-num">12</div><div class="pt-el-sym">Mg</div></div>
+      <div class="pt-el cat-post" data-z="13" data-symbol="Al" style="grid-column:13;grid-row:3"><div class="pt-el-num">13</div><div class="pt-el-sym">Al</div></div>
+      <div class="pt-el cat-metalloid" data-z="14" data-symbol="Si" style="grid-column:14;grid-row:3"><div class="pt-el-num">14</div><div class="pt-el-sym">Si</div></div>
+      <div class="pt-el cat-nonmetal" data-z="15" data-symbol="P" style="grid-column:15;grid-row:3"><div class="pt-el-num">15</div><div class="pt-el-sym">P</div></div>
+      <div class="pt-el cat-nonmetal" data-z="16" data-symbol="S" style="grid-column:16;grid-row:3"><div class="pt-el-num">16</div><div class="pt-el-sym">S</div></div>
+      <div class="pt-el cat-halogen" data-z="17" data-symbol="Cl" style="grid-column:17;grid-row:3"><div class="pt-el-num">17</div><div class="pt-el-sym">Cl</div></div>
+      <div class="pt-el cat-noble" data-z="18" data-symbol="Ar" style="grid-column:18;grid-row:3"><div class="pt-el-num">18</div><div class="pt-el-sym">Ar</div></div>
+
+      <!-- ═══ PERIOD 4 ═══ -->
+      <div class="pt-el cat-alkali" data-z="19" data-symbol="K" style="grid-column:1;grid-row:4"><div class="pt-el-num">19</div><div class="pt-el-sym">K</div></div>
+      <div class="pt-el cat-alkaline" data-z="20" data-symbol="Ca" style="grid-column:2;grid-row:4"><div class="pt-el-num">20</div><div class="pt-el-sym">Ca</div></div>
+      <div class="pt-el cat-transition" data-z="21" data-symbol="Sc" style="grid-column:3;grid-row:4"><div class="pt-el-num">21</div><div class="pt-el-sym">Sc</div></div>
+      <div class="pt-el cat-transition" data-z="22" data-symbol="Ti" style="grid-column:4;grid-row:4"><div class="pt-el-num">22</div><div class="pt-el-sym">Ti</div></div>
+      <div class="pt-el cat-transition" data-z="23" data-symbol="V" style="grid-column:5;grid-row:4"><div class="pt-el-num">23</div><div class="pt-el-sym">V</div></div>
+      <div class="pt-el cat-transition" data-z="24" data-symbol="Cr" style="grid-column:6;grid-row:4"><div class="pt-el-num">24</div><div class="pt-el-sym">Cr</div></div>
+      <div class="pt-el cat-transition" data-z="25" data-symbol="Mn" style="grid-column:7;grid-row:4"><div class="pt-el-num">25</div><div class="pt-el-sym">Mn</div></div>
+      <div class="pt-el cat-transition" data-z="26" data-symbol="Fe" style="grid-column:8;grid-row:4"><div class="pt-el-num">26</div><div class="pt-el-sym">Fe</div></div>
+      <div class="pt-el cat-transition" data-z="27" data-symbol="Co" style="grid-column:9;grid-row:4"><div class="pt-el-num">27</div><div class="pt-el-sym">Co</div></div>
+      <div class="pt-el cat-transition" data-z="28" data-symbol="Ni" style="grid-column:10;grid-row:4"><div class="pt-el-num">28</div><div class="pt-el-sym">Ni</div></div>
+      <div class="pt-el cat-transition" data-z="29" data-symbol="Cu" style="grid-column:11;grid-row:4"><div class="pt-el-num">29</div><div class="pt-el-sym">Cu</div></div>
+      <div class="pt-el cat-transition" data-z="30" data-symbol="Zn" style="grid-column:12;grid-row:4"><div class="pt-el-num">30</div><div class="pt-el-sym">Zn</div></div>
+      <div class="pt-el cat-post" data-z="31" data-symbol="Ga" style="grid-column:13;grid-row:4"><div class="pt-el-num">31</div><div class="pt-el-sym">Ga</div></div>
+      <div class="pt-el cat-metalloid" data-z="32" data-symbol="Ge" style="grid-column:14;grid-row:4"><div class="pt-el-num">32</div><div class="pt-el-sym">Ge</div></div>
+      <div class="pt-el cat-metalloid" data-z="33" data-symbol="As" style="grid-column:15;grid-row:4"><div class="pt-el-num">33</div><div class="pt-el-sym">As</div></div>
+      <div class="pt-el cat-nonmetal" data-z="34" data-symbol="Se" style="grid-column:16;grid-row:4"><div class="pt-el-num">34</div><div class="pt-el-sym">Se</div></div>
+      <div class="pt-el cat-halogen" data-z="35" data-symbol="Br" style="grid-column:17;grid-row:4"><div class="pt-el-num">35</div><div class="pt-el-sym">Br</div></div>
+      <div class="pt-el cat-noble" data-z="36" data-symbol="Kr" style="grid-column:18;grid-row:4"><div class="pt-el-num">36</div><div class="pt-el-sym">Kr</div></div>
+
+      <!-- ═══ PERIOD 5 ═══ -->
+      <div class="pt-el cat-alkali" data-z="37" data-symbol="Rb" style="grid-column:1;grid-row:5"><div class="pt-el-num">37</div><div class="pt-el-sym">Rb</div></div>
+      <div class="pt-el cat-alkaline" data-z="38" data-symbol="Sr" style="grid-column:2;grid-row:5"><div class="pt-el-num">38</div><div class="pt-el-sym">Sr</div></div>
+      <div class="pt-el cat-transition" data-z="39" data-symbol="Y" style="grid-column:3;grid-row:5"><div class="pt-el-num">39</div><div class="pt-el-sym">Y</div></div>
+      <div class="pt-el cat-transition" data-z="40" data-symbol="Zr" style="grid-column:4;grid-row:5"><div class="pt-el-num">40</div><div class="pt-el-sym">Zr</div></div>
+      <div class="pt-el cat-transition" data-z="41" data-symbol="Nb" style="grid-column:5;grid-row:5"><div class="pt-el-num">41</div><div class="pt-el-sym">Nb</div></div>
+      <div class="pt-el cat-transition" data-z="42" data-symbol="Mo" style="grid-column:6;grid-row:5"><div class="pt-el-num">42</div><div class="pt-el-sym">Mo</div></div>
+      <div class="pt-el cat-transition" data-z="43" data-symbol="Tc" style="grid-column:7;grid-row:5"><div class="pt-el-num">43</div><div class="pt-el-sym">Tc</div></div>
+      <div class="pt-el cat-transition" data-z="44" data-symbol="Ru" style="grid-column:8;grid-row:5"><div class="pt-el-num">44</div><div class="pt-el-sym">Ru</div></div>
+      <div class="pt-el cat-transition" data-z="45" data-symbol="Rh" style="grid-column:9;grid-row:5"><div class="pt-el-num">45</div><div class="pt-el-sym">Rh</div></div>
+      <div class="pt-el cat-transition" data-z="46" data-symbol="Pd" style="grid-column:10;grid-row:5"><div class="pt-el-num">46</div><div class="pt-el-sym">Pd</div></div>
+      <div class="pt-el cat-transition" data-z="47" data-symbol="Ag" style="grid-column:11;grid-row:5"><div class="pt-el-num">47</div><div class="pt-el-sym">Ag</div></div>
+      <div class="pt-el cat-transition" data-z="48" data-symbol="Cd" style="grid-column:12;grid-row:5"><div class="pt-el-num">48</div><div class="pt-el-sym">Cd</div></div>
+      <div class="pt-el cat-post" data-z="49" data-symbol="In" style="grid-column:13;grid-row:5"><div class="pt-el-num">49</div><div class="pt-el-sym">In</div></div>
+      <div class="pt-el cat-post" data-z="50" data-symbol="Sn" style="grid-column:14;grid-row:5"><div class="pt-el-num">50</div><div class="pt-el-sym">Sn</div></div>
+      <div class="pt-el cat-metalloid" data-z="51" data-symbol="Sb" style="grid-column:15;grid-row:5"><div class="pt-el-num">51</div><div class="pt-el-sym">Sb</div></div>
+      <div class="pt-el cat-metalloid" data-z="52" data-symbol="Te" style="grid-column:16;grid-row:5"><div class="pt-el-num">52</div><div class="pt-el-sym">Te</div></div>
+      <div class="pt-el cat-halogen" data-z="53" data-symbol="I" style="grid-column:17;grid-row:5"><div class="pt-el-num">53</div><div class="pt-el-sym">I</div></div>
+      <div class="pt-el cat-noble" data-z="54" data-symbol="Xe" style="grid-column:18;grid-row:5"><div class="pt-el-num">54</div><div class="pt-el-sym">Xe</div></div>
+
+      <!-- ═══ PERIOD 6 ═══ -->
+      <div class="pt-el cat-alkali" data-z="55" data-symbol="Cs" style="grid-column:1;grid-row:6"><div class="pt-el-num">55</div><div class="pt-el-sym">Cs</div></div>
+      <div class="pt-el cat-alkaline" data-z="56" data-symbol="Ba" style="grid-column:2;grid-row:6"><div class="pt-el-num">56</div><div class="pt-el-sym">Ba</div></div>
+      <div class="pt-el cat-lanthanide" data-z="57" data-symbol="★" style="grid-column:3;grid-row:6"><div class="pt-el-num">57-71</div><div class="pt-el-sym">★</div></div>
+      <div class="pt-el cat-transition" data-z="72" data-symbol="Hf" style="grid-column:4;grid-row:6"><div class="pt-el-num">72</div><div class="pt-el-sym">Hf</div></div>
+      <div class="pt-el cat-transition" data-z="73" data-symbol="Ta" style="grid-column:5;grid-row:6"><div class="pt-el-num">73</div><div class="pt-el-sym">Ta</div></div>
+      <div class="pt-el cat-transition" data-z="74" data-symbol="W" style="grid-column:6;grid-row:6"><div class="pt-el-num">74</div><div class="pt-el-sym">W</div></div>
+      <div class="pt-el cat-transition" data-z="75" data-symbol="Re" style="grid-column:7;grid-row:6"><div class="pt-el-num">75</div><div class="pt-el-sym">Re</div></div>
+      <div class="pt-el cat-transition" data-z="76" data-symbol="Os" style="grid-column:8;grid-row:6"><div class="pt-el-num">76</div><div class="pt-el-sym">Os</div></div>
+      <div class="pt-el cat-transition" data-z="77" data-symbol="Ir" style="grid-column:9;grid-row:6"><div class="pt-el-num">77</div><div class="pt-el-sym">Ir</div></div>
+      <div class="pt-el cat-transition" data-z="78" data-symbol="Pt" style="grid-column:10;grid-row:6"><div class="pt-el-num">78</div><div class="pt-el-sym">Pt</div></div>
+      <div class="pt-el cat-transition" data-z="79" data-symbol="Au" style="grid-column:11;grid-row:6"><div class="pt-el-num">79</div><div class="pt-el-sym">Au</div></div>
+      <div class="pt-el cat-transition" data-z="80" data-symbol="Hg" style="grid-column:12;grid-row:6"><div class="pt-el-num">80</div><div class="pt-el-sym">Hg</div></div>
+      <div class="pt-el cat-post" data-z="81" data-symbol="Tl" style="grid-column:13;grid-row:6"><div class="pt-el-num">81</div><div class="pt-el-sym">Tl</div></div>
+      <div class="pt-el cat-post" data-z="82" data-symbol="Pb" style="grid-column:14;grid-row:6"><div class="pt-el-num">82</div><div class="pt-el-sym">Pb</div></div>
+      <div class="pt-el cat-post" data-z="83" data-symbol="Bi" style="grid-column:15;grid-row:6"><div class="pt-el-num">83</div><div class="pt-el-sym">Bi</div></div>
+      <div class="pt-el cat-metalloid" data-z="84" data-symbol="Po" style="grid-column:16;grid-row:6"><div class="pt-el-num">84</div><div class="pt-el-sym">Po</div></div>
+      <div class="pt-el cat-halogen" data-z="85" data-symbol="At" style="grid-column:17;grid-row:6"><div class="pt-el-num">85</div><div class="pt-el-sym">At</div></div>
+      <div class="pt-el cat-noble" data-z="86" data-symbol="Rn" style="grid-column:18;grid-row:6"><div class="pt-el-num">86</div><div class="pt-el-sym">Rn</div></div>
+
+      <!-- ═══ PERIOD 7 ═══ -->
+      <div class="pt-el cat-alkali" data-z="87" data-symbol="Fr" style="grid-column:1;grid-row:7"><div class="pt-el-num">87</div><div class="pt-el-sym">Fr</div></div>
+      <div class="pt-el cat-alkaline" data-z="88" data-symbol="Ra" style="grid-column:2;grid-row:7"><div class="pt-el-num">88</div><div class="pt-el-sym">Ra</div></div>
+      <div class="pt-el cat-actinide" data-z="89" data-symbol="★★" style="grid-column:3;grid-row:7"><div class="pt-el-num">89-103</div><div class="pt-el-sym">★★</div></div>
+      <div class="pt-el cat-transition" data-z="104" data-symbol="Rf" style="grid-column:4;grid-row:7"><div class="pt-el-num">104</div><div class="pt-el-sym">Rf</div></div>
+      <div class="pt-el cat-transition" data-z="105" data-symbol="Db" style="grid-column:5;grid-row:7"><div class="pt-el-num">105</div><div class="pt-el-sym">Db</div></div>
+      <div class="pt-el cat-transition" data-z="106" data-symbol="Sg" style="grid-column:6;grid-row:7"><div class="pt-el-num">106</div><div class="pt-el-sym">Sg</div></div>
+      <div class="pt-el cat-transition" data-z="107" data-symbol="Bh" style="grid-column:7;grid-row:7"><div class="pt-el-num">107</div><div class="pt-el-sym">Bh</div></div>
+      <div class="pt-el cat-transition" data-z="108" data-symbol="Hs" style="grid-column:8;grid-row:7"><div class="pt-el-num">108</div><div class="pt-el-sym">Hs</div></div>
+      <div class="pt-el cat-transition" data-z="109" data-symbol="Mt" style="grid-column:9;grid-row:7"><div class="pt-el-num">109</div><div class="pt-el-sym">Mt</div></div>
+      <div class="pt-el cat-transition" data-z="110" data-symbol="Ds" style="grid-column:10;grid-row:7"><div class="pt-el-num">110</div><div class="pt-el-sym">Ds</div></div>
+      <div class="pt-el cat-transition" data-z="111" data-symbol="Rg" style="grid-column:11;grid-row:7"><div class="pt-el-num">111</div><div class="pt-el-sym">Rg</div></div>
+      <div class="pt-el cat-transition" data-z="112" data-symbol="Cn" style="grid-column:12;grid-row:7"><div class="pt-el-num">112</div><div class="pt-el-sym">Cn</div></div>
+      <div class="pt-el cat-post" data-z="113" data-symbol="Nh" style="grid-column:13;grid-row:7"><div class="pt-el-num">113</div><div class="pt-el-sym">Nh</div></div>
+      <div class="pt-el cat-post" data-z="114" data-symbol="Fl" style="grid-column:14;grid-row:7"><div class="pt-el-num">114</div><div class="pt-el-sym">Fl</div></div>
+      <div class="pt-el cat-post" data-z="115" data-symbol="Mc" style="grid-column:15;grid-row:7"><div class="pt-el-num">115</div><div class="pt-el-sym">Mc</div></div>
+      <div class="pt-el cat-post" data-z="116" data-symbol="Lv" style="grid-column:16;grid-row:7"><div class="pt-el-num">116</div><div class="pt-el-sym">Lv</div></div>
+      <div class="pt-el cat-halogen" data-z="117" data-symbol="Ts" style="grid-column:17;grid-row:7"><div class="pt-el-num">117</div><div class="pt-el-sym">Ts</div></div>
+      <div class="pt-el cat-noble" data-z="118" data-symbol="Og" style="grid-column:18;grid-row:7"><div class="pt-el-num">118</div><div class="pt-el-sym">Og</div></div>
+
+      <!-- ═══ SPACER ═══ -->
+      <div class="pt-spacer"></div>
+
+      <!-- ═══ LANTHANIDES (La 57 → Lu 71) ═══ -->
+      <div class="pt-la-label" style="grid-row:9">★ LA</div>
+      <div class="pt-el cat-lanthanide" data-z="57" data-symbol="La" style="grid-column:4;grid-row:9"><div class="pt-el-num">57</div><div class="pt-el-sym">La</div></div>
+      <div class="pt-el cat-lanthanide" data-z="58" data-symbol="Ce" style="grid-column:5;grid-row:9"><div class="pt-el-num">58</div><div class="pt-el-sym">Ce</div></div>
+      <div class="pt-el cat-lanthanide" data-z="59" data-symbol="Pr" style="grid-column:6;grid-row:9"><div class="pt-el-num">59</div><div class="pt-el-sym">Pr</div></div>
+      <div class="pt-el cat-lanthanide" data-z="60" data-symbol="Nd" style="grid-column:7;grid-row:9"><div class="pt-el-num">60</div><div class="pt-el-sym">Nd</div></div>
+      <div class="pt-el cat-lanthanide" data-z="61" data-symbol="Pm" style="grid-column:8;grid-row:9"><div class="pt-el-num">61</div><div class="pt-el-sym">Pm</div></div>
+      <div class="pt-el cat-lanthanide" data-z="62" data-symbol="Sm" style="grid-column:9;grid-row:9"><div class="pt-el-num">62</div><div class="pt-el-sym">Sm</div></div>
+      <div class="pt-el cat-lanthanide" data-z="63" data-symbol="Eu" style="grid-column:10;grid-row:9"><div class="pt-el-num">63</div><div class="pt-el-sym">Eu</div></div>
+      <div class="pt-el cat-lanthanide" data-z="64" data-symbol="Gd" style="grid-column:11;grid-row:9"><div class="pt-el-num">64</div><div class="pt-el-sym">Gd</div></div>
+      <div class="pt-el cat-lanthanide" data-z="65" data-symbol="Tb" style="grid-column:12;grid-row:9"><div class="pt-el-num">65</div><div class="pt-el-sym">Tb</div></div>
+      <div class="pt-el cat-lanthanide" data-z="66" data-symbol="Dy" style="grid-column:13;grid-row:9"><div class="pt-el-num">66</div><div class="pt-el-sym">Dy</div></div>
+      <div class="pt-el cat-lanthanide" data-z="67" data-symbol="Ho" style="grid-column:14;grid-row:9"><div class="pt-el-num">67</div><div class="pt-el-sym">Ho</div></div>
+      <div class="pt-el cat-lanthanide" data-z="68" data-symbol="Er" style="grid-column:15;grid-row:9"><div class="pt-el-num">68</div><div class="pt-el-sym">Er</div></div>
+      <div class="pt-el cat-lanthanide" data-z="69" data-symbol="Tm" style="grid-column:16;grid-row:9"><div class="pt-el-num">69</div><div class="pt-el-sym">Tm</div></div>
+      <div class="pt-el cat-lanthanide" data-z="70" data-symbol="Yb" style="grid-column:17;grid-row:9"><div class="pt-el-num">70</div><div class="pt-el-sym">Yb</div></div>
+      <div class="pt-el cat-lanthanide" data-z="71" data-symbol="Lu" style="grid-column:18;grid-row:9"><div class="pt-el-num">71</div><div class="pt-el-sym">Lu</div></div>
+
+      <!-- ═══ ACTINIDES (Ac 89 → Lr 103) ═══ -->
+      <div class="pt-ac-label" style="grid-row:10">★★ AC</div>
+      <div class="pt-el cat-actinide" data-z="89" data-symbol="Ac" style="grid-column:4;grid-row:10"><div class="pt-el-num">89</div><div class="pt-el-sym">Ac</div></div>
+      <div class="pt-el cat-actinide" data-z="90" data-symbol="Th" style="grid-column:5;grid-row:10"><div class="pt-el-num">90</div><div class="pt-el-sym">Th</div></div>
+      <div class="pt-el cat-actinide" data-z="91" data-symbol="Pa" style="grid-column:6;grid-row:10"><div class="pt-el-num">91</div><div class="pt-el-sym">Pa</div></div>
+      <div class="pt-el cat-actinide" data-z="92" data-symbol="U" style="grid-column:7;grid-row:10"><div class="pt-el-num">92</div><div class="pt-el-sym">U</div></div>
+      <div class="pt-el cat-actinide" data-z="93" data-symbol="Np" style="grid-column:8;grid-row:10"><div class="pt-el-num">93</div><div class="pt-el-sym">Np</div></div>
+      <div class="pt-el cat-actinide" data-z="94" data-symbol="Pu" style="grid-column:9;grid-row:10"><div class="pt-el-num">94</div><div class="pt-el-sym">Pu</div></div>
+      <div class="pt-el cat-actinide" data-z="95" data-symbol="Am" style="grid-column:10;grid-row:10"><div class="pt-el-num">95</div><div class="pt-el-sym">Am</div></div>
+      <div class="pt-el cat-actinide" data-z="96" data-symbol="Cm" style="grid-column:11;grid-row:10"><div class="pt-el-num">96</div><div class="pt-el-sym">Cm</div></div>
+      <div class="pt-el cat-actinide" data-z="97" data-symbol="Bk" style="grid-column:12;grid-row:10"><div class="pt-el-num">97</div><div class="pt-el-sym">Bk</div></div>
+      <div class="pt-el cat-actinide" data-z="98" data-symbol="Cf" style="grid-column:13;grid-row:10"><div class="pt-el-num">98</div><div class="pt-el-sym">Cf</div></div>
+      <div class="pt-el cat-actinide" data-z="99" data-symbol="Es" style="grid-column:14;grid-row:10"><div class="pt-el-num">99</div><div class="pt-el-sym">Es</div></div>
+      <div class="pt-el cat-actinide" data-z="100" data-symbol="Fm" style="grid-column:15;grid-row:10"><div class="pt-el-num">100</div><div class="pt-el-sym">Fm</div></div>
+      <div class="pt-el cat-actinide" data-z="101" data-symbol="Md" style="grid-column:16;grid-row:10"><div class="pt-el-num">101</div><div class="pt-el-sym">Md</div></div>
+      <div class="pt-el cat-actinide" data-z="102" data-symbol="No" style="grid-column:17;grid-row:10"><div class="pt-el-num">102</div><div class="pt-el-sym">No</div></div>
+      <div class="pt-el cat-actinide" data-z="103" data-symbol="Lr" style="grid-column:18;grid-row:10"><div class="pt-el-num">103</div><div class="pt-el-sym">Lr</div></div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="pt-legend experience-lab">
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#FFD700"></div><span data-i18n="alkali">Alkali</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#FF9900"></div><span data-i18n="alkalineEarth">Alkaline Earth</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#00D4FF"></div><span data-i18n="transition">Transition</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#AAAAAA"></div><span data-i18n="postTransition">Post-Transition</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#00FF9D"></div><span data-i18n="metalloid">Metalloid</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#00F0FF"></div><span data-i18n="nonmetal">Nonmetal</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#FF0055"></div><span data-i18n="halogen">Halogen</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#BF00FF"></div><span data-i18n="nobleGas">Noble Gas</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#FF69B4"></div><span data-i18n="lanthanide">Lanthanide</span></div>
+      <div class="pt-legend-item"><div class="pt-legend-dot" style="background:#FF6432"></div><span data-i18n="actinide">Actinide</span></div>
+    </div>
+    </div>
+
+    <!-- FUSION BAR -->
+    <div class="fusion-bar" id="reaction-actions">
+      <span class="fusion-label">TRAY:</span>
+      <div id="multi-tray-container" style="display:flex; gap:3px;">
+        <div class="fusion-slot" id="slot-0">—</div>
+        <div class="fusion-slot" id="slot-1">—</div>
+        <div class="fusion-slot" id="slot-2">—</div>
+      </div>
+      <button class="fusion-btn" id="btn-fuse">🧪 COMBINAR</button>
+      <button class="fusion-btn" id="btn-mix" data-i18n="mixButton">◌ MEZCLAR</button>
+      <button class="fusion-btn experience-lab" id="btn-suggest">💡 SUGGEST</button>
+      <button class="fusion-btn experience-lab" id="btn-random">🔀 RANDOM</button>
+      <button class="fusion-btn-undo" id="btn-undo">↩ UNDO</button>
+      <button class="fusion-btn-clear" id="btn-clear">✕ CLEAR</button>
     </div>
     <div class="nuclear-mode-bar" id="nuclear-mode-bar" data-i18n-aria-label="nuclearReactionsLabel" aria-label="Reacciones nucleares">
       <select class="experience-lab" id="nuclear-route-selector" data-i18n-aria-label="nuclearRouteLabel" aria-label="Canal isotópico nuclear">
@@ -247,9 +583,107 @@
     </div>
   </div>
 
-  <!-- THREE.JS MONOLITHIC SCRIPT LOADING -->
-  <script src="vendor/three.min.js?v=72.2"></script>
-  <script src="periodic-table-data.js?v=72.2"></script>
-  <script src="app.js?v=72.2"></script>
+  <!-- VERIFIED CATALOGUE SUGGESTIONS MODAL -->
+  <div id="suggestion-modal" role="dialog" aria-modal="true" aria-labelledby="suggestion-modal-title" style="display:none; position:fixed; bottom:80px; right:20px; z-index:120; width:340px; background:linear-gradient(145deg, rgba(14,18,26,0.96) 0%, rgba(4,6,12,0.98) 100%); border:1px solid rgba(255,255,255,0.3); border-radius:14px; padding:14px; box-shadow:0 12px 40px rgba(0,0,0,0.9); backdrop-filter:blur(20px); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:6px; margin-bottom:10px;">
+      <span id="suggestion-modal-title" style="font-size:10px; font-weight:700; color:#FFFFFF; letter-spacing:1.5px;">💡 SUGERENCIAS VERIFICADAS</span>
+      <button id="btn-close-suggest" data-i18n-aria-label="closeSuggestionsLabel" aria-label="Close suggestions" style="background:none; border:none; color:#FFFFFF; font-size:12px; cursor:pointer;">✕</button>
+    </div>
+    <div id="suggestion-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+  </div>
+
+  <!-- INTERACTIVE GUIDED ONBOARDING TUTORIAL OVERLAY -->
+  <div id="onboarding-overlay" role="dialog" aria-modal="false" aria-labelledby="onboarding-title" aria-describedby="onboarding-instruction onboarding-objective" style="display:none; position:fixed; bottom:110px; left:50%; transform:translateX(-50%); z-index:200; width:460px; background:linear-gradient(145deg, rgba(14,18,26,0.98) 0%, rgba(4,6,12,0.99) 100%); border:2px solid #00FF9D; border-radius:16px; padding:18px; box-shadow:0 0 35px rgba(0,255,157,0.4), 0 16px 50px rgba(0,0,0,0.95); backdrop-filter:blur(25px); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px; margin-bottom:10px;">
+      <span id="onboarding-title" tabindex="-1" style="font-size:11px; font-weight:900; color:#00FF9D; letter-spacing:1.5px;">🚀 TUTORIAL GUIADO INTERACTIVO</span>
+      <button id="btn-close-onboarding" style="background:none; border:none; color:#FFFFFF; font-size:11px; font-weight:bold; cursor:pointer;">✕ OMITIR</button>
+    </div>
+    <div id="onboarding-instruction" style="font-family:'Fira Code',monospace; font-size:10px; color:#FFFFFF; line-height:1.5; margin-bottom:12px;">Paso 1: Selecciona 2 elementos de la tabla periódica.</div>
+    <div id="onboarding-objective" class="tutorial-objective" data-complete="false">OBJETIVO: explora el control resaltado.</div>
+    <p id="onboarding-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span id="onboarding-step-indicator" style="font-size:9px; color:#FFD700; font-weight:bold;">PASO 1 / 3</span>
+      <div style="display:flex; gap:6px;">
+        <button id="btn-prev-onboarding" style="padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.08); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; cursor:pointer;">← ANTERIOR</button>
+        <button id="btn-next-onboarding" style="padding:6px 16px; border-radius:8px; border:1px solid #00FF9D; background:rgba(0,255,157,0.25); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; cursor:pointer;">SIGUIENTE ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TECHNICAL DOCUMENTATION MODAL -->
+  <div id="docs-modal" role="dialog" aria-modal="true" aria-labelledby="docs-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:160; width:520px; max-height:80vh; overflow-y:auto; background:linear-gradient(145deg, rgba(14,18,26,0.98) 0%, rgba(4,6,12,0.99) 100%); border:1px solid rgba(0,240,255,0.5); border-radius:16px; padding:20px; box-shadow:0 16px 60px rgba(0,0,0,0.95); backdrop-filter:blur(25px); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:10px; margin-bottom:14px;">
+      <span id="docs-modal-title" style="font-size:12px; font-weight:900; color:#00F0FF; letter-spacing:2px;">📖 GUÍA TÉCNICA Y DOCUMENTACIÓN IUPAC 3D</span>
+      <button id="btn-close-docs" data-i18n-aria-label="closeDocsLabel" aria-label="Close documentation" style="background:none; border:none; color:#FFFFFF; font-size:16px; cursor:pointer;">✕</button>
+    </div>
+    <div id="docs-modal-content" style="font-family:'Fira Code',monospace; font-size:9.5px; color:rgba(255,255,255,0.9); line-height:1.6; display:flex; flex-direction:column; gap:12px;">
+      <div>
+        <h4 style="color:#FFD700; font-size:10.5px; font-family:'Orbitron',sans-serif; margin-bottom:4px;">1. MODELO TÉRMICO EDUCATIVO (0 K - 5000 K)</h4>
+        <p>El control aplica datos de transición específicos cuando están disponibles. El movimiento es ilustrativo y no constituye dinámica molecular predictiva.</p>
+        <ul style="padding-left:14px; margin-top:4px; color:rgba(255,255,255,0.85);">
+          <li><b>Sólido:</b> oscilación visual alrededor de posiciones de equilibrio.</li>
+          <li><b>Líquido:</b> movilidad cohesiva aproximada.</li>
+          <li><b>Gas:</b> movimiento cinético visual con límites elásticos.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 style="color:#00FF9D; font-size:10.5px; font-family:'Orbitron',sans-serif; margin-bottom:4px;">2. HERRAMIENTA DE MEDICIÓN LÁSER 3D</h4>
+        <p>Activa <b>📏 MEDIR 3D</b> en la telemetría:</p>
+        <ul style="padding-left:14px; margin-top:4px; color:rgba(255,255,255,0.85);">
+          <li><b>2 puntos:</b> Distancia en Å y pm sólo para geometrías con escala calibrada; en las demás se muestran unidades de modelo.</li>
+          <li><b>3 puntos:</b> Ángulo geométrico en grados (°); no implica un ángulo de enlace validado.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 style="color:#BF00FF; font-size:10.5px; font-family:'Orbitron',sans-serif; margin-bottom:4px;">3. FÍSICA LENNARD-JONES &amp; SÍNTESIS</h4>
+        <p>El botón químico solo forma productos presentes en el catálogo verificado. Fusión y fisión nuclear usan controles y canales isotópicos separados. Lennard‑Jones es un modelo reducido y no una simulación ab initio.</p>
+      </div>
+
+      <div>
+        <h4 style="color:#FF0055; font-size:10.5px; font-family:'Orbitron',sans-serif; margin-bottom:4px;">4. EXPORTACIÓN &amp; COMPARTIR</h4>
+        <p>Descarga nodos de coordenadas calibradas (<b>.GLTF</b>), una escena USDA o coordenadas químicas (<b>.XYZ</b>). Las escenas nucleares o sin escala quedan bloqueadas. Pulsa <b>🔗 SHARE</b> para generar enlaces URL directos con el estado.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDUCATIONAL QUIZ MODAL -->
+  <div id="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:150; width:420px; background:linear-gradient(145deg, rgba(14,18,26,0.98) 0%, rgba(4,6,12,0.99) 100%); border:1px solid rgba(255,215,0,0.5); border-radius:16px; padding:18px; box-shadow:0 16px 50px rgba(0,0,0,0.95); backdrop-filter:blur(25px); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px; margin-bottom:12px;">
+      <span id="quiz-modal-title" style="font-size:11px; font-weight:700; color:#FFD700; letter-spacing:1.5px;">🎓 MODO EDUCATIVO // CHEMICAL QUIZ</span>
+      <button id="btn-close-quiz" data-i18n-aria-label="closeQuizLabel" aria-label="Close quiz" style="background:none; border:none; color:#FFFFFF; font-size:14px; cursor:pointer;">✕</button>
+    </div>
+    <div id="quiz-body">
+      <div id="quiz-question" style="font-size:10.5px; color:#FFFFFF; line-height:1.4; margin-bottom:12px;">Cargando pregunta...</div>
+      <div id="quiz-options" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <div id="quiz-explanation" style="display:none; margin-top:12px; font-size:9.5px; color:#00FF9D; background:rgba(0,255,157,0.1); padding:8px; border-radius:8px; border:1px solid rgba(0,255,157,0.3);"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+        <span id="quiz-progress" class="scientific-token" style="font-size:9px; color:#FFD700;">1 / 3</span>
+        <button id="btn-next-quiz" style="display:none; padding:6px 16px; border-radius:8px; border:1px solid #FFD700; background:rgba(255,215,0,0.18); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; cursor:pointer;">SIGUIENTE ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THREE.JS -->
+  <script src="vendor/three.min.js?v=101.2"></script>
+  <script src="periodic-table-data.js?v=101.2"></script>
+  <script src="src/i18n/i18n.js?v=101.2"></script>
+  <script src="src/i18n/runtime-i18n.js?v=101.2"></script>
+  <script src="src/i18n/ui-labels.js?v=101.2"></script>
+  <script src="src/i18n/telemetry-i18n.js?v=101.2"></script>
+  <script src="src/i18n/scientific-i18n.js?v=101.2"></script>
+  <script src="src/i18n/experience-science-i18n.js?v=101.2"></script>
+  <script src="src/education/quiz-data.js?v=101.2"></script>
+  <script src="src/education/education-content.js?v=101.2"></script>
+  <script src="src/education/advanced-tutorial.js?v=101.2"></script>
+  <script src="src/experience/experience-mode.js?v=101.2"></script>
+  <script src="src/nuclear/nuclear-data.js?v=101.2"></script>
+  <script src="src/chemistry/verified-reactions.js?v=101.2"></script>
+  <script src="src/analysis/compatibility-engine.js?v=101.2"></script>
+  <script src="src/physics/thermodynamics.js?v=101.2"></script>
+  <script src="src/physics/measurement.js?v=101.2"></script>
+  <script src="src/audio/procedural-audio.js?v=101.2"></script>
+  <script src="app.js?v=101.2"></script>
 </body>
 </html>

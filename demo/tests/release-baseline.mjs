@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = new URL('../../', import.meta.url);
 const baseline = JSON.parse(readFileSync(new URL('./release-baseline.json', import.meta.url), 'utf8'));
 const actual = {};
-const portableTextExtensions = new Set(['.html','.js','.mjs','.json','.md','.yml','.yaml','.css','.svg','.txt']);
+const portableTextExtensions = new Set(['.html','.js','.mjs','.json','.md','.yml','.yaml','.css','.svg','.txt','.gitattributes']);
 
 function portableBytes(relativePath, bytes) {
   const extension = relativePath.slice(relativePath.lastIndexOf('.')).toLowerCase();

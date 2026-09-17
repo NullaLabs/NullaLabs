@@ -48,22 +48,42 @@ window.addEventListener('DOMContentLoaded', function() {
   const hudConditions = document.getElementById('hud-conditions');
   const tempSlider = document.getElementById('temp-slider');
   const tempVal = document.getElementById('temp-val');
-  
-  // MATERIALS TOOLBAR LISTENERS
-  const btnMatNacl = document.getElementById('btn-mat-nacl');
-  const btnMatDiamond = document.getElementById('btn-mat-diamond');
-  const btnMatC60 = document.getElementById('btn-mat-c60');
-  const btnMatCnt = document.getElementById('btn-mat-cnt');
-  const btnMatGraphene = document.getElementById('btn-mat-graphene');
-  const btnMatSolvation = document.getElementById('btn-mat-solvation');
-
-  if (btnMatNacl) btnMatNacl.addEventListener('click', () => { clearReactantTray(); buildNaclCrystal(); });
-  if (btnMatDiamond) btnMatDiamond.addEventListener('click', () => { clearReactantTray(); buildDiamondLattice(); });
-  if (btnMatC60) btnMatC60.addEventListener('click', () => { clearReactantTray(); buildFullereneC60(); });
-  if (btnMatCnt) btnMatCnt.addEventListener('click', () => { clearReactantTray(); buildCarbonNanotube(); });
-  if (btnMatGraphene) btnMatGraphene.addEventListener('click', () => { clearReactantTray(); buildGrapheneSheet(); });
-  if (btnMatSolvation) btnMatSolvation.addEventListener('click', () => { clearReactantTray(); buildSolvationShell(); });
-
+  const phaseProgressFill = document.getElementById('phase-progress-fill');
+  const phaseTransitionStatus = document.getElementById('phase-transition-status');
+  function updateThermalStatus() {
+    const status = window.NULLA_THERMODYNAMICS?.phaseStatus(activeThermalProfile,temperatureK);
+    if (phaseProgressFill) phaseProgressFill.style.width = `${Math.round((status?.progress ?? 0) * 100)}%`;
+    if (!phaseTransitionStatus) return;
+    if (!status || status.key === 'unknown') {
+      phaseTransitionStatus.textContent = `${tr('phaseUnavailable')} · ${tr('phaseModelDisabled')}`;
+      return;
+    }
+    const phaseLabel = status.atTransition ? tr('phaseBoundary') : phaseAtTemperature(activeThermalProfile,temperatureK).label;
+    const displayedTransition = status.atTransition ? status.boundaryTransition : status.transition;
+    const displayedTransitionK = status.atTransition ? status.boundaryK : status.nextTransitionK;
+    const transitionKey = {
+      melting:'transitionMelting',
+      boiling:'transitionBoiling',
+      sublimation:'transitionSublimation'
+    }[displayedTransition];
+    const transition = displayedTransitionK == null
+      ? tr('noFurtherTransition')
+      : `${tr(transitionKey)} @ ${displayedTransitionK} K`;
+    const applicability = activeThermalProfile?.applicablePhase && activeThermalProfile.applicablePhase !== status.key
+      ? ` · ${tr('outsideApplicability')} (${tr(`phase${activeThermalProfile.applicablePhase[0].toUpperCase()}${activeThermalProfile.applicablePhase.slice(1)}`)})`
+      : '';
+    phaseTransitionStatus.textContent = `${phaseLabel} · ${transition}${applicability} · ${tr('qualitativeNotMd')}`;
+  }
+  function setThermalControlEnabled(enabled, reason = 'unavailable') {
+    if (tempSlider) tempSlider.disabled = !enabled;
+    if (tempSlider) tempSlider.style.opacity = enabled ? '1' : '0.45';
+    if (tempVal) tempVal.textContent = enabled
+      ? `${temperatureK} K (${Math.round(temperatureK - 273.15)}°C)`
+      : reason === 'nuclear'
+        ? tr('nuclearThermalOutsideModel')
+        : tr('phaseUnavailable');
+    updateThermalStatus();
+  }
   const btnReassemble = document.getElementById('btn-reassemble');
   const btnOrbitals = document.getElementById('btn-orbitals');
   const btnMeasure = document.getElementById('btn-measure');
@@ -481,12 +501,16 @@ window.addEventListener('DOMContentLoaded', function() {
   moleculeGroup.add(selectRing);
 
   // ═══════════════════════════════════════════════════════════════
-  // WEBAUDIO API QUANTUM SYNTHESIZER (Local-First & Frugal)
+  // WEBAUDIO API QUANTUM SYNTHESIZER (Local-First & Frugal / Legion C08)
   // ═══════════════════════════════════════════════════════════════
   let audioCtx = null;
-  let audioEnabled = true;
+  let audioEnabled = typeof window !== 'undefined' && window.NULLA_AUDIO ? !window.NULLA_AUDIO.isMuted() : true;
 
   function initAudio() {
+    if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+      window.NULLA_AUDIO.unlock();
+      return;
+    }
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -494,6 +518,12 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function playTone(freq, type = 'sine', duration = 0.15, vol = 0.08) {
     if (!audioEnabled) return;
+    if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+      if (freq >= 800) window.NULLA_AUDIO.playCue('confirm');
+      else if (freq >= 500) window.NULLA_AUDIO.playCue('material');
+      else window.NULLA_AUDIO.playCue('click');
+      return;
+    }
     initAudio();
     if (!audioCtx) return;
     try {
@@ -512,6 +542,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function playCollisionSound() {
     if (!audioEnabled) return;
+    if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+      window.NULLA_AUDIO.playCue('nuclear');
+      return;
+    }
     initAudio();
     if (!audioCtx) return;
     try {
@@ -1076,307 +1110,8 @@ window.addEventListener('DOMContentLoaded', function() {
     );
   }
 
-  // FORM SINGLE ELEMENT (Real Crystal Lattices & Molecular States)
-  // ═══════════════════════════════════════════════════════════════
-  
-  // ═══════════════════════════════════════════════════════════════
-  // ADVANCED CHEMICAL MATERIALS & CRYSTAL LATTICES
-  // ═══════════════════════════════════════════════════════════════
-  
-  // ═══════════════════════════════════════════════════════════════
-  // ADVANCED CHEMICAL MATERIALS & CRYSTAL LATTICES
-  // ═══════════════════════════════════════════════════════════════
-  function buildNaclCrystal() {
-    isDnaMode = false;
-    const atoms = [];
-    const bonds = [];
-    const spacing = 2.4;
-    const n = 4;
-    let idCounter = 1;
-    const ionGrid = [];
-
-    for (let x = 0; x < n; x++) {
-      ionGrid[x] = [];
-      for (let y = 0; y < n; y++) {
-        ionGrid[x][y] = [];
-        for (let z = 0; z < n; z++) {
-          const isNa = (x + y + z) % 2 === 0;
-          const atomicNum = isNa ? 11 : 17;
-          const posVec = new THREE.Vector3(
-            (x - (n - 1) / 2) * spacing,
-            (y - (n - 1) / 2) * spacing,
-            (z - (n - 1) / 2) * spacing
-          );
-          atoms.push({
-            z: atomicNum,
-            pos: posVec.clone(),
-            col: isNa ? 0xFFD700 : 0x00FF9D,
-            scale: isNa ? 1.2 : 1.6
-          });
-          ionGrid[x][y][z] = atoms.length - 1;
-        }
-      }
-    }
-
-    for (let x = 0; x < n; x++) {
-      for (let y = 0; y < n; y++) {
-        for (let z = 0; z < n; z++) {
-          const idx1 = ionGrid[x][y][z];
-          if (x + 1 < n) bonds.push({ a: idx1, b: ionGrid[x + 1][y][z] });
-          if (y + 1 < n) bonds.push({ a: idx1, b: ionGrid[x][y + 1][z] });
-          if (z + 1 < n) bonds.push({ a: idx1, b: ionGrid[x][y][z + 1] });
-        }
-      }
-    }
-
-    spawnAtoms(atoms);
-    spawnBonds(bonds);
-    updateTelemetry(
-      'Cristal Cúbico de Cloruro de Sodio (NaCl 3D)',
-      'Na₃₂Cl₃₂',
-      'Red Iónica Cristalina FCC',
-      'Enlace Iónico (Electrostático)',
-      'Sólido Cristalino (Punto Fusión 1074 K)'
-    );
-  }
-
-  function buildDiamondLattice() {
-    isDnaMode = false;
-    const atoms = [];
-    const bonds = [];
-    const scale = 2.0;
-
-    const baseUnits = [
-      [0, 0, 0], [1, 1, 0], [1, 0, 1], [0, 1, 1],
-      [2, 0, 0], [2, 2, 0], [2, 0, 2], [0, 2, 2],
-      [0, 2, 0], [0, 0, 2], [2, 2, 2],
-      [0.5, 0.5, 0.5], [1.5, 1.5, 0.5], [1.5, 0.5, 1.5], [0.5, 1.5, 1.5],
-      [0.5, 0.5, 1.5], [1.5, 1.5, 1.5], [1.5, 0.5, 0.5], [0.5, 1.5, 0.5]
-    ];
-
-    baseUnits.forEach(pt => {
-      const posVec = new THREE.Vector3((pt[0] - 1) * scale, (pt[1] - 1) * scale, (pt[2] - 1) * scale);
-      atoms.push({
-        z: 6,
-        pos: posVec.clone(),
-        col: 0x00F0FF,
-        scale: 1.15
-      });
-    });
-
-    const cutoff = scale * 1.1;
-    for (let i = 0; i < atoms.length; i++) {
-      for (let j = i + 1; j < atoms.length; j++) {
-        if (atoms[i].pos.distanceTo(atoms[j].pos) <= cutoff) {
-          bonds.push({ a: i, b: j });
-        }
-      }
-    }
-
-    spawnAtoms(atoms);
-    spawnBonds(bonds);
-    updateTelemetry(
-      'Diamante Covalente (Red Tetraédrica sp³)',
-      'C₆₄',
-      'Sólido Covalente Gigante',
-      'Covalente sp³ (Dureza Mohs 10)',
-      'Sólido Cristalino'
-    );
-  }
-
-  function buildFullereneC60() {
-    isDnaMode = false;
-    const atoms = [];
-    const bonds = [];
-    const r = 4.2;
-
-    const phi = (1 + Math.sqrt(5)) / 2;
-    const rawVerts = [];
-    const addPerms = (a, b, c) => {
-      rawVerts.push([a, b, c], [-a, b, c], [a, -b, c], [-a, -b, c]);
-      rawVerts.push([a, c, b], [-a, c, b], [a, -c, b], [-a, -c, b]);
-    };
-    addPerms(0, 1, 3 * phi);
-    addPerms(1, 2 + phi, 2 * phi);
-    addPerms(1 / phi, 2, 2 * phi + 1);
-
-    rawVerts.slice(0, 60).forEach(v => {
-      const vec = new THREE.Vector3(v[0], v[1], v[2]).normalize().multiplyScalar(r);
-      atoms.push({
-        z: 6,
-        pos: vec.clone(),
-        col: 0x8A2BE2,
-        scale: 1.1
-      });
-    });
-
-    const cutoff = r * 0.7;
-    for (let i = 0; i < atoms.length; i++) {
-      for (let j = i + 1; j < atoms.length; j++) {
-        if (atoms[i].pos.distanceTo(atoms[j].pos) <= cutoff) {
-          bonds.push({ a: i, b: j });
-        }
-      }
-    }
-
-    spawnAtoms(atoms);
-    spawnBonds(bonds);
-    updateTelemetry(
-      'Fullereno Buckyball (C₆₀)',
-      'C₆₀',
-      'Nanomaterial de Carbono',
-      'Covalente sp² (Icosaedro Truncado)',
-      'Sólido Molecular'
-    );
-  }
-
-  function buildCarbonNanotube() {
-    isDnaMode = false;
-    const atoms = [];
-    const bonds = [];
-    const r = 3.2;
-    const length = 16.0;
-    const rings = 12;
-    const atomsPerRing = 10;
-
-    for (let i = 0; i < rings; i++) {
-      const zPos = (i - (rings - 1) / 2) * (length / rings);
-      const angleOffset = (i % 2) * (Math.PI / atomsPerRing);
-      for (let j = 0; j < atomsPerRing; j++) {
-        const theta = (j / atomsPerRing) * Math.PI * 2 + angleOffset;
-        const posVec = new THREE.Vector3(r * Math.cos(theta), zPos, r * Math.sin(theta));
-        atoms.push({
-          z: 6,
-          pos: posVec.clone(),
-          col: 0x00FF9D,
-          scale: 1.1
-        });
-      }
-    }
-
-    const cutoff = 1.9;
-    for (let i = 0; i < atoms.length; i++) {
-      for (let j = i + 1; j < atoms.length; j++) {
-        if (atoms[i].pos.distanceTo(atoms[j].pos) <= cutoff) {
-          bonds.push({ a: i, b: j });
-        }
-      }
-    }
-
-    spawnAtoms(atoms);
-    spawnBonds(bonds);
-    updateTelemetry(
-      'Nanotubo de Carbono Monocapa (SWCNT)',
-      'C₁₂₀',
-      'Nanotubo de Grafeno Cilíndrico',
-      'Covalente sp² (Resistencia a Tracción Ultra-Alta)',
-      'Sólido Estructurado'
-    );
-  }
-
-  function buildGrapheneSheet() {
-    isDnaMode = false;
-    const atoms = [];
-    const bonds = [];
-    const rowCount = 8;
-    const colCount = 10;
-    const a = 1.42;
-
-    for (let r = 0; r < rowCount; r++) {
-      for (let c = 0; c < colCount; c++) {
-        const x = c * Math.sqrt(3) * a + (r % 2) * (Math.sqrt(3) / 2) * a - 6.0;
-        const z = r * 1.5 * a - 5.0;
-        const posVec = new THREE.Vector3(x, 0, z);
-        atoms.push({
-          z: 6,
-          pos: posVec.clone(),
-          col: 0x00F0FF,
-          scale: 1.1
-        });
-      }
-    }
-
-    const cutoff = a * 1.2;
-    for (let i = 0; i < atoms.length; i++) {
-      for (let j = i + 1; j < atoms.length; j++) {
-        if (atoms[i].pos.distanceTo(atoms[j].pos) <= cutoff) {
-          bonds.push({ a: i, b: j });
-        }
-      }
-    }
-
-    spawnAtoms(atoms);
-    spawnBonds(bonds);
-    updateTelemetry(
-      'Lámina Monocapa de Grafeno 2D',
-      'C₈₀',
-      'Material 2D (Red Hexagonal)',
-      'Covalente sp² (Alta Conductividad)',
-      'Sólido 2D Monocapa'
-    );
-  }
-
-  function buildSolvationShell() {
-    isDnaMode = false;
-    const atoms = [];
-    const bonds = [];
-
-    const naPos = new THREE.Vector3(0, 0, 0);
-    atoms.push({
-      z: 11,
-      pos: naPos.clone(),
-      col: 0xFFD700,
-      scale: 1.8
-    });
-
-    const shellRadius = 4.2;
-    const numWaters = 12;
-
-    for (let i = 0; i < numWaters; i++) {
-      const phi = Math.acos(-1 + (2 * i) / numWaters);
-      const theta = Math.sqrt(numWaters * Math.PI) * phi;
-      const oDir = new THREE.Vector3(
-        Math.cos(theta) * Math.sin(phi),
-        Math.sin(theta) * Math.sin(phi),
-        Math.cos(phi)
-      ).normalize();
-
-      const oPos = oDir.clone().multiplyScalar(shellRadius);
-      const oIdx = atoms.length;
-      atoms.push({
-        z: 8,
-        pos: oPos.clone(),
-        col: 0xFF0055,
-        scale: 1.3
-      });
-
-      const hDist = 1.0;
-      const side1 = new THREE.Vector3(-oDir.y, oDir.x, 0).normalize().multiplyScalar(0.7);
-      const h1Pos = oPos.clone().add(oDir.clone().multiplyScalar(hDist)).add(side1);
-      const h2Pos = oPos.clone().add(oDir.clone().multiplyScalar(hDist)).sub(side1);
-
-      const h1Idx = atoms.length;
-      atoms.push({ z: 1, pos: h1Pos.clone(), col: 0xFFFFFF, scale: 0.8 });
-      const h2Idx = atoms.length;
-      atoms.push({ z: 1, pos: h2Pos.clone(), col: 0xFFFFFF, scale: 0.8 });
-
-      bonds.push({ a: oIdx, b: h1Idx });
-      bonds.push({ a: oIdx, b: h2Idx });
-    }
-
-    spawnAtoms(atoms);
-    spawnBonds(bonds);
-    updateTelemetry(
-      'Esfera de Solvatación de Ion Sodio (Na⁺ en H₂O)',
-      'Na⁺(H₂O)₁₂',
-      'Complejo de Solvatación Acuosa',
-      'Interacción Ion-Dipolo Electroestática',
-      'Solución Acuosa Líquida'
-    );
-  }
-
-
-  function formElement(z, fromCenter) {
+  // Shared material activation preserves one rendering path for all structures.
+  function activateMaterial(id, atoms, profile, telemetry, scale, bondCutoff, explicitBonds = null) {
     isDnaMode = false;
     activeCollisionMode = 'chemical';
     activeStructureId = id;
@@ -3344,6 +3079,8 @@ window.addEventListener('DOMContentLoaded', function() {
     button.addEventListener('click', () => {
       playTone(620, 'triangle', 0.15);
       clearReactantTray();
+      document.querySelectorAll('.material-grid .shader-btn').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+      builder();
     });
   });
 
@@ -3866,8 +3603,18 @@ window.addEventListener('DOMContentLoaded', function() {
 
   // AUDIO TOGGLE Button
   if (btnAudio) {
+    if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+      audioEnabled = !window.NULLA_AUDIO.isMuted();
+      btnAudio.textContent = tr(audioEnabled ? 'audioOn' : 'audioOff');
+      btnAudio.style.color = audioEnabled ? '#FFFFFF' : 'rgba(255,255,255,0.4)';
+    }
     btnAudio.addEventListener('click', () => {
-      audioEnabled = !audioEnabled;
+      if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+        const muted = window.NULLA_AUDIO.toggleMute();
+        audioEnabled = !muted;
+      } else {
+        audioEnabled = !audioEnabled;
+      }
       btnAudio.textContent = tr(audioEnabled ? 'audioOn' : 'audioOff');
       btnAudio.style.color = audioEnabled ? '#FFFFFF' : 'rgba(255,255,255,0.4)';
     });

@@ -9,8 +9,8 @@
     "VERIFICATION.md": "c58cae7f45ca1fea52cceea7063bf14808a788f6bafd4059bfd3c2be006cc5d3",
     "demo/SCIENTIFIC_METHOD.md": "4246813de898fd44d23d15460a7a131e8dd448d894612ac1386c7550358d935c",
     "demo/ARCHITECTURE.md": "6068117679b445220ee1e504bbb142eb25d6004963074f5939aa893bfaeb185a",
-    "demo/index.html": "d1ea07d67b429031c50a7211ae273215b6d1b322040b4035c80cfc690e16c40b",
-    "demo/app.js": "e256d515c681a9daecac5d07000c15fadadabdb51f00739aa0c7eeccca0481bf",
+    "demo/index.html": "9fb8a8df83b6acae65f085222edfca5c709d198dd2b3eaa68f459662cb39be97",
+    "demo/app.js": "d94d5be9676f1d85df568347746959f6460704173f4780f24c21e5c36bc6e1a3",
     "demo/vendor/three.min.js": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2",
     "demo/periodic-table-data.js": "7b2a60a5260a1edf67f18d1c317972c5031d90933382006c68105e9c00a6a2b4",
     "demo/src/i18n/i18n.js": "04dc96b08ab8d595529f9127524d3f7eca7eb3f943668b58819dad49ddcf009e",
@@ -28,7 +28,8 @@
     "demo/src/analysis/compatibility-engine.js": "3cf8b711bb6408ba3f53a262acf97bda175aacee12f95a0368e0310b9c2fdfa7",
     "demo/src/physics/thermodynamics.js": "a06df9d9236c5fc458801d78dd0d507e4711a95d4614a83da0c153fecefe3d84",
     "demo/src/physics/measurement.js": "bbb8cde99f4cce30173ea9d253b3e38a2a4b189f83987bddf3621c7e95ea615d",
-    "demo/tests/smoke.mjs": "23176c0f887fc70318bb344b12136924a149011f506f83f9a8c32c63c8e890e1",
-    "demo/tests/release-baseline.mjs": "67d36cc66759215faaac98148fb50692b515be607758b3a1d4279c1a3fc70977"
+    "demo/tests/smoke.mjs": "16f5f91da0342df20d896ee3f2ac531186f20b99c4522db380b3fd9ed370ed2b",
+    "demo/tests/release-baseline.mjs": "26475063f058248f893de7ef6743e3ba0024642a453c9b3372981224ebd966e6",
+    "demo/src/audio/procedural-audio.js": "ed5eb10ae64b0ff0a720e790ccea978dec1e1f69b2338861198e4417eb0d6676"
   }
 }
