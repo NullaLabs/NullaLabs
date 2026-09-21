@@ -1,102 +1,209 @@
 <!-- NULLALABS PUBLIC PROFILE -->
 <div align="center">
 
-  <img src="header-ethernium-v10.svg?v=511" alt="Ethernium / NullaLabs" width="90%" />
+  <img src="header-ethernium-v10.svg?v=512" alt="Ethernium / NullaLabs" width="92%" />
 
   <p>
-    <code>LOCAL-FIRST</code> ·
-    <code>MEASURED CLAIMS</code> ·
-    <code>REVERSIBLE ENGINEERING</code> ·
-    <code>VERIFIABLE RELEASES</code>
+    <code>[ LOCAL-FIRST ]</code> &nbsp;•&nbsp;
+    <code>[ EVIDENCE-LED ]</code> &nbsp;•&nbsp;
+    <code>[ REVERSIBLE ]</code> &nbsp;•&nbsp;
+    <code>[ SOVEREIGN BY DESIGN ]</code>
+  </p>
+
+  <p>
+    <img src="badges/badge-ethernium-webgl.svg" alt="WebGL 2.0" />
+    <img src="badges/badge-ethernium-threejs.svg" alt="Three.js" />
+    <img src="badges/badge-ethernium-python.svg" alt="Python" />
+    <img src="badges/badge-ethernium-glsl.svg" alt="GLSL Shaders" />
   </p>
 
 </div>
 
-## NullaLabs / Ethernium
+---
 
-NullaLabs is the personal research and engineering identity behind Ethernium.
-The public work focuses on local-first software, bounded automation, explicit
-product boundaries and evidence that can be reproduced from a clean checkout.
+## Ethernium :: NullaLabs
 
-The public repositories below are the verifiable surface. Private prototypes,
-roadmaps and internal measurements are not presented as public product proof.
+**NullaLabs** is the personal research and engineering identity behind
+**Ethernium**: local-first software, bounded automation, explicit authority and
+claims that remain proportional to reproducible evidence.
 
-## Public software
+The profile deliberately separates three things:
 
-### Chronolith
-
-Continuity and integrity tooling for long-running human–AI projects: canonical
-state, Merkle evidence, signatures and independently checkable provenance.
-
-- [Source repository](https://github.com/NullaLabs/CHRONOLITH-by-Ethernium)
-- [Published Python package](https://pypi.org/project/chronolith-pro/)
-
-### Seneschal
-
-Local context-cost and security preflight for AI workflows: bounded BM25
-retrieval, secret/prompt-injection checks, signed grants and an audit ledger.
-Its decisions are consultative; the authorized runtime remains responsible for
-execution.
-
-- [Source repository](https://github.com/NullaLabs/SENESCHAL-by-Ethernium)
-- [Published Python package](https://pypi.org/project/seneschal/)
-
-### Fonts Forge
-
-Raster-specimen to OpenType tooling with automatic layout detection, vector
-generation, a local studio and regression tests. The repository is
-source-available under its own license; it is not MIT.
-
-- [Source repository](https://github.com/NullaLabs/FONTS-FORGE-by-Ethernium)
-
-### KAPTURA
-
-Local-first browser capture and real WebM/MP4/GIF processing with Lanczos
-scaling. Neural upscaling is not performed by the browser: authorized operators
-may hand a saved master to a separate private companion.
-
-- [Source repository](https://github.com/NullaLabs/KAPTURA-by-Ethernium)
+| Surface | Meaning | Evidence boundary |
+| :--- | :--- | :--- |
+| **Public software** | Repositories and packages that can be inspected now | Source, tests and releases are linked below |
+| **Private engineering** | Active ecosystem components under controlled development | A name or diagram is not a public release |
+| **Visual research** | Interface language, shaders and interaction studies | Visual artifacts are not physical or scientific proof |
 
 <div align="center">
-  <img src="particle-public-projects.gif?v=511" alt="Visual index of the public projects" width="100%" />
+  <img src="particle-public-projects.gif?v=512" alt="Visual index of NullaLabs public projects" width="100%" />
+  <p><sub>Public engineering surface — four independently inspectable projects.</sub></p>
 </div>
 
-## Research boundary
+---
 
-Names such as Ethernium Orb, Conekta, PROTEKTA, LEGION, FRUGAL, INVICTVS and
-THESTRAL refer to private or in-development work unless a public repository and
-reproducible release are linked above. A design document, screenshot, simulated
-scene or passing unit test is not physical deployment evidence.
+## Public systems
 
-Claims about latency, CPU/GPU usage, bypass ratios, frame rate, security efficacy
-or external anchoring apply only to the exact artifact, hardware and procedure
-recorded beside the measurement. Hashes demonstrate byte integrity; they do not
-by themselves establish authorship, safety or semantic truth.
+### 01 // Chronolith
 
-## Engineering principles
+<table>
+<tr>
+<td width="58%" valign="middle">
 
-- Local deterministic paths before neural or cloud escalation.
-- No hidden mutation authority in a UI, model or advisory component.
-- Source, release, evidence and historical archive remain separate.
-- Inputs from other projects stay read-only until mapped, adapted and tested.
-- Missing external or physical proof is reported as a limitation, not filled by
-  simulated success.
-- Releases should be reconstructable and reversible.
+**Continuity and integrity evidence for long-running human–AI projects**
+
+Canonical state, Merkle evidence, signatures and independently checkable
+provenance. Hashes establish byte integrity; they do not by themselves prove
+authorship, safety or semantic truth.
+
+- Deterministic evidence records and project baselines
+- Continuity artifacts for work that spans sessions
+- Python distributions with explicit edition boundaries
+
+[Source repository](https://github.com/NullaLabs/CHRONOLITH-by-Ethernium) ·
+[Published package](https://pypi.org/project/chronolith-pro/)
+
+</td>
+<td width="42%" valign="middle">
+  <img src="logo-chronolith.png" alt="Chronolith by Ethernium" width="100%" />
+</td>
+</tr>
+</table>
+
+---
+
+### 02 // Seneschal
+
+<table>
+<tr>
+<td width="42%" valign="middle">
+  <img src="logo-seneschal.png" alt="Seneschal by Ethernium" width="100%" />
+</td>
+<td width="58%" valign="middle">
+
+**Consultative context-cost and security preflight for AI workflows**
+
+Bounded BM25 retrieval, secret and prompt-injection checks, signed grants and
+an audit ledger. Seneschal advises; the authorized runtime retains execution
+authority.
+
+- Local and deterministic context selection
+- Explicit findings instead of hidden mutation
+- Zero-runtime-dependency Python package
+
+[Source repository](https://github.com/NullaLabs/SENESCHAL-by-Ethernium) ·
+[Published package](https://pypi.org/project/seneschal/)
+
+</td>
+</tr>
+</table>
+
+---
+
+### 03 // Fonts Forge
+
+<table>
+<tr>
+<td width="58%" valign="middle">
+
+**Raster-specimen to OpenType tooling**
+
+Automatic layout detection, vector generation, a local studio and regression
+tests for producing TTF/WOFF/WOFF2 artifacts. The repository is
+source-available under its own license; it is not MIT.
+
+- Raster layout analysis and glyph extraction
+- Bézier/vector generation and font assembly
+- Local workflow with test-backed release metadata
+
+[Source repository](https://github.com/NullaLabs/FONTS-FORGE-by-Ethernium)
+
+</td>
+<td width="42%" valign="middle">
+  <img src="logo-fontforge.png?v=512" alt="Fonts Forge by Ethernium" width="100%" />
+</td>
+</tr>
+</table>
+
+---
+
+### 04 // KAPTURA
+
+<table>
+<tr>
+<td width="42%" valign="middle">
+  <img src="logo-kaptura.png?v=512" alt="KAPTURA by Ethernium" width="100%" />
+</td>
+<td width="58%" valign="middle">
+
+**Local-first browser capture and real media processing**
+
+Screen/tab capture plus WebM, MP4 and GIF processing with Lanczos scaling.
+Neural upscaling is not performed by the browser; an authorized operator may
+hand a saved master to a separate private companion.
+
+- Browser-native capture
+- Real transcoding and GIF encoding paths
+- Explicit boundary between deterministic scaling and private AI tooling
+
+[Source repository](https://github.com/NullaLabs/KAPTURA-by-Ethernium)
+
+</td>
+</tr>
+</table>
+
+---
+
+## Private ecosystem boundary
+
+<table>
+<tr>
+<td align="center"><strong>FRUGAL</strong><br/><sub>local cognitive kernel</sub></td>
+<td align="center"><strong>CHRONOLITH</strong><br/><sub>integrity evidence</sub></td>
+<td align="center"><strong>SENESCHAL</strong><br/><sub>consultative preflight</sub></td>
+</tr>
+<tr>
+<td align="center"><strong>INVICTVS</strong><br/><sub>visual control surface</sub></td>
+<td align="center"><strong>THESTRAL</strong><br/><sub>IDE / control plane</sub></td>
+<td align="center"><strong>EXEKUTION</strong><br/><sub>controlled execution research</sub></td>
+</tr>
+</table>
+
+These labels describe the intended separation of responsibilities. Components
+without a linked public repository and reproducible release remain private or
+in development. Internal screenshots, simulations and unit tests do not prove
+deployment in a physical or hostile environment.
+
+> **Evidence rule:** latency, bypass ratio, CPU/GPU use, frame rate, security
+> efficacy and external anchoring apply only to the exact artifact, hardware
+> and procedure recorded with the measurement.
+
+---
 
 ## Visual research
 
-The following are local repository artifacts, not hosted-product links or
-scientific datasets.
-
 <div align="center">
-  <img src="particle-dna-console-v16-helix.gif?v=511" alt="Educational stylized DNA helix visualization" width="100%" />
-  <p><sub>Educational repeating base-pair motif; not a genomic sequence.</sub></p>
+  <img src="particle-dna-console-v16-helix.gif?v=512" alt="Educational stylized DNA helix visualization" width="100%" />
+  <p><sub>Educational repeating base-pair motif — not a genomic sequence.</sub></p>
 </div>
 
 <div align="center">
-  <img src="particle-periodic-table-au.gif?v=511" alt="Periodic-table visualization with gold highlighted" width="100%" />
-  <p><sub>Interface visualization; not an experimental physics result.</sub></p>
+  <img src="particle-periodic-table-au.gif?v=512" alt="Periodic-table visualization with gold highlighted" width="100%" />
+  <p><sub>Interface visualization — not an experimental physics result.</sub></p>
 </div>
+
+---
+
+## Engineering doctrine
+
+| Principle | Operational consequence |
+| :--- | :--- |
+| **Frugal routing** | Deterministic and symbolic paths precede neural/cloud escalation |
+| **Controlled authority** | A UI, model or advisory component has no hidden mutation power |
+| **Promotion gates** | External input moves through source → mapped → adapter → tested → promoted |
+| **Release hygiene** | Source, release, evidence and cold archive remain distinct |
+| **Honest limits** | Missing physical or external proof is recorded, never simulated as success |
+| **Rollback** | Meaningful changes remain reviewable, reconstructable and reversible |
 
 ## Working stack
 
@@ -118,13 +225,18 @@ scientific datasets.
 
 </div>
 
+---
+
 ## Direction
 
-Build useful local-first systems whose claims are proportionate to their
-evidence and whose components can evolve without collapsing into one monolith.
+Build useful local-first systems whose components remain understandable on
+their own, whose integrations are contractual, and whose claims can be tested
+without trusting the presentation.
 
 <div align="center">
   <img src="ethernium-hologram.png" alt="Ethernium visual identity" width="100%" />
+  <br/><br/>
+  <img src="ethernium-emblem-circle.png" alt="Ethernium emblem" width="48" />
   <br/>
-  <sub>Public profile last contract review: 2026-09-21.</sub>
+  <sub><strong>ETHERNIUM ECOSYSTEM</strong> · Public profile contract reviewed 2026-09-21</sub>
 </div>
