@@ -156,6 +156,34 @@ hand a saved master to a separate private companion.
 
 ## Private ecosystem boundary
 
+### Ethernium Orb // Windows endpoint research
+
+<table>
+<tr>
+<td width="58%" valign="middle">
+
+**Private Windows endpoint-security project within the Ethernium family**
+
+Orb packages a native Windows host/service and AMSI-related binaries alongside
+the PROTEKTA TypeScript defense engine. Android, Linux and robotics variants
+exist as separate private repositories. PROTEKTA is the shared defensive
+research layer; Orb is a product-facing family, not a synonym for the entire
+ecosystem.
+
+**Current maturity: private implementation under validation, not a certified
+EDR release.** Unit tests exist, but clean build, durable recovery and physical
+endpoint-protection gates have not all passed. Claims such as 0% idle CPU,
+hostile-attack resistance or deployment readiness are not made by this profile.
+
+</td>
+<td width="42%" valign="middle">
+  <img src="logo-orb-antivirus.png" alt="Ethernium Orb visual identity" width="100%" />
+</td>
+</tr>
+</table>
+
+---
+
 <table>
 <tr>
 <td align="center"><strong>FRUGAL</strong><br/><sub>local cognitive kernel</sub></td>
