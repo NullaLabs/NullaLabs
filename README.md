@@ -7,10 +7,10 @@
     <code>[ LOCAL-FIRST ]</code> &nbsp;•&nbsp;
     <code>[ EVIDENCE-LED ]</code> &nbsp;•&nbsp;
     <code>[ REVERSIBLE ]</code> &nbsp;•&nbsp;
-    <code>[ SOVEREIGN BY DESIGN ]</code>
-    <code>[ FRUGAL ]</code>
-    <code>[ PORTABLE ]</code>
-    <code>[ INTERACTIVE ]</code>
+    <code>[ SOVEREIGN BY DESIGN ]</code> &nbsp;•&nbsp;
+    <code>[ FRUGAL ]</code> &nbsp;•&nbsp;
+    <code>[ PORTABLE ]</code> &nbsp;•&nbsp;
+    <code>[ INTERACTIVE ]</code> &nbsp;•&nbsp;
     <code>[ USER-FRIENDLY ]</code>
   </p>
 
