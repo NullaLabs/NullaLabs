@@ -8,6 +8,10 @@
     <code>[ EVIDENCE-LED ]</code> &nbsp;•&nbsp;
     <code>[ REVERSIBLE ]</code> &nbsp;•&nbsp;
     <code>[ SOVEREIGN BY DESIGN ]</code>
+    <code>[ FRUGAL ]</code>
+    <code>[ PORTABLE ]</code>
+    <code>[ INTERACTIVE ]</code>
+    <code>[ USER-FRIENDLY ]</code>
   </p>
 
   <p>
