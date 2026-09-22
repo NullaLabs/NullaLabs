@@ -15,10 +15,9 @@
   </p>
 
   <p>
-    <img src="badges/badge-ethernium-webgl.svg" alt="WebGL 2.0" />
-    <img src="badges/badge-ethernium-threejs.svg" alt="Three.js" />
-    <img src="badges/badge-ethernium-python.svg" alt="Python" />
-    <img src="badges/badge-ethernium-glsl.svg" alt="GLSL Shaders" />
+    <img src="badges/badge-ethernium-webgl.svg" alt="NEMETH CORP." />
+    <img src="badges/badge-ethernium-threejs.svg" alt="NULLA-LABS" />
+    <img src="badges/badge-ethernium-python.svg" alt="ETHERNIUM" />
   </p>
 
 </div>
