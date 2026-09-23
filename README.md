@@ -10,7 +10,7 @@
     <code>[ SOVEREIGN BY DESIGN ]</code> &nbsp;•&nbsp;
     <code>[ FRUGAL ]</code> &nbsp;•&nbsp;
     <code>[ PORTABLE ]</code> &nbsp;•&nbsp;
-    <code>[ INTERACTIVE ]</code>
+    <code>[ INTERACTIVE ]</code> &nbsp;•&nbsp;
     <code>[ USER-FRIENDLY ]</code>
   </p>
 
