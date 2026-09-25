@@ -265,9 +265,9 @@ their own, whose integrations are contractual, and whose claims can be tested
 without trusting the presentation.
 
 <div align="center">
-  <img src="ethernium-hologram.png" alt="Ethernium visual identity" width="100%" />
+  <img src="Nemeth-mark.png" alt="Nemeth Corp visual identity" width="220" />
   <br/><br/>
-  <img src="ethernium-emblem-circle.png" alt="Ethernium emblem" width="48" />
-  <br/>
-  <sub><strong>ETHERNIUM ECOSYSTEM</strong> · Public profile contract reviewed 2026-09-21</sub>
+  <h3>NEMETH CORP.</h3>
+  <sub><strong>NEMETH CORP. // NULLALABS</strong> · Public profile contract reviewed 2026-09-25</sub>
 </div>
+
