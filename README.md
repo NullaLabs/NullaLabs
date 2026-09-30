@@ -13,13 +13,7 @@
     <code>[ INTERACTIVE ]</code> &nbsp;•&nbsp;
     <code>[ USER-FRIENDLY ]</code>
   </p>
-
-  <p>
-    <img src="badges/badge-ethernium-webgl.svg" alt="NEMETH CORP." />
-    <img src="badges/badge-ethernium-threejs.svg" alt="NULLA-LABS" />
-    <img src="badges/badge-ethernium-python.svg" alt="ETHERNIUM" />
-  </p>
-
+  
 </div>
 
 ---
