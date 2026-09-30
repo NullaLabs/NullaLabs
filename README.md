@@ -265,7 +265,7 @@ their own, whose integrations are contractual, and whose claims can be tested
 without trusting the presentation.
 
 <div align="center">
-  <img src="Nemeth-mark.png" alt="Nemeth Corp visual identity" width="220" />
+  <img src="Nemeth-mark.png" alt="Nemeth Corp visual identity" width="110" />
   <br/><br/>
   <h3>NEMETH CORP.</h3>
   <sub><strong>NEMETH CORP. // NULLALABS</strong> · Public profile contract reviewed 2026-09-25</sub>

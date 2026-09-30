@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 32" width="170" height="32">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@700&amp;display=swap');
+      
       .tech-text {
-        font-family: 'Fira Code', monospace;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'JetBrains Mono', 'Fira Code', monospace, sans-serif;
         font-weight: 700;
         font-size: 11px;
         fill: #FFFFFF !important;

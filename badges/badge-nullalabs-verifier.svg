@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48" width="280" height="48">
+  <defs>
+    <style>
+      
+      
+      .btn-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'JetBrains Mono', 'Fira Code', monospace, sans-serif;
+        font-weight: 900;
+        font-size: 13px;
+        fill: #FFFFFF !important;
+        stroke: #000000;
+        stroke-width: 1.5px;
+        paint-order: stroke fill;
+        letter-spacing: 1.5px;
+        filter: drop-shadow(0 0 6px #00FF9DC0);
+      }
+
+      .sub-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'JetBrains Mono', 'Fira Code', monospace, sans-serif;
+        font-weight: 700;
+        font-size: 8px;
+        fill: #00FF9D;
+        letter-spacing: 1.2px;
+      }
+
+      .glow-border {
+        animation: borderGlow 4s ease-in-out infinite alternate;
+      }
+
+      @keyframes borderGlow {
+        0% { stroke: #00FF9D; filter: drop-shadow(0 0 3px #00FF9D); }
+        50% { stroke: #00C853; filter: drop-shadow(0 0 5px #00C853); }
+        100% { stroke: #00FF9D; filter: drop-shadow(0 0 3px #00FF9D); }
+      }
+
+      .pulse-dot {
+        animation: pulse 1.8s infinite;
+      }
+      
+      @keyframes pulse {
+        0% { fill: #00FF9D; opacity: 1; filter: drop-shadow(0 0 5px #00FF9D); }
+        50% { fill: #00FF9D; opacity: 0.3; filter: drop-shadow(0 0 1px #00FF9D); }
+        100% { fill: #00FF9D; opacity: 1; filter: drop-shadow(0 0 5px #00FF9D); }
+      }
+    </style>
+
+    <clipPath id="clip-badgenullalabsverifiersvg">
+      <rect width="280" height="48" rx="12" />
+    </clipPath>
+
+    <linearGradient id="grad-badgenullalabsverifiersvg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05070E" />
+      <stop offset="50%" stop-color="#0C1222" />
+      <stop offset="100%" stop-color="#030508" />
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#clip-badgenullalabsverifiersvg)">
+    <rect width="280" height="48" rx="12" fill="url(#grad-badgenullalabsverifiersvg)" />
+    <line x1="0" y1="24" x2="280" y2="24" stroke="#ffffff" stroke-width="0.3" stroke-opacity="0.1" />
+  </g>
+
+  <rect class="glow-border" x="1.5" y="1.5" width="277" height="45" rx="10.5" fill="none" stroke="#00FF9D" stroke-width="1.5" stroke-opacity="0.9" />
+
+  <circle class="pulse-dot" cx="20" cy="24" r="4.5" fill="#00FF9D" />
+
+  <text x="36" y="22" class="btn-text">O(1) GOVERNANCE</text>
+  <text x="36" y="36" class="sub-text">FAIL-CLOSED AUDITOR</text>
+</svg>

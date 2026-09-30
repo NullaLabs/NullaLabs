@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48" width="280" height="48">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@800;900&amp;family=Fira+Code:wght@700&amp;display=swap');
+      
       
       .btn-text {
         font-family: 'Nebula', 'Orbitron', monospace;
