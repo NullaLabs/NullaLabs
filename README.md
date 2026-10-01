@@ -34,7 +34,7 @@ The profile deliberately separates three things:
 
 <div align="center">
   <img src="particle-public-projects.gif?v=512" alt="Visual index of NullaLabs public projects" width="100%" />
-  <p><sub>Public engineering surface — four independently inspectable projects.</sub></p>
+  <p><sub>Engineering surface — independently inspectable systems, packages and tools.</sub></p>
 </div>
 
 ---
@@ -57,7 +57,7 @@ authorship, safety or semantic truth.
 - Continuity artifacts for work that spans sessions
 - Python distributions with explicit edition boundaries
 
-[Source repository](https://github.com/NullaLabs/CHRONOLITH-by-Ethernium) ·
+<sub>[Proprietary Core Engine]</sub> ·
 [Published package](https://pypi.org/project/chronolith-pro/)
 
 </td>
@@ -88,7 +88,7 @@ authority.
 - Explicit findings instead of hidden mutation
 - Zero-runtime-dependency Python package
 
-[Source repository](https://github.com/NullaLabs/SENESCHAL-by-Ethernium) ·
+<sub>[Proprietary Core Engine]</sub> ·
 [Published package](https://pypi.org/project/seneschal/)
 
 </td>
