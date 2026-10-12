@@ -254,17 +254,18 @@ deployment in a physical or hostile environment.
 
 ## Visuals & Interactive WebGL Developments
 
-### RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive Studio
+### RYODAN // SPACE MAVE — 4K Sovereign Audio-Reactive Studio ([@Ryodan](https://x.com/Ryodan_mave?s=20) Art Contest Project)
 
 <div align="center">
   <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1" title="Click Play to Launch 4K Studio with Audio">
-    <img src="ryodan-space-maeve-vector.svg?v=513" alt="RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive WebGL Studio" width="100%" />
+    <img src="ryodan-space-mave-vector.svg?v=514" alt="RYODAN // SPACE MAVE — 4K Sovereign Audio-Reactive WebGL Studio" width="100%" />
   </a>
   <p>
     <sub>
-      <strong>25-Layer Real-Time WebGL &amp; Custom GLSL Shader Engine (60 FPS Local-First)</strong> ·
+      <strong>Official Art Contest Project for <a href="https://x.com/Ryodan_mave?s=20">@Ryodan (@Ryodan_mave)</a> · 25-Layer Real-Time WebGL &amp; Custom GLSL Shader Engine (60 FPS Local-First)</strong><br/>
       <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1">▶️ Play Live 4K Web Experience (with Audio)</a> ·
-      <a href="https://github.com/NullaLabs/RYODAN-ART-CONTEST">Source Repository</a>
+      <a href="https://github.com/NullaLabs/RYODAN-ART-CONTEST">Source Repository</a> ·
+      <a href="https://x.com/Ryodan_mave?s=20">@Ryodan on X</a>
     </sub>
   </p>
 </div>
