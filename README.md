@@ -252,6 +252,25 @@ deployment in a physical or hostile environment.
 
 ---
 
+## Visuals & Interactive WebGL Developments
+
+### RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive Studio
+
+<div align="center">
+  <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/">
+    <img src="ryodan-space-maeve-vector.svg?v=512" alt="RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive WebGL Studio" width="100%" />
+  </a>
+  <p>
+    <sub>
+      <strong>25-Layer Real-Time WebGL &amp; Custom GLSL Shader Engine (60 FPS Local-First)</strong> ·
+      <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/">Launch Live 4K Web Experience</a> ·
+      <a href="https://github.com/NullaLabs/RYODAN-ART-CONTEST">Source Repository</a>
+    </sub>
+  </p>
+</div>
+
+---
+
 ## Direction
 
 Build useful local-first systems whose components remain understandable on
@@ -264,4 +283,5 @@ without trusting the presentation.
   <h3>NEMETH CORP.</h3>
   <sub><strong>NEMETH CORP. // NULLALABS</strong> · Public profile contract reviewed 2026-09-25</sub>
 </div>
+
 
