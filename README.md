@@ -257,13 +257,13 @@ deployment in a physical or hostile environment.
 ### RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive Studio
 
 <div align="center">
-  <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/">
-    <img src="ryodan-space-maeve-vector.svg?v=512" alt="RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive WebGL Studio" width="100%" />
+  <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1" title="Click Play to Launch 4K Studio with Audio">
+    <img src="ryodan-space-maeve-vector.svg?v=513" alt="RYODAN // SPACE MAEVE — 4K Sovereign Audio-Reactive WebGL Studio" width="100%" />
   </a>
   <p>
     <sub>
       <strong>25-Layer Real-Time WebGL &amp; Custom GLSL Shader Engine (60 FPS Local-First)</strong> ·
-      <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/">Launch Live 4K Web Experience</a> ·
+      <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1">▶️ Play Live 4K Web Experience (with Audio)</a> ·
       <a href="https://github.com/NullaLabs/RYODAN-ART-CONTEST">Source Repository</a>
     </sub>
   </p>
