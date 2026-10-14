@@ -61,7 +61,7 @@ jobs:
       - name: Build allowlisted Pages artifact
         run: |
           mkdir -p _site/demo
-          cp demo/index.html demo/app.js demo/periodic-table-data.js _site/demo/
+          cp demo/index.html demo/app.js demo/periodic-table-data.js demo/liquid-glass.css _site/demo/
           cp -R demo/vendor demo/src _site/demo/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

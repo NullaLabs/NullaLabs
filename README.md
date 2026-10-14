@@ -58,6 +58,7 @@ authorship, safety or semantic truth.
 - Python distributions with explicit edition boundaries
 
 <sub>[Proprietary Core Engine]</sub> ·
+[Public repository mirror](https://github.com/NullaLabs/CHRONOLITH-by-Ethernium) ·
 [Published package](https://pypi.org/project/chronolith-pro/)
 
 </td>
@@ -89,6 +90,7 @@ authority.
 - Zero-runtime-dependency Python package
 
 <sub>[Proprietary Core Engine]</sub> ·
+[Public repository mirror](https://github.com/NullaLabs/SENESCHAL-by-Ethernium) ·
 [Published package](https://pypi.org/project/seneschal/)
 
 </td>
@@ -215,6 +217,12 @@ deployment in a physical or hostile environment.
 <div align="center">
   <img src="particle-periodic-table-au.gif?v=512" alt="Periodic-table visualization with gold highlighted" width="100%" />
   <p><sub>Interface visualization — not an experimental physics result.</sub></p>
+  <p>
+    <strong><a href="https://nullalabs.github.io/NullaLabs/demo/">Explore the interactive NULLA-LABS 3D periodic table and molecular visualizer →</a></strong><br/>
+    <sub>Educational visualization. Catalogue routes, scientific conditions and model limits are explicit; animated particles and non-calibrated scenes are illustrative, not experimental results.</sub><br/>
+    <a href="https://github.com/NullaLabs/NullaLabs/tree/main/demo">Demo source</a> ·
+    <a href="https://github.com/NullaLabs/NullaLabs/blob/main/demo/SCIENTIFIC_METHOD.md">Scientific method and limitations</a>
+  </p>
 </div>
 
 ---

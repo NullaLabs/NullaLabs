@@ -1,16 +1,16 @@
 {
-  "release": "2026-07-29-v101.2",
+  "release": "2026-10-14-v101.3-candidate",
   "algorithm": "portable-sha256-lf-text",
   "files": {
     ".gitattributes": "1d286c41100db83c55ca0d74d91b327190aedb29e467c958120c694f4bac06f7",
     ".github/workflows/companion-telemetry.yml": "cb13f4b74eaa7bb1a3816d12fedf7b3312561179ead58a41225a400353ed85a7",
-    ".github/workflows/static.yml": "f633578553aa6482beee16bbd8f5e2c6d8c77a5fe33db93aa7afce90217201d3",
+    ".github/workflows/static.yml": "55a8ad28c378c6d2e6448123a026bb1b72d647a34d92b296690f82363518c3a8",
     "MASTER_PLAN.md": "9376e7c000c142ba626ca7300a4add54c3dab2bd2fb545bb40972fa66ae20e44",
     "VERIFICATION.md": "c58cae7f45ca1fea52cceea7063bf14808a788f6bafd4059bfd3c2be006cc5d3",
     "demo/SCIENTIFIC_METHOD.md": "4246813de898fd44d23d15460a7a131e8dd448d894612ac1386c7550358d935c",
     "demo/ARCHITECTURE.md": "6068117679b445220ee1e504bbb142eb25d6004963074f5939aa893bfaeb185a",
-    "demo/index.html": "9fb8a8df83b6acae65f085222edfca5c709d198dd2b3eaa68f459662cb39be97",
-    "demo/app.js": "d94d5be9676f1d85df568347746959f6460704173f4780f24c21e5c36bc6e1a3",
+    "demo/index.html": "dfb6c177a313127d24732ac7d9126a0ccc5f643db438d0842cda002b46269c8d",
+    "demo/app.js": "f77b88ac6e645bbb9cdbc046a8a782f45145b91c85ba777791045e33ac99a85f",
     "demo/vendor/three.min.js": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2",
     "demo/periodic-table-data.js": "7b2a60a5260a1edf67f18d1c317972c5031d90933382006c68105e9c00a6a2b4",
     "demo/src/i18n/i18n.js": "04dc96b08ab8d595529f9127524d3f7eca7eb3f943668b58819dad49ddcf009e",
@@ -28,8 +28,11 @@
     "demo/src/analysis/compatibility-engine.js": "3cf8b711bb6408ba3f53a262acf97bda175aacee12f95a0368e0310b9c2fdfa7",
     "demo/src/physics/thermodynamics.js": "a06df9d9236c5fc458801d78dd0d507e4711a95d4614a83da0c153fecefe3d84",
     "demo/src/physics/measurement.js": "bbb8cde99f4cce30173ea9d253b3e38a2a4b189f83987bddf3621c7e95ea615d",
-    "demo/tests/smoke.mjs": "16f5f91da0342df20d896ee3f2ac531186f20b99c4522db380b3fd9ed370ed2b",
+    "demo/tests/smoke.mjs": "f28c2e63e92d07e626961f3337781a7891c463d994615a915e5ee0738c084696",
     "demo/tests/release-baseline.mjs": "26475063f058248f893de7ef6743e3ba0024642a453c9b3372981224ebd966e6",
-    "demo/src/audio/procedural-audio.js": "ed5eb10ae64b0ff0a720e790ccea978dec1e1f69b2338861198e4417eb0d6676"
+    "demo/src/audio/procedural-audio.js": "ed5eb10ae64b0ff0a720e790ccea978dec1e1f69b2338861198e4417eb0d6676",
+    "demo/liquid-glass.css": "d37c2001c38bd3113947fbc9996f3e3943ad2e443ca246549e751e4687aa1590",
+    "demo/EXPERIENCE_DESIGN.md": "b4ab576d7306f6dd498a94d0d864b9c0868a4a587b575796325eede7199f4c4b",
+    "demo/src/education/plain-language.js": "36bca401379b5e092e6f2705fabb983e3916fce9edb3f1502425c4272c16e90a"
   }
 }

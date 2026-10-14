@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NULLA-LABS // IUPAC 3D MOLECULAR SYNTHESIS PLATFORM</title>
   <meta name="description" content="Interactive educational 3D molecular and nuclear visualization platform with the 118-element periodic table, catalogued chemical products, isotope-aware reaction channels, and explicit model limitations.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     html, body { width:100%; height:100%; overflow:hidden; background:#020306; font-family:'Fira Code', monospace; color:#d0e0ff; }
@@ -274,6 +272,7 @@
       *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
     }
   </style>
+  <link rel="stylesheet" href="liquid-glass.css?v=101.3">
 </head>
 <body data-experience="basic">
   <canvas id="webgl-canvas" tabindex="0" data-i18n-aria-label="sceneLabel" aria-label="Interactive three-dimensional scientific scene"></canvas>
@@ -599,6 +598,10 @@
       <button id="btn-close-onboarding" style="background:none; border:none; color:#FFFFFF; font-size:11px; font-weight:bold; cursor:pointer;">✕ OMITIR</button>
     </div>
     <div id="onboarding-instruction" style="font-family:'Fira Code',monospace; font-size:10px; color:#FFFFFF; line-height:1.5; margin-bottom:12px;">Paso 1: Selecciona 2 elementos de la tabla periódica.</div>
+    <details id="onboarding-technical-details" style="margin:0 0 12px; border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:10px 12px; background:rgba(255,255,255,.035);">
+      <summary id="onboarding-technical-label" style="cursor:pointer; color:#9AEAFF; font-size:12px; font-weight:650;">Ver explicación científica</summary>
+      <p id="onboarding-technical-text" style="margin:8px 0 0; font-size:12px; line-height:1.55; color:#D9E2EF;">Explicación técnica del paso.</p>
+    </details>
     <div id="onboarding-objective" class="tutorial-objective" data-complete="false">OBJETIVO: explora el control resaltado.</div>
     <p id="onboarding-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -676,7 +679,8 @@
   <script src="src/i18n/experience-science-i18n.js?v=101.2"></script>
   <script src="src/education/quiz-data.js?v=101.2"></script>
   <script src="src/education/education-content.js?v=101.2"></script>
-  <script src="src/education/advanced-tutorial.js?v=101.2"></script>
+  <script src="src/education/plain-language.js?v=101.2"></script>
+    <script src="src/education/advanced-tutorial.js?v=101.2"></script>
   <script src="src/experience/experience-mode.js?v=101.2"></script>
   <script src="src/nuclear/nuclear-data.js?v=101.2"></script>
   <script src="src/chemistry/verified-reactions.js?v=101.2"></script>
