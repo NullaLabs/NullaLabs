@@ -32,6 +32,7 @@
     "demo/tests/release-baseline.mjs": "26475063f058248f893de7ef6743e3ba0024642a453c9b3372981224ebd966e6",
     "demo/src/audio/procedural-audio.js": "ed5eb10ae64b0ff0a720e790ccea978dec1e1f69b2338861198e4417eb0d6676",
     "demo/liquid-glass.css": "51091e4953dce380c40df5e6d4d98dc73e1ae365ddb9944e5dd542f7c6d6413b",
-    "demo/EXPERIENCE_DESIGN.md": "b4ab576d7306f6dd498a94d0d864b9c0868a4a587b575796325eede7199f4c4b"
+    "demo/EXPERIENCE_DESIGN.md": "b4ab576d7306f6dd498a94d0d864b9c0868a4a587b575796325eede7199f4c4b",
+    "demo/src/education/plain-language.js": "pending"
   }
 }
