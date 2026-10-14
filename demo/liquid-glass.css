@@ -425,3 +425,11 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
     background: rgba(10, 15, 25, .96) !important;
   }
 }
+
+#onboarding-technical-details { margin:0 0 12px !important; border-radius:13px !important; border:1px solid rgba(255,255,255,.13) !important; background:rgba(255,255,255,.035) !important; padding:10px 13px !important; }
+#onboarding-technical-details > summary { min-height:36px; display:flex; align-items:center; list-style:none; cursor:pointer; color:var(--nl-cyan); font-family:var(--nl-font); font-size:12px; font-weight:680; }
+#onboarding-technical-details > summary::-webkit-details-marker { display:none; }
+#onboarding-technical-details > summary::after { content:"+"; margin-left:auto; font-size:17px; color:var(--nl-text-muted); }
+#onboarding-technical-details[open] > summary::after { content:"−"; }
+#onboarding-technical-text { padding-top:8px; border-top:1px solid rgba(255,255,255,.09); color:#d9e2ef; font-family:var(--nl-font) !important; font-size:13px !important; line-height:1.6 !important; }
+@media (max-width:600px) { #onboarding-technical-details { padding:8px 10px !important; } #onboarding-technical-details > summary { font-size:11px; } #onboarding-technical-text { font-size:12px !important; } }
