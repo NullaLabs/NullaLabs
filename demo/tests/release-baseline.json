@@ -31,7 +31,7 @@
     "demo/tests/smoke.mjs": "16f5f91da0342df20d896ee3f2ac531186f20b99c4522db380b3fd9ed370ed2b",
     "demo/tests/release-baseline.mjs": "26475063f058248f893de7ef6743e3ba0024642a453c9b3372981224ebd966e6",
     "demo/src/audio/procedural-audio.js": "ed5eb10ae64b0ff0a720e790ccea978dec1e1f69b2338861198e4417eb0d6676",
-    "demo/liquid-glass.css": "9692dfd7bbd915b2af8efe718e9fb162544fec0a0abbbe7e8f36c70f3ff3611b",
+    "demo/liquid-glass.css": "e5461f3797b6f6da233306d85661785ab0f6e87740a500748d815ac793e8fc88",
     "demo/EXPERIENCE_DESIGN.md": "b4ab576d7306f6dd498a94d0d864b9c0868a4a587b575796325eede7199f4c4b"
   }
 }
