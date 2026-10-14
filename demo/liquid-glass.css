@@ -54,7 +54,6 @@ button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-
 }
 .hud-header, #molecular-hud, #pt-hud-panel, #pt-tooltip,
 #onboarding-overlay, #docs-modal, #quiz-modal, #suggestion-modal {
-  position: relative;
   isolation: isolate;
   color: var(--nl-text) !important;
   font-family: var(--nl-font) !important;
