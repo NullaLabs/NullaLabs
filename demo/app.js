@@ -3371,6 +3371,9 @@ window.addEventListener('DOMContentLoaded', function() {
   const onboardingOverlay = document.getElementById('onboarding-overlay');
   const onboardingTitle = document.getElementById('onboarding-title');
   const onboardingInstruction = document.getElementById('onboarding-instruction');
+  const onboardingTechnicalDetails = document.getElementById('onboarding-technical-details');
+  const onboardingTechnicalLabel = document.getElementById('onboarding-technical-label');
+  const onboardingTechnicalText = document.getElementById('onboarding-technical-text');
   const onboardingObjective = document.getElementById('onboarding-objective');
   const onboardingAnnouncement = document.getElementById('onboarding-announcement');
   const onboardingStepIndicator = document.getElementById('onboarding-step-indicator');
@@ -3437,7 +3440,8 @@ window.addEventListener('DOMContentLoaded', function() {
     if (onboardingObjective.textContent !== objectiveText) {
       onboardingObjective.textContent = objectiveText;
       if (onboardingAnnouncement) {
-        const announcement = `${step.title}. ${step.instruction} ${objectiveText}`;
+        const plainGuide = window.NULLA_TUTORIAL_PLAIN?.get(window.NULLA_I18N?.locale, step.id);
+        const announcement = `${step.title}. ${plainGuide?.text || step.instruction} ${objectiveText}`;
         onboardingAnnouncement.textContent = '';
         requestAnimationFrame(() => {
           if (onboardingOverlay?.style.display === 'block') onboardingAnnouncement.textContent = announcement;
@@ -3471,7 +3475,11 @@ window.addEventListener('DOMContentLoaded', function() {
     window.NULLA_EXPERIENCE?.set(s.mode,{persist:false});
 
     if (onboardingTitle) onboardingTitle.textContent = s.title;
-    if (onboardingInstruction) onboardingInstruction.textContent = s.instruction;
+    const plainGuide = window.NULLA_TUTORIAL_PLAIN?.get(window.NULLA_I18N?.locale, s.id);
+    if (onboardingInstruction) onboardingInstruction.textContent = plainGuide?.text || s.instruction;
+    if (onboardingTechnicalText) onboardingTechnicalText.textContent = s.instruction;
+    if (onboardingTechnicalLabel) onboardingTechnicalLabel.textContent = plainGuide?.technicalLabel || 'Scientific explanation';
+    if (onboardingTechnicalDetails) onboardingTechnicalDetails.open = false;
     if (onboardingStepIndicator) onboardingStepIndicator.textContent = education.ui.step.replace('{n}', s.step).replace('{total}',steps.length);
 
     if (btnNextOnboarding) btnNextOnboarding.textContent = s.step === steps.length ? education.ui.done : education.ui.next;
