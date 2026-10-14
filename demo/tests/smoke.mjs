@@ -15,6 +15,7 @@ const experienceScienceI18nSource = readFileSync(new URL('../src/i18n/experience
 const quizSource = readFileSync(new URL('../src/education/quiz-data.js', import.meta.url), 'utf8');
 const educationSource = readFileSync(new URL('../src/education/education-content.js', import.meta.url), 'utf8');
 const advancedTutorialSource = readFileSync(new URL('../src/education/advanced-tutorial.js', import.meta.url), 'utf8');
+const plainTutorialSource = readFileSync(new URL('../src/education/plain-language.js', import.meta.url), 'utf8');
 const experienceModeSource = readFileSync(new URL('../src/experience/experience-mode.js', import.meta.url), 'utf8');
 const chemistrySource = readFileSync(new URL('../src/chemistry/verified-reactions.js', import.meta.url), 'utf8');
 const compatibilitySource = readFileSync(new URL('../src/analysis/compatibility-engine.js', import.meta.url), 'utf8');
@@ -230,7 +231,16 @@ for (const locale of Object.keys(catalogs)) {
   assert.ok(education.docs.every(section => section.length === 2 && section.every(Boolean)), `${locale} documentation is incomplete`);
 }
 vm.runInNewContext(advancedTutorialSource, i18nSandbox);
+vm.runInNewContext(plainTutorialSource, i18nSandbox);
 assert.deepEqual([...i18nSandbox.NULLA_ADVANCED_TUTORIAL.locales].sort(), Object.keys(catalogs).sort(), 'advanced tutorial locales diverge');
+const plainTutorial = i18nSandbox.NULLA_TUTORIAL_PLAIN;
+assert.deepEqual([...plainTutorial.locales].sort(),Object.keys(catalogs).sort(),'plain-language tutorial locales diverge');
+assert.deepEqual(Array.from(plainTutorial.stepIds),["evidence","element","chemistry","thermal","nuclear","measurement","verification"],'plain-language tutorial step IDs diverge');
+for (const locale of Object.keys(catalogs)) {
+  assert.ok(plainTutorial.get(locale,'evidence')?.technicalLabel, `${locale} scientific disclosure label is missing`);
+  for (const stepId of plainTutorial.stepIds) assert.ok(plainTutorial.get(locale,stepId)?.text, `${locale}/${stepId} plain-language explanation is missing`);
+}
+
 for (const locale of Object.keys(catalogs)) {
   const tutorial = i18nSandbox.NULLA_ADVANCED_TUTORIAL.get(locale);
   assert.equal(tutorial.tutorial.length,7,`${locale} advanced tutorial step count diverges`);
