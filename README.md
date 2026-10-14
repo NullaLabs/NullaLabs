@@ -58,6 +58,7 @@ authorship, safety or semantic truth.
 - Python distributions with explicit edition boundaries
 
 <sub>[Proprietary Core Engine]</sub> ·
+[Public repository mirror](https://github.com/NullaLabs/CHRONOLITH-by-Ethernium) ·
 [Published package](https://pypi.org/project/chronolith-pro/)
 
 </td>
@@ -89,6 +90,7 @@ authority.
 - Zero-runtime-dependency Python package
 
 <sub>[Proprietary Core Engine]</sub> ·
+[Public repository mirror](https://github.com/NullaLabs/SENESCHAL-by-Ethernium) ·
 [Published package](https://pypi.org/project/seneschal/)
 
 </td>
