@@ -114,7 +114,7 @@ assert.doesNotMatch(app, /Hydrochloric Acid|Iron Oxide \(Rust\)|Phosphorus Pento
 assert.match(app, /tutorialReviewedScientificPanel/, 'tutorial verification must require an explicit scientific-panel review');
 assert.match(app, /canvas\.addEventListener\('keydown'[\s\S]{0,420}measurementHit/, '3D measurement must expose a keyboard selection path');
 assert.match(html, /id="onboarding-announcement"[^>]+aria-live="polite"[^>]+aria-atomic="true"/, 'tutorial steps need one atomic live announcer');
-assert.match(app, /const announcement = `\$\{step\.title\}\. \$\{step\.instruction\} \$\{objectiveText\}`/, 'tutorial announcements must include title, instruction, and objective state');
+assert.ok(app.includes("const announcement = `${step.title}. ${plainGuide?.text || step.instruction} ${objectiveText}`;"), 'tutorial announcements must include the plain-language instruction and objective state');
 assert.match(app, /aria-keyshortcuts','Enter Space'/, 'measurement mode must expose its keyboard shortcut');
 assert.match(app, /periodicCells\.forEach\(cell => \{[\s\S]{0,260}elementAria/, 'periodic-cell accessible names must refresh on locale changes');
 assert.match(html, /@media \(max-width: 600px\)[\s\S]{0,1800}\.nuclear-mode-bar \{[^}]*overflow-x:auto/, 'mobile nuclear controls must scroll instead of clipping');
