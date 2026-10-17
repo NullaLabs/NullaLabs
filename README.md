@@ -113,7 +113,8 @@ source-available under its own license; it is not MIT.
 - Bézier/vector generation and font assembly
 - Local workflow with test-backed release metadata
 
-[Source repository](https://github.com/NullaLabs/FONTS-FORGE-by-Ethernium)
+<sub>[Source-Available · Zone Beta Validation Gate]</sub> ·
+[Repository reference](https://github.com/NullaLabs/FONTS-FORGE-by-Ethernium)
 
 </td>
 <td width="42%" valign="middle">
@@ -143,8 +144,38 @@ hand a saved master to a separate private companion.
 - Real transcoding and GIF encoding paths
 - Explicit boundary between deterministic scaling and private AI tooling
 
-[Source repository](https://github.com/NullaLabs/KAPTURA-by-Ethernium)
+<sub>[Source-Available · Zone Beta Validation Gate]</sub> ·
+[Repository reference](https://github.com/NullaLabs/KAPTURA-by-Ethernium)
 
+</td>
+</tr>
+</table>
+
+---
+
+### 05 // SCRIBA (WRCP 1.2.1)
+
+<table>
+<tr>
+<td width="58%" valign="middle">
+
+**Workpiece Release Contract Protocol and fail-closed qualification gate**
+
+Eliminates race conditions, duplicate submissions and unverified promotions
+through formal release contract gates (`GO`, `GO_DEGRADED`, `NO_GO`). Built on
+native Node.js 24 (`node:sqlite`, `node:http`, `node:crypto`) with zero
+third-party npm dependencies.
+
+- Deterministic SQLite idempotency (40 concurrent replays → 1 record; mutated payload → `409 Conflict`)
+- Chaos-injection harness (`crm-delay`, `api-500`, `api-latency`, `response-lost`)
+- Fail-closed qualification verifier with 89/89 deterministic test assertions
+
+<sub>[WRCP 1.2.1 Engine · Zone Beta Validation Gate]</sub> ·
+[Repository reference](https://github.com/NullaLabs/SCRIBA-by-Ethernium)
+
+</td>
+<td width="42%" valign="middle">
+  <img src="scriba-pipeline.svg?v=512" alt="SCRIBA WRCP 1.2.1 Silicon Pipeline" width="100%" />
 </td>
 </tr>
 </table>
@@ -163,9 +194,9 @@ hand a saved master to a separate private companion.
 
 Orb packages a native Windows host/service and AMSI-related binaries alongside
 the PROTEKTA TypeScript defense engine. Android, Linux and robotics variants
-exist as separate private repositories. PROTEKTA is the shared defensive
-research layer; Orb is a product-facing family, not a synonym for the entire
-ecosystem.
+exist as separate private repositories under the unified `ISovereignProbe`
+contract. PROTEKTA is the shared defensive research layer; Orb is a
+product-facing family, not a synonym for the entire ecosystem.
 
 **Current maturity: private implementation under validation, not a certified
 EDR release.** Unit tests exist, but clean build, durable recovery and physical
@@ -181,23 +212,41 @@ hostile-attack resistance or deployment readiness are not made by this profile.
 
 ---
 
+### Sovereign Custody Pipeline & Holonic Architecture
+
 <table>
 <tr>
-<td align="center"><strong>FRUGAL</strong><br/><sub>local cognitive kernel</sub></td>
-<td align="center"><strong>CHRONOLITH</strong><br/><sub>integrity evidence</sub></td>
-<td align="center"><strong>SENESCHAL</strong><br/><sub>consultative preflight</sub></td>
+<td align="center"><strong>FRUGAL</strong><br/><sub>local cognitive kernel (Zone 0)</sub></td>
+<td align="center"><strong>SENESCHAL</strong><br/><sub>consultative preflight (L2)</sub></td>
+<td align="center"><strong>CHRONOLITH</strong><br/><sub>Merkle &amp; OTS evidence</sub></td>
 </tr>
 <tr>
-<td align="center"><strong>INVICTVS</strong><br/><sub>visual control surface</sub></td>
+<td align="center"><strong>SCRIBA</strong><br/><sub>WRCP 1.2.1 fail-closed gate</sub></td>
+<td align="center"><strong>EXEKUTION</strong><br/><sub>bounded execution broker</sub></td>
+<td align="center"><strong>NULLA-LABS</strong><br/><sub>47 rules &amp; O(1) ontology</sub></td>
+</tr>
+<tr>
+<td align="center"><strong>INVICTVS</strong><br/><sub>60 FPS visual control surface</sub></td>
 <td align="center"><strong>THESTRAL</strong><br/><sub>IDE / control plane</sub></td>
-<td align="center"><strong>EXEKUTION</strong><br/><sub>controlled execution research</sub></td>
+<td align="center"><strong>LEGION</strong><br/><sub>deterministic multi-cohort swarm</sub></td>
 </tr>
 </table>
 
+Every governed workflow and scale-invariant cybernetic cell
+($\mathcal{F} = \langle \mathcal{S}, \mathcal{I}, \Theta, \mathcal{A}, \mathcal{L} \rangle$:
+*Sensorium → Integrator → Homeostatic Threshold → Actuator → Immutable Ledger*)
+enforces strict separation of authority across four operational stages:
+
+1. **Preflight (`SENESCHAL`):** Bounded BM25 context retrieval, token-budget guard and prompt/secret inspection without hidden state mutation.
+2. **Integrity (`CHRONOLITH`):** Canonical SHA-256 Merkle tree sealing, Ed25519 signatures and verifiable provenance baselines.
+3. **Qualification (`SCRIBA`):** Fail-closed evaluation of evidence bundles against explicit policy sets (`GO` / `GO_DEGRADED` / `NO_GO`), where `UNKNOWN` never grants an exemption.
+4. **Execution (`EXEKUTION`):** Allowlisted local/edge broker execution only after cryptographic and contractual qualification succeeds.
+
 These labels describe the intended separation of responsibilities. Components
-without a linked public repository and reproducible release remain private or
-in development. Internal screenshots, simulations and unit tests do not prove
-deployment in a physical or hostile environment.
+without a linked public repository and reproducible release remain private in
+Zone Beta or air-gapped in Zone Zero under Invariants 3 and 7. Internal
+screenshots, simulations and unit tests do not prove deployment in a physical or
+hostile environment.
 
 > **Evidence rule:** latency, bypass ratio, CPU/GPU use, frame rate, security
 > efficacy and external anchoring apply only to the exact artifact, hardware
@@ -282,7 +331,7 @@ without trusting the presentation.
   <img src="Nemeth-mark.png" alt="Nemeth Corp visual identity" width="110" />
   <br/><br/>
   <h3>NEMETH CORP.</h3>
-  <sub><strong>NEMETH CORP. // NULLALABS</strong> · Public profile contract reviewed 2026-09-25</sub>
+  <sub><strong>NEMETH CORP. // NULLALABS</strong> · Public profile contract reviewed 2026-10-17</sub>
 </div>
 
 

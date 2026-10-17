@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 320" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07080A" />
+      <stop offset="100%" stop-color="#0F1117" />
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="100%" stop-color="#9D00FF" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="320" rx="12" fill="url(#bgGrad)" stroke="#1E293B" stroke-width="1.5"/>
+  <rect x="0" y="0" width="1000" height="4" fill="url(#cyanGrad)"/>
+
+  <text x="30" y="36" fill="#00E5FF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" letter-spacing="2">NEMETH CORP // NULLA LABS // SILICON PIPELINE</text>
+  <text x="30" y="60" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="700">SCRIBA — DATA FLOW</text>
+
+  <!-- Step 1 -->
+  <g transform="translate(30, 85)">
+    <rect width="215" height="205" rx="8" fill="#0B0D13" stroke="#00E5FF" stroke-width="1.5"/>
+    <text x="15" y="28" fill="#00E5FF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="900">01</text>
+    <text x="45" y="25" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700">INGESTIÓN // INPUT</text>
+    <line x1="15" y1="36" x2="200" y2="36" stroke="#1E293B" stroke-width="1"/>
+  </g>
+  <text x="45" y="135" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400">
+    <tspan x="45" dy="0">Solicitudes de sellado,</tspan>
+    <tspan x="45" dy="16">payloads de transacciones</tspan>
+    <tspan x="45" dy="16">y eventos de sistema</tspan>
+  </text>
+
+  <path d="M 255 188 L 270 188 M 265 182 L 272 188 L 265 194" stroke="#00E5FF" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Step 2 -->
+  <g transform="translate(275, 85)">
+    <rect width="215" height="205" rx="8" fill="#0B0D13" stroke="#FF3366" stroke-width="1.5"/>
+    <text x="15" y="28" fill="#FF3366" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="900">02</text>
+    <text x="45" y="25" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700">GUARDIÁN // GATE</text>
+    <line x1="15" y1="36" x2="200" y2="36" stroke="#1E293B" stroke-width="1"/>
+  </g>
+  <text x="290" y="135" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400">
+    <tspan x="290" dy="0">Filtro de idempotencia</tspan>
+    <tspan x="290" dy="16">O(1) con deduplicación por</tspan>
+    <tspan x="290" dy="16">hash SHA-256</tspan>
+  </text>
+
+  <path d="M 500 188 L 515 188 M 510 182 L 517 188 L 510 194" stroke="#9D00FF" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Step 3 -->
+  <g transform="translate(520, 85)">
+    <rect width="215" height="205" rx="8" fill="#0B0D13" stroke="#9D00FF" stroke-width="1.5"/>
+    <text x="15" y="28" fill="#9D00FF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="900">03</text>
+    <text x="45" y="25" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700">NÚCLEO // CORE</text>
+    <line x1="15" y1="36" x2="200" y2="36" stroke="#1E293B" stroke-width="1"/>
+  </g>
+  <text x="535" y="135" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400">
+    <tspan x="535" dy="0">Motor de calificación</tspan>
+    <tspan x="535" dy="16">formal WRCP 1.2.1 y firma</tspan>
+    <tspan x="535" dy="16">de silicio</tspan>
+  </text>
+
+  <path d="M 745 188 L 760 188 M 755 182 L 762 188 L 755 194" stroke="#00FF66" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Step 4 -->
+  <g transform="translate(765, 85)">
+    <rect width="205" height="205" rx="8" fill="#0B0D13" stroke="#00FF66" stroke-width="1.5"/>
+    <text x="15" y="28" fill="#00FF66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="900">04</text>
+    <text x="45" y="25" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700">SALIDA // TELEMETRY</text>
+    <line x1="15" y1="36" x2="190" y2="36" stroke="#1E293B" stroke-width="1"/>
+  </g>
+  <text x="780" y="135" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400">
+    <tspan x="780" dy="0">Recibo notarial inmutable</tspan>
+    <tspan x="780" dy="16">(.wrcp.json) registrado en</tspan>
+    <tspan x="780" dy="16">Chronolith</tspan>
+  </text>
+</svg>
