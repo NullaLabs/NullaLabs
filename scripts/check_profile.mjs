@@ -13,26 +13,30 @@ for (const forbidden of [
   'E:\\',
   'steveblackbeard.github.io',
   'raw.githubusercontent.com/SteveBlackbeard',
+  'Co-authored-by:',
 ]) {
   assert.equal(readme.includes(forbidden), false, `forbidden public reference: ${forbidden}`);
 }
 
-for (const repository of [
-  'CHRONOLITH-by-Ethernium',
-  'SENESCHAL-by-Ethernium',
-  'FONTS-FORGE-by-Ethernium',
-  'KAPTURA-by-Ethernium',
+for (const requiredReference of [
+  'https://pypi.org/project/chronolith-pro/',
+  'https://pypi.org/project/seneschal/',
+  'https://github.com/NullaLabs/FONTS-FORGE-by-Ethernium',
+  'https://github.com/NullaLabs/KAPTURA-by-Ethernium',
+  'https://github.com/NullaLabs/SCRIBA-by-Ethernium',
+  'https://github.com/NullaLabs/RYODAN-ART-CONTEST',
+  'Sovereign Custody Pipeline & Holonic Architecture',
 ]) {
-  assert.ok(readme.includes(`https://github.com/NullaLabs/${repository}`), `missing public repository: ${repository}`);
+  assert.ok(readme.includes(requiredReference), `missing required profile reference: ${requiredReference}`);
 }
 
 const localImages = [...readme.matchAll(/<img\s+src="([^"?#]+)(?:[?#][^"]*)?"/g)]
   .map((match) => match[1])
   .filter((source) => !source.startsWith('https://'));
 
-assert.ok(localImages.length > 0, 'profile must contain local visual assets');
+assert.ok(localImages.length >= 19, 'profile must contain local visual assets and badges');
 for (const source of localImages) {
   assert.ok(existsSync(resolve(root, source)), `missing local image: ${source}`);
 }
 
-console.log(`Profile contract passed: ${localImages.length} local images verified.`);
+console.log(`Profile contract passed: ${localImages.length} local images and 7 canonical references verified.`);
