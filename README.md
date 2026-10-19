@@ -23,7 +23,8 @@
 </div>
 
 ---
-A   N E W   E R A   I S   A R R A V I N G
+KNOWLEDGE IS NOT INDIVIDUAL BUT OF THE EXPANSION ITSELF
+A NEW ERA IS ARRIVING
 
 ## Ethernium :: NullaLabs
 
