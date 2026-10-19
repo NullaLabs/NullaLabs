@@ -13,6 +13,12 @@
     <code>[ INTERACTIVE ]</code> &nbsp;•&nbsp;
     <code>[ USER-FRIENDLY ]</code>
   </p>
+
+  <p align="center">
+    <a href="https://nullalabs.github.io/demo/" target="_blank" title="Launch IUPAC 3D Molecular &amp; Nuclear Platform">
+      <img src="badge-launch.svg?v=512" alt="Launch Live 3D Scientific Demo" width="420" />
+    </a>
+  </p>
   
 </div>
 
@@ -33,8 +39,10 @@ The profile deliberately separates three things:
 | **Visual research** | Interface language, shaders and interaction studies | Visual artifacts are not physical or scientific proof |
 
 <div align="center">
-  <img src="particle-public-projects.gif?v=512" alt="Visual index of NullaLabs public projects" width="100%" />
-  <p><sub>Engineering surface — independently inspectable systems, packages and tools.</sub></p>
+  <a href="https://nullalabs.github.io/demo/" target="_blank" title="Explore Interactive 3D Platform">
+    <img src="particle-public-projects.gif?v=512" alt="Visual index of NullaLabs public projects" width="100%" />
+  </a>
+  <p><sub>Engineering surface — independently inspectable systems, packages and tools. Click to explore interactive 3D platform.</sub></p>
 </div>
 
 ---
@@ -257,13 +265,17 @@ hostile environment.
 ## Visual research
 
 <div align="center">
-  <img src="particle-dna-console-v16-helix.gif?v=512" alt="Educational stylized DNA helix visualization" width="100%" />
-  <p><sub>Educational repeating base-pair motif — not a genomic sequence.</sub></p>
+  <a href="https://nullalabs.github.io/demo/" target="_blank" title="Launch IUPAC 3D Molecular Platform">
+    <img src="particle-dna-console-v16-helix.gif?v=512" alt="Educational stylized DNA helix visualization" width="100%" />
+  </a>
+  <p><sub>Educational repeating base-pair motif — not a genomic sequence. Click to launch interactive 3D platform.</sub></p>
 </div>
 
 <div align="center">
-  <img src="particle-periodic-table-au.gif?v=512" alt="Periodic-table visualization with gold highlighted" width="100%" />
-  <p><sub>Interface visualization — not an experimental physics result.</sub></p>
+  <a href="https://nullalabs.github.io/demo/" target="_blank" title="Launch IUPAC Periodic Table in 3D">
+    <img src="particle-periodic-table-au.gif?v=512" alt="Periodic-table visualization with gold highlighted" width="100%" />
+  </a>
+  <p><sub>Interface visualization — not an experimental physics result. Click to explore 118-element orbital model.</sub></p>
 </div>
 
 ---
@@ -315,6 +327,24 @@ hostile environment.
       <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1">▶️ Play Live 4K Web Experience (with Audio)</a> ·
       <a href="https://github.com/NullaLabs/RYODAN-ART-CONTEST">Source Repository</a> ·
       <a href="https://x.com/Ryodan_mave?s=20">@Ryodan on X</a>
+    </sub>
+  </p>
+</div>
+
+---
+
+### NULLA-LABS // IUPAC 3D MOLECULAR & NUCLEAR PLATFORM
+
+<div align="center">
+  <a href="https://nullalabs.github.io/demo/" target="_blank" title="Launch IUPAC 3D Molecular & Nuclear Platform">
+    <img src="particle-console.gif?v=514" alt="NULLA-LABS IUPAC 3D Molecular &amp; Nuclear Synthesis Platform" width="100%" />
+  </a>
+  <p>
+    <sub>
+      <strong>Educational 3D Molecular &amp; Nuclear Visualization Engine · Complete 118-Element IUPAC Periodic Table (60 FPS Local-First)</strong><br/>
+      <a href="https://nullalabs.github.io/demo/" target="_blank">🚀 Launch Live 3D Platform (GitHub Pages)</a> ·
+      <a href="demo/">Local Source Directory</a> ·
+      <a href="demo/ARCHITECTURE.md">Architecture Contract</a>
     </sub>
   </p>
 </div>
