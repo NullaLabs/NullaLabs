@@ -23,6 +23,7 @@
 </div>
 
 ---
+A   N E W   E R A   I S   A R R A V I N G
 
 ## Ethernium :: NullaLabs
 
