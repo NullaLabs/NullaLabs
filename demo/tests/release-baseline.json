@@ -4,7 +4,7 @@
   "files": {
     ".gitattributes": "1d286c41100db83c55ca0d74d91b327190aedb29e467c958120c694f4bac06f7",
     ".github/workflows/companion-telemetry.yml": "cb13f4b74eaa7bb1a3816d12fedf7b3312561179ead58a41225a400353ed85a7",
-    ".github/workflows/static.yml": "f633578553aa6482beee16bbd8f5e2c6d8c77a5fe33db93aa7afce90217201d3",
+    ".github/workflows/static.yml": "163b8ba99f7898c6054f9ebd183a7df123ae3d27efd9a2347f2bcb999dc7b18a",
     "MASTER_PLAN.md": "9376e7c000c142ba626ca7300a4add54c3dab2bd2fb545bb40972fa66ae20e44",
     "VERIFICATION.md": "c58cae7f45ca1fea52cceea7063bf14808a788f6bafd4059bfd3c2be006cc5d3",
     "demo/SCIENTIFIC_METHOD.md": "4246813de898fd44d23d15460a7a131e8dd448d894612ac1386c7550358d935c",
