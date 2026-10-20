@@ -277,7 +277,13 @@ hostile environment.
   <a href="https://nullalabs.github.io/NullaLabs/demo/" target="_blank" title="Launch IUPAC Periodic Table in 3D">
     <img src="particle-periodic-table-au.gif?v=512" alt="Periodic-table visualization with gold highlighted" width="100%" />
   </a>
-  <p><sub>Interface visualization — not an experimental physics result. Click to explore 118-element orbital model.</sub></p>
+  <p><sub>
+      <strong>Educational 3D Molecular &amp; Nuclear Visualization Engine · Complete 118-Element IUPAC Periodic Table (60 FPS Local-First)</strong><br/>
+      <a href="https://nullalabs.github.io/NullaLabs/demo/" target="_blank">🚀 Launch Live 3D Platform (GitHub Pages)</a> ·
+      <a href="demo/">Local Source Directory</a> ·
+      <a href="demo/ARCHITECTURE.md">Architecture Contract</a>
+    </sub>
+  </p>
 </div>
 
 ---
@@ -329,24 +335,6 @@ hostile environment.
       <a href="https://nullalabs.github.io/RYODAN-ART-CONTEST/?autoplay=1">▶️ Play Live 4K Web Experience (with Audio)</a> ·
       <a href="https://github.com/NullaLabs/RYODAN-ART-CONTEST">Source Repository</a> ·
       <a href="https://x.com/Ryodan_mave?s=20">@Ryodan on X</a>
-    </sub>
-  </p>
-</div>
-
----
-
-### NULLA-LABS // IUPAC 3D MOLECULAR & NUCLEAR PLATFORM
-
-<div align="center">
-  <a href="https://nullalabs.github.io/NullaLabs/demo/" target="_blank" title="Launch IUPAC 3D Molecular & Nuclear Platform">
-    <img src="particle-console.gif?v=514" alt="NULLA-LABS IUPAC 3D Molecular &amp; Nuclear Synthesis Platform" width="100%" />
-  </a>
-  <p>
-    <sub>
-      <strong>Educational 3D Molecular &amp; Nuclear Visualization Engine · Complete 118-Element IUPAC Periodic Table (60 FPS Local-First)</strong><br/>
-      <a href="https://nullalabs.github.io/NullaLabs/demo/" target="_blank">🚀 Launch Live 3D Platform (GitHub Pages)</a> ·
-      <a href="demo/">Local Source Directory</a> ·
-      <a href="demo/ARCHITECTURE.md">Architecture Contract</a>
     </sub>
   </p>
 </div>
