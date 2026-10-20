@@ -51,62 +51,6 @@ The profile deliberately separates three things:
 
 ## Public systems
 
-### 01 // Chronolith
-
-<table>
-<tr>
-<td width="58%" valign="middle">
-
-**Continuity and integrity evidence for long-running human–AI projects**
-
-Canonical state, Merkle evidence, signatures and independently checkable
-provenance. Hashes establish byte integrity; they do not by themselves prove
-authorship, safety or semantic truth.
-
-- Deterministic evidence records and project baselines
-- Continuity artifacts for work that spans sessions
-- Python distributions with explicit edition boundaries
-
-<sub>[Proprietary Core Engine]</sub> ·
-[Published package](https://pypi.org/project/chronolith-pro/)
-
-</td>
-<td width="42%" valign="middle">
-  <img src="logo-chronolith.png" alt="Chronolith by Ethernium" width="100%" />
-</td>
-</tr>
-</table>
-
----
-
-### 02 // Seneschal
-
-<table>
-<tr>
-<td width="42%" valign="middle">
-  <img src="logo-seneschal.png" alt="Seneschal by Ethernium" width="100%" />
-</td>
-<td width="58%" valign="middle">
-
-**Consultative context-cost and security preflight for AI workflows**
-
-Bounded BM25 retrieval, secret and prompt-injection checks, signed grants and
-an audit ledger. Seneschal advises; the authorized runtime retains execution
-authority.
-
-- Local and deterministic context selection
-- Explicit findings instead of hidden mutation
-- Zero-runtime-dependency Python package
-
-<sub>[Proprietary Core Engine]</sub> ·
-[Published package](https://pypi.org/project/seneschal/)
-
-</td>
-</tr>
-</table>
-
----
-
 ### 03 // Fonts Forge
 
 <table>
@@ -163,35 +107,6 @@ hand a saved master to a separate private companion.
 
 ---
 
-### 05 // SCRIBA (WRCP 1.2.1)
-
-<table>
-<tr>
-<td width="58%" valign="middle">
-
-**Workpiece Release Contract Protocol and fail-closed qualification gate**
-
-Eliminates race conditions, duplicate submissions and unverified promotions
-through formal release contract gates (`GO`, `GO_DEGRADED`, `NO_GO`). Built on
-native Node.js 24 (`node:sqlite`, `node:http`, `node:crypto`) with zero
-third-party npm dependencies.
-
-- Deterministic SQLite idempotency (40 concurrent replays → 1 record; mutated payload → `409 Conflict`)
-- Chaos-injection harness (`crm-delay`, `api-500`, `api-latency`, `response-lost`)
-- Fail-closed qualification verifier with 89/89 deterministic test assertions
-
-<sub>[WRCP 1.2.1 Engine · Zone Beta Validation Gate]</sub> ·
-[Repository reference](https://github.com/NullaLabs/SCRIBA-by-Ethernium)
-
-</td>
-<td width="42%" valign="middle">
-  <img src="scriba-pipeline.svg?v=512" alt="SCRIBA WRCP 1.2.1 Silicon Pipeline" width="100%" />
-</td>
-</tr>
-</table>
-
----
-
 ## Private ecosystem boundary
 
 ### Ethernium Orb // Windows endpoint research
@@ -216,6 +131,62 @@ hostile-attack resistance or deployment readiness are not made by this profile.
 </td>
 <td width="42%" valign="middle">
   <img src="logo-orb-antivirus.png" alt="Ethernium Orb visual identity" width="100%" />
+</td>
+</tr>
+</table>
+
+---
+
+### 01 // Chronolith
+
+<table>
+<tr>
+<td width="58%" valign="middle">
+
+**Continuity and integrity evidence for long-running human–AI projects**
+
+Canonical state, Merkle evidence, signatures and independently checkable
+provenance. Hashes establish byte integrity; they do not by themselves prove
+authorship, safety or semantic truth.
+
+- Deterministic evidence records and project baselines
+- Continuity artifacts for work that spans sessions
+- Python distributions with explicit edition boundaries
+
+<sub>[Proprietary Core Engine]</sub> ·
+[Published package](https://pypi.org/project/chronolith-pro/)
+
+</td>
+<td width="42%" valign="middle">
+  <img src="logo-chronolith.png" alt="Chronolith by Ethernium" width="100%" />
+</td>
+</tr>
+</table>
+
+---
+
+### 02 // Seneschal
+
+<table>
+<tr>
+<td width="42%" valign="middle">
+  <img src="logo-seneschal.png" alt="Seneschal by Ethernium" width="100%" />
+</td>
+<td width="58%" valign="middle">
+
+**Consultative context-cost and security preflight for AI workflows**
+
+Bounded BM25 retrieval, secret and prompt-injection checks, signed grants and
+an audit ledger. Seneschal advises; the authorized runtime retains execution
+authority.
+
+- Local and deterministic context selection
+- Explicit findings instead of hidden mutation
+- Zero-runtime-dependency Python package
+
+<sub>[Proprietary Core Engine]</sub> ·
+[Published package](https://pypi.org/project/seneschal/)
+
 </td>
 </tr>
 </table>
