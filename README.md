@@ -107,7 +107,34 @@ hand a saved master to a separate private companion.
 
 ---
 
-## Private ecosystem boundary
+### 05 // SCRIBA (WRCP 1.2.1)
+
+<table>
+<tr>
+<td width="58%" valign="middle">
+
+**Workpiece Release Contract Protocol and fail-closed qualification gate**
+
+Eliminates race conditions, duplicate submissions and unverified promotions
+through formal release contract gates (`GO`, `GO_DEGRADED`, `NO_GO`). Built on
+native Node.js 24 (`node:sqlite`, `node:http`, `node:crypto`) with zero
+third-party npm dependencies.
+
+- Deterministic SQLite idempotency (40 concurrent replays → 1 record; mutated payload → `409 Conflict`)
+- Chaos-injection harness (`crm-delay`, `api-500`, `api-latency`, `response-lost`)
+- Fail-closed qualification verifier with 89/89 deterministic test assertions
+
+<sub>[WRCP 1.2.1 Engine · Zone Beta Validation Gate]</sub> ·
+[Repository reference](https://github.com/NullaLabs/SCRIBA-by-Ethernium)
+
+</td>
+<td width="42%" valign="middle">
+  <img src="scriba-pipeline.svg?v=512" alt="SCRIBA WRCP 1.2.1 Silicon Pipeline" width="100%" />
+</td>
+</tr>
+</table>
+
+---
 
 ### Ethernium Orb // Windows endpoint research
 
