@@ -9,11 +9,11 @@
     "VERIFICATION.md": "c58cae7f45ca1fea52cceea7063bf14808a788f6bafd4059bfd3c2be006cc5d3",
     "demo/SCIENTIFIC_METHOD.md": "4246813de898fd44d23d15460a7a131e8dd448d894612ac1386c7550358d935c",
     "demo/ARCHITECTURE.md": "6068117679b445220ee1e504bbb142eb25d6004963074f5939aa893bfaeb185a",
-    "demo/index.html": "08d6e8d31e3f81261f0934f36657e9c7fb2f511c61710b1d686e3015295c6750",
-    "demo/app.js": "d0aa6f5f5fed4466066259bb36157f14e7b586f1b2d2c25ab6e4c28205ea5c89",
+    "demo/index.html": "1e96195fd3720c37c196040ef9c1d0748908cf9c3e6a7504eec01033589f7581",
+    "demo/app.js": "023e11445e1951a8dfaeab724a7f0696afc19591212c3d915fdbe4dcc2fc42fe",
     "demo/vendor/three.min.js": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2",
     "demo/periodic-table-data.js": "7b2a60a5260a1edf67f18d1c317972c5031d90933382006c68105e9c00a6a2b4",
-    "demo/src/i18n/i18n.js": "c64b2c72e92951dc3734341a379a9c3818d66f49cea9fed8d5d6d27e77b0890a",
+    "demo/src/i18n/i18n.js": "c92543e6ca09a9af4ab6a814322ab547bb17d193af50e4db59b06d9d4e3677c6",
     "demo/src/i18n/runtime-i18n.js": "197da75c949adb40d356f8bdcaef1fc184ca3097693422cd3275b5bb7c5e5e52",
     "demo/src/i18n/ui-labels.js": "053a5ef3bced1ce891584b019158028a1c3abd6c0b8f999d06c0e931f7967086",
     "demo/src/i18n/telemetry-i18n.js": "e9643a754d17c46c8032d870daeb6e52fc96177c88cf98fffaecb82927db8cc0",
@@ -28,7 +28,7 @@
     "demo/src/analysis/compatibility-engine.js": "1102a20af38f47d2e67bb142d7ad61b865584a5479827c75cc33f8040ba42469",
     "demo/src/physics/thermodynamics.js": "a06df9d9236c5fc458801d78dd0d507e4711a95d4614a83da0c153fecefe3d84",
     "demo/src/physics/measurement.js": "bbb8cde99f4cce30173ea9d253b3e38a2a4b189f83987bddf3621c7e95ea615d",
-    "demo/tests/smoke.mjs": "e2cd24f82f87a3de365414bbf3bd41a97674f6584a2961f704b8eb4ecb85c32c",
+    "demo/tests/smoke.mjs": "d7a28237b391fd853c66befef5a555d84953a338bcb07da95d682f48adb802c1",
     "demo/tests/release-baseline.mjs": "26475063f058248f893de7ef6743e3ba0024642a453c9b3372981224ebd966e6",
     "demo/src/audio/procedural-audio.js": "ed5eb10ae64b0ff0a720e790ccea978dec1e1f69b2338861198e4417eb0d6676"
   }

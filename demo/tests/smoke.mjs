@@ -352,10 +352,8 @@ assert.ok(synk5.synapticWeight > synk1.synapticWeight, 'STDP pulse sequence must
 assert.ok(synk5.conductanceMicroS > synk1.conductanceMicroS, 'STDP potentiation must increase synaptic conductance');
 assert.match(html, /id="btn-visual-mode"/, '3D visual representation switcher button must be present');
 assert.match(html, /id="btn-xrd"/, 'Bragg XRD diffraction button must be present');
-assert.match(html, /id="btn-collapse-left-hud"/, 'left telemetry panel collapse button must be present');
-assert.match(html, /id="btn-restore-left-hud"/, 'left telemetry panel restore button must be present');
-assert.match(html, /id="btn-collapse-pt-hud"/, 'bottom periodic table collapse button must be present');
-assert.match(html, /id="btn-restore-pt-hud"/, 'bottom periodic table restore button must be present');
+assert.match(html, /id="btn-restore-left-hud"/, 'left telemetry panel drawer tab button must be present');
+assert.match(html, /id="btn-restore-pt-hud"/, 'bottom periodic table drawer tab button must be present');
 const xrdSample = compatibility.computeBraggXRDPattern([
   { z: 11, x: 0, y: 0, zCoord: 0 },
   { z: 17, x: 2.82, y: 0, zCoord: 0 },

@@ -25,7 +25,7 @@
     '#btn-reassemble':'dna','#btn-orbitals':'orbitals','#btn-measure':'measure','.material-lab-title':'materials','#btn-record':'record',
     '.pt-panel-title':'controller','.fusion-label':'tray','#btn-fuse':'combine','#btn-suggest':'suggest','#btn-random':'random','#btn-undo':'undo',
     '#btn-clear':'clear','#btn-nuclear-fusion':'fusion','#btn-nuclear-fission':'fission',
-    '#btn-collapse-left-hud':'collapseLeft','#btn-restore-left-hud':'restoreLeft','#btn-collapse-pt-hud':'collapsePt','#btn-restore-pt-hud':'restorePt',
+    '#btn-restore-left-hud':'restoreLeft','#btn-restore-pt-hud':'restorePt',
     '#btn-synkronia':'relaxLattice','#btn-polymorph':'crystalPhase','#btn-export-cif':'exportCif','#btn-xrd':'xrdBragg',
     '#btn-stage-active':'stageActive','#mode-basic':'modeBasic','#mode-lab':'modeLab','#mode-science':'modeScience'
   };

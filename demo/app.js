@@ -4352,10 +4352,8 @@ window.addEventListener('DOMContentLoaded', function() {
 
   // Collapsible Left Telemetry Panel & Bottom Periodic Table Panel (3D Solid Crystal Drawer Tabs)
   const leftHudPanel = document.getElementById('molecular-hud');
-  const btnCollapseLeftHud = document.getElementById('btn-collapse-left-hud');
   const btnRestoreLeftHud = document.getElementById('btn-restore-left-hud');
   const ptHudCollapsePanel = document.getElementById('pt-hud-panel');
-  const btnCollapsePtHud = document.getElementById('btn-collapse-pt-hud');
   const btnRestorePtHud = document.getElementById('btn-restore-pt-hud');
 
   function updateDrawerTabs() {
@@ -4367,10 +4365,6 @@ window.addEventListener('DOMContentLoaded', function() {
       btnRestoreLeftHud.title = tr(isLeftCollapsed ? 'restoreLeft' : 'collapseLeft');
       btnRestoreLeftHud.setAttribute('aria-expanded', !isLeftCollapsed);
     }
-    if (btnCollapseLeftHud) {
-      btnCollapseLeftHud.textContent = tr('collapseLeft');
-      btnCollapseLeftHud.title = tr('collapseLeft');
-    }
     if (btnRestorePtHud) {
       btnRestorePtHud.textContent = tr(isPtCollapsed ? 'restorePt' : 'collapsePt');
       btnRestorePtHud.title = tr(isPtCollapsed ? 'restorePt' : 'collapsePt');
@@ -4381,10 +4375,6 @@ window.addEventListener('DOMContentLoaded', function() {
       } else {
         btnRestorePtHud.style.bottom = '';
       }
-    }
-    if (btnCollapsePtHud) {
-      btnCollapsePtHud.textContent = tr('collapsePt');
-      btnCollapsePtHud.title = tr('collapsePt');
     }
   }
 
@@ -4414,22 +4404,10 @@ window.addEventListener('DOMContentLoaded', function() {
     updateDrawerTabs();
   }
 
-  if (btnCollapseLeftHud) {
-    btnCollapseLeftHud.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleLeftHud(true);
-    });
-  }
   if (btnRestoreLeftHud) {
     btnRestoreLeftHud.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleLeftHud();
-    });
-  }
-  if (btnCollapsePtHud) {
-    btnCollapsePtHud.addEventListener('click', (e) => {
-      e.stopPropagation();
-      togglePtHud(true);
     });
   }
   if (btnRestorePtHud) {
