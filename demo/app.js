@@ -3733,6 +3733,281 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // THEORIA-NULLA & INYEKTOR: POLYMORPH PHASE TRANSITION ENGINE (P, T)
+  // ═══════════════════════════════════════════════════════════════
+  let activePolymorphFamily = 'C';
+  let activePolymorphId = null;
+
+  function buildPolymorphAtoms(poly) {
+    const atoms = [];
+    const bonds = [];
+    const zA = poly.atoms[0]?.z || 6;
+    const zB = poly.atoms[1]?.z || zA;
+    const gType = poly.geomType;
+
+    if (gType === 'hex_layered') {
+      const r = 4.6;
+      [-5.2, 0, 5.2].forEach((py, layerIdx) => {
+        const shiftX = (layerIdx % 2) * 1.4;
+        const cIdx = atoms.length;
+        atoms.push({ z: zA, pos: new THREE.Vector3(shiftX, py, 0), scale: 1.45 });
+        const ring = [];
+        for (let i = 0; i < 6; i++) {
+          const th = (i / 6) * Math.PI * 2;
+          const idx = atoms.length;
+          atoms.push({ z: i % 2 === 0 ? zB : zA, pos: new THREE.Vector3(shiftX + r * Math.cos(th), py, r * Math.sin(th)), scale: 1.4 });
+          ring.push(idx);
+          bonds.push({ a: cIdx, b: idx, order: 1 });
+        }
+        for (let i = 0; i < 6; i++) bonds.push({ a: ring[i], b: ring[(i + 1) % 6], order: 1 });
+      });
+    } else if (gType === 'diamond_cubic') {
+      const d = 5.4;
+      const centers = [
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(d, d, 0),
+        new THREE.Vector3(-d, d, 0),
+        new THREE.Vector3(0, -d, d),
+        new THREE.Vector3(0, -d, -d)
+      ];
+      centers.forEach((cPos, cIdx) => {
+        const iCenter = atoms.length;
+        atoms.push({ z: zA, pos: cPos.clone(), scale: 1.6 });
+        const t = 3.2 * (cIdx % 2 === 0 ? 1 : -1);
+        [
+          new THREE.Vector3(t, t, t),
+          new THREE.Vector3(-t, -t, t),
+          new THREE.Vector3(-t, t, -t),
+          new THREE.Vector3(t, -t, -t)
+        ].forEach(v => {
+          const iSub = atoms.length;
+          atoms.push({ z: zB, pos: cPos.clone().add(v), scale: 1.4 });
+          bonds.push({ a: iCenter, b: iSub, order: 1 });
+        });
+      });
+    } else if (gType === 'wurtzite_hex') {
+      const r = 5.0;
+      [-4.8, 0, 4.8].forEach((py, lIdx) => {
+        const rot = (lIdx % 2) * (Math.PI / 6);
+        const cIdx = atoms.length;
+        atoms.push({ z: zA, pos: new THREE.Vector3(0, py, 0), scale: 1.6 });
+        for (let i = 0; i < 6; i++) {
+          const th = (i / 6) * Math.PI * 2 + rot;
+          const idx = atoms.length;
+          atoms.push({ z: i % 2 === 0 ? zB : zA, pos: new THREE.Vector3(r * Math.cos(th), py + (i % 2) * 1.1, r * Math.sin(th)), scale: 1.45 });
+          bonds.push({ a: cIdx, b: idx, order: 1 });
+        }
+      });
+    } else if (gType === 'rutile_oct' || gType === 'anatase_oct') {
+      const d = gType === 'rutile_oct' ? 6.0 : 5.4;
+      const tilt = gType === 'anatase_oct' ? 1.4 : 0.0;
+      [new THREE.Vector3(-d, -tilt, 0), new THREE.Vector3(0, tilt, 0), new THREE.Vector3(d, -tilt, 0)].forEach(cPos => {
+        const mIdx = atoms.length;
+        atoms.push({ z: zA, pos: cPos.clone(), scale: 1.75 });
+        [
+          new THREE.Vector3(3.4, 0, 0), new THREE.Vector3(-3.4, 0, 0),
+          new THREE.Vector3(0, 3.4, 0), new THREE.Vector3(0, -3.4, 0),
+          new THREE.Vector3(0, 0, 3.4), new THREE.Vector3(0, 0, -3.4)
+        ].forEach(oVec => {
+          const oIdx = atoms.length;
+          atoms.push({ z: zB, pos: cPos.clone().add(oVec), scale: 1.35 });
+          bonds.push({ a: mIdx, b: oIdx, order: 1 });
+        });
+      });
+    } else if (gType === 'quartz_tetra') {
+      const r = 5.6;
+      for (let k = 0; k < 6; k++) {
+        const th = (k / 6) * Math.PI * 2;
+        const py = (k - 2.5) * 2.4;
+        const siIdx = atoms.length;
+        const siPos = new THREE.Vector3(r * Math.cos(th), py, r * Math.sin(th));
+        atoms.push({ z: zA, pos: siPos, scale: 1.65 });
+        const o1 = atoms.length;
+        atoms.push({ z: zB, pos: siPos.clone().add(new THREE.Vector3(0, 2.2, 0)), scale: 1.35 });
+        const o2 = atoms.length;
+        atoms.push({ z: zB, pos: siPos.clone().multiplyScalar(0.65), scale: 1.35 });
+        bonds.push({ a: siIdx, b: o1, order: 1 }, { a: siIdx, b: o2, order: 1 });
+        if (k > 0) bonds.push({ a: siIdx, b: siIdx - 3, order: 1 });
+      }
+    } else if (gType === 'bcc_lattice') {
+      const d = 5.4;
+      for (let ix = -1; ix <= 1; ix++) {
+        for (let iy = -1; iy <= 1; iy++) {
+          for (let iz = -1; iz <= 1; iz++) {
+            atoms.push({ z: zA, pos: new THREE.Vector3(ix * d, iy * d, iz * d), scale: 1.65 });
+          }
+        }
+      }
+      atoms.push({ z: zA, pos: new THREE.Vector3(d * 0.5, d * 0.5, d * 0.5), scale: 1.75 });
+      atoms.push({ z: zA, pos: new THREE.Vector3(-d * 0.5, -d * 0.5, -d * 0.5), scale: 1.75 });
+    } else {
+      const d = 4.8;
+      for (let ix = -1; ix <= 1; ix++) {
+        for (let iy = -1; iy <= 1; iy++) {
+          for (let iz = -1; iz <= 1; iz++) {
+            const zAtom = (Math.abs(ix + iy + iz) % 2 === 0) ? zA : zB;
+            atoms.push({ z: zAtom, pos: new THREE.Vector3(ix * d, iy * d, iz * d), scale: zAtom === zA ? 1.7 : 1.4 });
+          }
+        }
+      }
+    }
+    return { atoms, bonds: bonds.length ? bonds : null };
+  }
+
+  function triggerPolymorphTransition() {
+    playTone(710, 'triangle', 0.18);
+    isDnaMode = false;
+    activeCollisionMode = 'chemical';
+    const candidateFormula = activeReactionRef?.formula && window.NULLA_COMPATIBILITY?.POLYMORPH_FAMILIES?.[activeReactionRef.formula]
+      ? activeReactionRef.formula
+      : activePolymorphFamily;
+    const nextInfo = window.NULLA_COMPATIBILITY?.getNextPolymorph?.(candidateFormula, activePolymorphId);
+    if (!nextInfo) return;
+
+    activePolymorphFamily = nextInfo.familyKey;
+    const poly = nextInfo.polymorph;
+    activePolymorphId = poly.id;
+    activeReactionRef = poly;
+    activeStructureId = `polymorph-${poly.id}`;
+
+    const built = buildPolymorphAtoms(poly);
+    let nearestDistance = Infinity;
+    for (let i = 0; i < built.atoms.length; i++) {
+      for (let j = i + 1; j < built.atoms.length; j++) {
+        const dist = built.atoms[i].pos.distanceTo(built.atoms[j].pos);
+        if (dist > 0.1 && dist < nearestDistance) nearestDistance = dist;
+      }
+    }
+    activeBondCutoffWorld = Number.isFinite(nearestDistance) ? nearestDistance * 1.22 : 5.5;
+    angstromPerWorldUnit = Number.isFinite(poly.bondLengthA) && Number.isFinite(nearestDistance)
+      ? poly.bondLengthA / nearestDistance
+      : 0.35;
+    measurementScaleVerified = true;
+
+    activeThermalProfile = {
+      label: `${poly.formula} (${poly.id})`,
+      melt: poly.melt,
+      boil: poly.boil,
+      transition: poly.transition || 'melting',
+      pressure: poly.pWindow,
+      model: 'catalogued reference'
+    };
+    setThermalControlEnabled(Boolean(window.NULLA_THERMODYNAMICS?.hasUsablePhaseProfile?.(activeThermalProfile)));
+    spawnAtoms(built.atoms, built.bonds);
+
+    const freeEnergyKJmol = window.NULLA_COMPATIBILITY?.evaluateFreeEnergyKJmol?.(poly.enthalpy, poly.entropyJmolK, temperatureK);
+    const dGTag = freeEnergyKJmol !== null ? ` · ΔG°(${temperatureK}K)=${freeEnergyKJmol} kJ/mol` : '';
+    const seal = window.NULLA_COMPATIBILITY?.computeChronolithSeal?.(`POLYMORPH|${poly.id}|${temperatureK}`) || 'CHR-POLY';
+
+    updateTelemetry(
+      `🔄 POLIMORFO [${nextInfo.index + 1}/${nextInfo.total}] · ${poly.name}`,
+      `Fórmula: ${poly.formula} | Grupo Espacial IUCr: ${poly.spaceGroup}`,
+      `COMPETICIÓN DE FASES P–T · Ventana: P ∈ [${poly.pWindow}] · T ∈ [${poly.tWindow}]`,
+      `d₀ = ${poly.bondLengthA} Å · B₀ = ${poly.bulkModulusGPa} GPa · HV = ${poly.vickersGPa} GPa · Eg = ${poly.bandgapEv} eV`,
+      `T_actual = ${temperatureK} K · Tb/Tsub = ${poly.boil} K`,
+      `${poly.enthalpy} kJ/mol${dGTag}`,
+      '0 Debye (RED CRISTALINA)',
+      `99% · POLIMORFO CRISTALOGRÁFICO VERIFICADO`,
+      `${poly.note} · [${seal}]`
+    );
+    if (hudCompatibility) {
+      hudCompatibility.textContent = `FASE CRISTALINA: ${poly.name} (${poly.spaceGroup})`;
+      hudCompatibility.style.color = '#FFD166';
+    }
+    if (hudConditions) {
+      hudConditions.textContent = `THEORIA-NULLA + INYEKTOR [P: ${poly.pWindow} | T: ${poly.tWindow}] · [${seal}]`;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // SYNKRONIA-SNN-CORE: NEUROMORPHIC MEMRISTOR & ION-CHANNEL ENGINE
+  // ═══════════════════════════════════════════════════════════════
+  const SYNKRONIA_KEYS = ['SrTiO₃', 'TiO₂', 'BaTiO₃', 'MoS₂', 'LiCoO₂', 'NaCl'];
+  let activeSynkroniaIndex = 0;
+  let synkroniaPulseCount = 0;
+
+  function triggerSynkroniaPulse() {
+    playTone(840 + (synkroniaPulseCount % 4) * 60, 'sine', 0.18);
+    isDnaMode = false;
+    activeCollisionMode = 'chemical';
+
+    const currentFormula = activeReactionRef?.formula;
+    if (currentFormula && SYNKRONIA_KEYS.includes(currentFormula)) {
+      activeSynkroniaIndex = SYNKRONIA_KEYS.indexOf(currentFormula);
+    } else if (synkroniaPulseCount >= 4) {
+      activeSynkroniaIndex = (activeSynkroniaIndex + 1) % SYNKRONIA_KEYS.length;
+      synkroniaPulseCount = 0;
+    }
+    synkroniaPulseCount++;
+    const targetKey = SYNKRONIA_KEYS[activeSynkroniaIndex];
+    const synk = window.NULLA_COMPATIBILITY?.evaluateSynkroniaState?.(targetKey, synkroniaPulseCount, temperatureK);
+    if (!synk) return;
+
+    const atoms = [];
+    const bonds = [];
+    const d = 5.0;
+    // Build 3x3x3 host oxide/perovskite/2D matrix + conductive oxygen-vacancy filament along X-axis
+    for (let ix = -1; ix <= 1; ix++) {
+      for (let iy = -1; iy <= 1; iy++) {
+        for (let iz = -1; iz <= 1; iz++) {
+          const isFilamentCore = (iy === 0 && iz === 0);
+          const idx = atoms.length;
+          const zAtom = (Math.abs(ix + iy + iz) % 2 === 0) ? synk.zA : synk.zB;
+          atoms.push({
+            z: zAtom,
+            pos: new THREE.Vector3(ix * d, iy * d, iz * d),
+            col: isFilamentCore ? (synk.synapticWeight >= 0.8 ? 0x00FF9D : 0x00F0FF) : undefined,
+            scale: isFilamentCore ? 1.85 : 1.4
+          });
+          if (idx > 0 && isFilamentCore && atoms[idx - 1]) {
+            bonds.push({ a: idx, b: Math.max(0, idx - 9), order: 2 });
+          }
+        }
+      }
+    }
+    for (let i = 0; i < atoms.length; i++) {
+      for (let j = i + 1; j < atoms.length; j++) {
+        if (atoms[i].pos.distanceTo(atoms[j].pos) <= d * 1.08) {
+          bonds.push({ a: i, b: j, order: (atoms[i].col && atoms[j].col) ? 2 : 1 });
+        }
+      }
+    }
+
+    angstromPerWorldUnit = 2.0 / d;
+    measurementScaleVerified = true;
+    activeStructureId = `synkronia-${targetKey}-p${synkroniaPulseCount}`;
+    spawnAtoms(atoms, bonds);
+
+    updateTelemetry(
+      `⚡ SYNKRONIA SNN · ${synk.device}`,
+      `Matriz: ${synk.formula} | Pulso #${synk.pulseCount} | Peso Sináptico w = ${synk.synapticWeight}`,
+      `CONDUCTANCIA SINÁPTICA G = ${synk.conductanceMicroS} μS · Ratio ON/OFF = ${synk.onOffRatio}:1`,
+      synk.mechanism,
+      `V_set = +${synk.vSetV} V · V_reset = ${synk.vResetV} V · τ_STDP = ${synk.tauStdpMs} ms · E = ${synk.energySpikeFJ} fJ/spike`,
+      `-${synk.energySpikeFJ} fJ/spike (ULTRA-FRUGAL SNN)`,
+      `${synk.vSetV} V (UMBRAL DE CONMUTACIÓN)`,
+      `${Math.round(synk.synapticWeight * 100)}% · ${synk.stateLabel}`,
+      `Plasticidad dependiente del tiempo de espiga (STDP): Δw = A₊·exp(-Δt/τ₊) @ ${temperatureK} K · [${synk.chronolithSeal}]`
+    );
+    if (hudCompatibility) {
+      hudCompatibility.textContent = `${synk.stateLabel} (G = ${synk.conductanceMicroS} μS)`;
+      hudCompatibility.style.color = synk.synapticWeight >= 0.8 ? '#00FF9D' : '#00F0FF';
+    }
+    if (hudConditions) {
+      hudConditions.textContent = `SYNKRONIA-SNN-CORE + LEGION [C02_BIO + C03_MATH] · Pulso #${synk.pulseCount} · [${synk.chronolithSeal}]`;
+    }
+  }
+
+  const btnPolymorph = document.getElementById('btn-polymorph');
+  if (btnPolymorph) {
+    btnPolymorph.addEventListener('click', triggerPolymorphTransition);
+  }
+  const btnSynkronia = document.getElementById('btn-synkronia');
+  if (btnSynkronia) {
+    btnSynkronia.addEventListener('click', triggerSynkroniaPulse);
+  }
+
   document.querySelectorAll('#molecular-tray-bar [data-mol-id]').forEach(chip => {
     chip.addEventListener('click', () => {
       const molId = chip.getAttribute('data-mol-id');

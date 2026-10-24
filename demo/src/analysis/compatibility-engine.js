@@ -449,12 +449,139 @@
     };
   }
 
+  // THEORIA-NULLA & INYEKTOR: Crystallographic Polymorph Phase Competition (P, T)
+  const POLYMORPH_FAMILIES = {
+    'C': [
+      { id:'graphite', formula:'C', name:'α-Grafito Hexagonal (sp²)', spaceGroup:'P6₃/mmc (No. 194)', geomType:'hex_layered', atoms:[{z:6,c:42}], bondLengthA:1.42, melt:null, boil:3915, transition:'sublimation', enthalpy:0.0, entropyJmolK:5.74, bulkModulusGPa:34, vickersGPa:0.2, bandgapEv:0.0, pWindow:'0 – 5.0 GPa', tWindow:'0 – 3915 K', note:'Fase termodinámica basal del carbono a 1 atm (ΔHf° = 0 kJ/mol); conducción balística en planos basales sp².' },
+      { id:'diamond', formula:'C', name:'Diamante Cúbico (sp³)', spaceGroup:'Fd-3m (No. 227)', geomType:'diamond_cubic', atoms:[{z:6,c:24}], bondLengthA:1.544, melt:null, boil:3915, transition:'sublimation', enthalpy:1.9, entropyJmolK:2.38, bulkModulusGPa:443, vickersGPa:95.0, bandgapEv:5.47, pWindow:'5.0 – 60 GPa', tWindow:'0 – 4200 K', note:'Polimorfo tetraédrico sp³ de alta presión (Clapeyron dP/dT = 2.7 MPa/K); metaestable cinéticamente a 1 atm.' },
+      { id:'lonsdaleite', formula:'C', name:'Lonsdaleíta Hexagonal 2H (sp³)', spaceGroup:'P6₃/mmc (No. 194 · 2H)', geomType:'wurtzite_hex', atoms:[{z:6,c:24}], bondLengthA:1.54, melt:null, boil:3900, transition:'sublimation', enthalpy:4.5, entropyJmolK:2.50, bulkModulusGPa:450, vickersGPa:110.0, bandgapEv:4.50, pWindow:'15 – 120 GPa (Choque)', tWindow:'1000 – 3500 K', note:'Diamante hexagonal formado en impactos hiperveloces (> 15 GPa); rigidez axial superior al diamante cúbico.' }
+    ],
+    'BN': [
+      { id:'h-BN', formula:'BN', name:'h-BN Hexagonal 2D (Grafeno Blanco)', spaceGroup:'P6₃/mmc (No. 194)', geomType:'hex_layered', atoms:[{z:5,c:21},{z:7,c:21}], bondLengthA:1.45, melt:3246, boil:3400, transition:'sublimation', enthalpy:-254.4, entropyJmolK:-87.7, bulkModulusGPa:36.5, vickersGPa:1.5, bandgapEv:5.96, pWindow:'0 – 6.0 GPa', tWindow:'0 – 3246 K', note:'Polimorfo laminar sp² isoelectrónico al grafito; aislante de banda ancha y sustrato van der Waals sin trampas de carga.' },
+      { id:'c-BN', formula:'BN', name:'c-BN Borazón Cúbico Esfalerita (sp³)', spaceGroup:'F-43m (No. 216)', geomType:'diamond_cubic', atoms:[{z:5,c:12},{z:7,c:12}], bondLengthA:1.57, melt:3246, boil:3500, transition:'sublimation', enthalpy:-266.8, entropyJmolK:-92.1, bulkModulusGPa:382, vickersGPa:62.0, bandgapEv:6.40, pWindow:'6.0 – 50 GPa', tWindow:'1500 – 3500 K', note:'Segundo material sintético más duro (HV = 62 GPa); químicamente inerte frente al hierro líquido donde el diamante se disuelve.' },
+      { id:'w-BN', formula:'BN', name:'w-BN Wurtzita Hexagonal (sp³)', spaceGroup:'P6₃mc (No. 186)', geomType:'wurtzite_hex', atoms:[{z:5,c:12},{z:7,c:12}], bondLengthA:1.56, melt:3200, boil:3450, transition:'sublimation', enthalpy:-263.0, entropyJmolK:-90.5, bulkModulusGPa:390, vickersGPa:70.0, bandgapEv:5.80, pWindow:'12 – 90 GPa', tWindow:'1000 – 3400 K', note:'Fase densa de alta presión con reorientación de enlaces opuestos bajo tensión de indentación extrema.' }
+    ],
+    'TiO₂': [
+      { id:'rutile', formula:'TiO₂', name:'TiO₂ Rutilo Tetragonal', spaceGroup:'P4₂/mnm (No. 136)', geomType:'rutile_oct', atoms:[{z:22,c:9},{z:8,c:18}], bondLengthA:1.96, melt:2116, boil:3245, enthalpy:-944.0, entropyJmolK:-185.5, bulkModulusGPa:212, vickersGPa:11.0, bandgapEv:3.03, pWindow:'0 – 12 GPa', tWindow:'873 – 2116 K', note:'Fase termodinámica más estable de TiO₂; cadenas lineales de octaedros TiO₆ que facilitan canales de vacantes en memristores.' },
+      { id:'anatase', formula:'TiO₂', name:'TiO₂ Anatasa Tetragonal (Fotocatalítica)', spaceGroup:'I4₁/amd (No. 141)', geomType:'anatase_oct', atoms:[{z:22,c:8},{z:8,c:16}], bondLengthA:1.93, melt:2116, boil:3245, enthalpy:-938.7, entropyJmolK:-183.0, bulkModulusGPa:179, vickersGPa:8.5, bandgapEv:3.20, pWindow:'0 – 2.5 GPa', tWindow:'0 – 873 K', note:'Octaedros TiO₆ en zigzag compartiendo 4 aristas; masa efectiva electrónica baja e intensa actividad fotocatalítica UV.' },
+      { id:'cotunnite', formula:'TiO₂', name:'TiO₂-OI Cotunnita (Ultra-Alta Presión)', spaceGroup:'Pnma (No. 62 · CN=9)', geomType:'dense_superlattice', atoms:[{z:22,c:9},{z:8,c:18}], bondLengthA:2.02, melt:2116, boil:3245, enthalpy:-910.0, entropyJmolK:-195.0, bulkModulusGPa:431, vickersGPa:38.0, bandgapEv:2.55, pWindow:'12 – 80 GPa', tWindow:'300 – 2000 K', note:'Polimorfo de coordinación 9 sintetizado en celda de yunque de diamante (B₀ = 431 GPa, dureza cercana al c-BN).' }
+    ],
+    'SiO₂': [
+      { id:'quartz', formula:'SiO₂', name:'α-Cuarzo Trigonal (Piezoeléctrico)', spaceGroup:'P3₁21 (No. 152)', geomType:'quartz_tetra', atoms:[{z:14,c:9},{z:8,c:18}], bondLengthA:1.61, melt:1986, boil:3223, enthalpy:-910.7, entropyJmolK:-182.5, bulkModulusGPa:37.7, vickersGPa:11.5, bandgapEv:8.90, pWindow:'0 – 3.0 GPa', tWindow:'0 – 846 K', note:'Red helicoidal quiral de tetraedros SiO₄ compartiendo vértices (CN=4); estándar universal de osciladores piezoeléctricos.' },
+      { id:'cristobalite', formula:'SiO₂', name:'β-Cristobalita Cúbica (Alta T)', spaceGroup:'Fd-3m (No. 227)', geomType:'diamond_cubic', atoms:[{z:14,c:8},{z:8,c:16}], bondLengthA:1.60, melt:1986, boil:3223, enthalpy:-907.5, entropyJmolK:-179.0, bulkModulusGPa:16.4, vickersGPa:9.5, bandgapEv:8.50, pWindow:'0 – 2.0 GPa', tWindow:'1743 – 1986 K', note:'Polimorfo refractario de alta temperatura donde los silicios adoptan una red tipo diamante unida por puentes Si–O–Si de 180°.' },
+      { id:'stishovite', formula:'SiO₂', name:'Estishovita Rutilo (SiO₆ Octaédrico · P > 9 GPa)', spaceGroup:'P4₂/mnm (No. 136 · CN=6)', geomType:'rutile_oct', atoms:[{z:14,c:9},{z:8,c:18}], bondLengthA:1.77, melt:1986, boil:3223, enthalpy:-861.0, entropyJmolK:-198.0, bulkModulusGPa:313, vickersGPa:33.0, bandgapEv:8.20, pWindow:'9.0 – 60 GPa', tWindow:'300 – 2500 K', note:'Bajo presión extrema (> 9 GPa) el silicio salta de coordinación tetraédrica (CN=4) a octaédrica (CN=6), elevando B₀ de 37 a 313 GPa.' }
+    ],
+    'ZrO₂': [
+      { id:'monoclinic', formula:'ZrO₂', name:'m-ZrO₂ Baddeleyita Monoclínica (CN=7)', spaceGroup:'P2₁/c (No. 14)', geomType:'anatase_oct', atoms:[{z:40,c:8},{z:8,c:16}], bondLengthA:2.15, melt:2988, boil:4573, enthalpy:-1100.6, entropyJmolK:-194.2, bulkModulusGPa:188, vickersGPa:12.0, bandgapEv:5.20, pWindow:'0 – 5.0 GPa', tWindow:'0 – 1443 K', note:'Polimorfo estable a 298 K con coordinación 7; sufre transformación martensítica expansiva (+4.5% volumen) al enfriar desde 1443 K.' },
+      { id:'tetragonal', formula:'ZrO₂', name:'t-ZrO₂ Zirconia Tetragonal Tenaz (TZP)', spaceGroup:'P4₂/nmc (No. 137)', geomType:'rutile_oct', atoms:[{z:40,c:9},{z:8,c:18}], bondLengthA:2.20, melt:2988, boil:4573, enthalpy:-1094.0, entropyJmolK:-189.5, bulkModulusGPa:205, vickersGPa:14.5, bandgapEv:5.10, pWindow:'0 – 10 GPa', tWindow:'1443 – 2643 K', note:'«Acero cerámico»: el campo de tensión en la punta de una grieta dispara la transición t→m, cerrando la fisura por compresión.' },
+      { id:'cubic', formula:'ZrO₂', name:'c-ZrO₂ Zirconia Cúbica Fluorita (YSZ)', spaceGroup:'Fm-3m (No. 225)', geomType:'fluorite_cubic', atoms:[{z:40,c:8},{z:8,c:16}], bondLengthA:2.24, melt:2988, boil:4573, enthalpy:-1088.0, entropyJmolK:-186.0, bulkModulusGPa:220, vickersGPa:15.0, bandgapEv:5.00, pWindow:'0 – 20 GPa', tWindow:'2643 – 2988 K', note:'Red fluorita con alta conductividad iónica de O²⁻ y bajísima conductividad térmica (2.1 W/m·K) para álabes de turbina.' }
+    ],
+    'Fe': [
+      { id:'alpha-Fe', formula:'Fe', name:'α-Fe Ferrita BCC (Ferromagnético)', spaceGroup:'Im-3m (No. 229)', geomType:'bcc_lattice', atoms:[{z:26,c:15}], bondLengthA:2.48, melt:1811, boil:3134, enthalpy:0.0, entropyJmolK:27.3, bulkModulusGPa:170, vickersGPa:0.8, bandgapEv:0.0, pWindow:'0 – 13 GPa', tWindow:'0 – 1185 K', note:'Red cúbica centrada en el cuerpo (BCC, factor de empaquetamiento 68%); ferromagnética hasta T_Curie = 1043 K.' },
+      { id:'gamma-Fe', formula:'Fe', name:'γ-Fe Austenita FCC (Alta Solubilidad Intersticial)', spaceGroup:'Fm-3m (No. 225)', geomType:'fcc_lattice', atoms:[{z:26,c:18}], bondLengthA:2.58, melt:1811, boil:3134, enthalpy:0.9, entropyJmolK:28.1, bulkModulusGPa:162, vickersGPa:1.2, bandgapEv:0.0, pWindow:'0 – 10 GPa', tWindow:'1185 – 1667 K', note:'Red cúbica centrada en las caras (FCC, empaquetamiento 74%); intersticios octaédricos mayores que disuelven hasta 2.14 wt% de Carbono.' },
+      { id:'epsilon-Fe', formula:'Fe', name:'ε-Fe Hexaferrum HCP (Núcleo Terrestre · P > 13 GPa)', spaceGroup:'P6₃/mmc (No. 194)', geomType:'wurtzite_hex', atoms:[{z:26,c:21}], bondLengthA:2.40, melt:6200, boil:9000, enthalpy:3.2, entropyJmolK:25.4, bulkModulusGPa:290, vickersGPa:4.5, bandgapEv:0.0, pWindow:'13 – 360 GPa', tWindow:'0 – 6200 K', note:'Polimorfo hexagonal compacto no-magnético estable sobre 13 GPa; constituye el núcleo interno sólido de la Tierra a 330 GPa.' }
+    ]
+  };
+
+  const FAMILY_ORDER = ['C', 'BN', 'TiO₂', 'SiO₂', 'ZrO₂', 'Fe'];
+
+  function getNextPolymorph(currentFormula, currentPolyId) {
+    let familyKey = FAMILY_ORDER.find(k => k === currentFormula);
+    if (!familyKey) {
+      if (['Cₙ', 'C₆₀'].includes(currentFormula)) familyKey = 'C';
+      else familyKey = 'C';
+    }
+    const list = POLYMORPH_FAMILIES[familyKey];
+    const currentIndex = list.findIndex(item => item.id === currentPolyId);
+    if (currentIndex === -1) return { familyKey, polymorph: list[0], index: 0, total: list.length };
+    if (currentIndex + 1 < list.length) {
+      return { familyKey, polymorph: list[currentIndex + 1], index: currentIndex + 1, total: list.length };
+    }
+    const nextFamilyIdx = (FAMILY_ORDER.indexOf(familyKey) + 1) % FAMILY_ORDER.length;
+    const nextKey = FAMILY_ORDER[nextFamilyIdx];
+    const nextList = POLYMORPH_FAMILIES[nextKey];
+    return { familyKey: nextKey, polymorph: nextList[0], index: 0, total: nextList.length };
+  }
+
+  // SYNKRONIA-SNN-CORE: Neuromorphic Memristor & Bio-Ionic Plasticity Profiles
+  const SYNKRONIA_PROFILES = {
+    'TiO₂': {
+      device:'Memristor Filamentario Pt / TiO₂₋ₓ / Pt',
+      mechanism:'Deriva de vacantes de oxígeno doblemente cargadas (V_O••) bajo campo eléctrico',
+      vSetV:1.10, vResetV:-0.85, gMinMicroS:0.8, gMaxMicroS:1000.0, tauStdpMs:18.0, energySpikeFJ:45.0,
+      formula:'TiO₂', zA:22, zB:8
+    },
+    'SrTiO₃': {
+      device:'Sinapsis Cuántica Perovskita 2DEG SrTiO₃',
+      mechanism:'Modulación de barrera Schottky y filamentos de vacantes en octaedros TiO₆',
+      vSetV:0.85, vResetV:-0.70, gMinMicroS:0.15, gMaxMicroS:1500.0, tauStdpMs:12.0, energySpikeFJ:18.0,
+      formula:'SrTiO₃', zA:38, zB:22
+    },
+    'BaTiO₃': {
+      device:'Unión Túnel Ferroeléctrica (FTJ) BaTiO₃',
+      mechanism:'Inversión de polarización espontánea (P_s = 26 μC/cm²) que modula la barrera túnel',
+      vSetV:0.70, vResetV:-0.65, gMinMicroS:0.25, gMaxMicroS:1250.0, tauStdpMs:10.0, energySpikeFJ:8.5,
+      formula:'BaTiO₃', zA:56, zB:22
+    },
+    'MoS₂': {
+      device:'Memtransistor Neuromórfico 2D Van der Waals MoS₂',
+      mechanism:'Migración de vacantes de azufre asistida por bordes de grano en monocapa 2D',
+      vSetV:0.95, vResetV:-0.80, gMinMicroS:0.05, gMaxMicroS:650.0, tauStdpMs:15.0, energySpikeFJ:15.0,
+      formula:'MoS₂', zA:42, zB:16
+    },
+    'LiCoO₂': {
+      device:'Sinapsis Electroquímica de Estado Sólido Li₁₋ₓCoO₂',
+      mechanism:'Intercalación/desintercalación reversible de iones Li⁺ con 256 estados analógicos lineales',
+      vSetV:0.45, vResetV:-0.40, gMinMicroS:2.0, gMaxMicroS:1800.0, tauStdpMs:25.0, energySpikeFJ:12.0,
+      formula:'LiCoO₂', zA:27, zB:8
+    },
+    'NaCl': {
+      device:'Canal Iónico Biológico Hodgkin-Huxley Na⁺ / H₂O',
+      mechanism:'Despolarización de membrana (-70 mV → +40 mV) por transporte selectivo de Na⁺ solvatado',
+      vSetV:0.055, vResetV:-0.070, gMinMicroS:0.5, gMaxMicroS:120.0, tauStdpMs:20.0, energySpikeFJ:5.0,
+      formula:'Na⁺(H₂O)₆Cl⁻', zA:11, zB:8
+    }
+  };
+
+  function evaluateSynkroniaState(formulaOrKey, pulseCount = 1, temperatureK = 298) {
+    const cleanKey = SYNKRONIA_PROFILES[formulaOrKey]
+      ? formulaOrKey
+      : (formulaOrKey && formulaOrKey.includes('Na') ? 'NaCl' : 'SrTiO₃');
+    const prof = SYNKRONIA_PROFILES[cleanKey];
+    const n = Math.max(1, Number(pulseCount) || 1);
+    // STDP Long-Term Potentiation (LTP) curve with thermal Arrhenius acceleration
+    const thermalFactor = Math.min(1.6, Math.max(0.6, temperatureK / 298.0));
+    const weight = Number((1 - 0.92 * Math.exp(-0.38 * n * thermalFactor)).toFixed(3));
+    const conductanceMicroS = Number((prof.gMinMicroS + weight * (prof.gMaxMicroS - prof.gMinMicroS)).toFixed(1));
+    const onOffRatio = Math.round(prof.gMaxMicroS / Math.max(0.01, prof.gMinMicroS));
+    const stateLabel = weight >= 0.82
+      ? 'LRS (ON · FILAMENTO CONDUCTIVO SATURADO · LTP MÁXIMA)'
+      : weight >= 0.40
+        ? 'POTENCIACIÓN SINÁPTICA ANALÓGICA (STDP · LTP ACTIVA)'
+        : 'HRS → TRANSICIÓN UMBRAL (NUCLEACIÓN DE FILAMENTO V_O••)';
+    const seal = computeChronolithSeal(`SYNKRONIA|${prof.formula}|w=${weight}|T=${temperatureK}`);
+    return {
+      profileKey: cleanKey,
+      ...prof,
+      pulseCount: n,
+      synapticWeight: weight,
+      conductanceMicroS,
+      onOffRatio,
+      stateLabel,
+      chronolithSeal: seal
+    };
+  }
+
   root.NULLA_COMPATIBILITY = Object.freeze({
     chemical,
     nuclear,
     multidisciplinary,
     computeGoldschmidtTolerance,
     evaluateFreeEnergyKJmol,
-    computeChronolithSeal
+    computeChronolithSeal,
+    POLYMORPH_FAMILIES,
+    getNextPolymorph,
+    SYNKRONIA_PROFILES,
+    evaluateSynkroniaState
   });
 })(globalThis);

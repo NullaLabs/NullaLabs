@@ -340,6 +340,16 @@ assert.ok(btoGoldschmidt && btoGoldschmidt.t >= 1.0 && btoGoldschmidt.t <= 1.08,
 const freeEnergy298 = compatibility.evaluateFreeEnergyKJmol(-285.8, -163.3, 298);
 assert.ok(Math.abs(freeEnergy298 - (-237.1)) < 0.2, 'Gibbs free energy of H2O at 298 K must match thermodynamic reference');
 assert.match(compatibility.computeChronolithSeal('BaTiO₃|298|-1659'), /^CHR-[0-9A-F]{8}$/, 'Chronolith seal must produce deterministic 8-hex-digit hash');
+assert.match(html, /id="btn-polymorph"/, 'polymorph phase competition button must be present');
+assert.match(html, /id="btn-synkronia"/, 'Synkronia neuromorphic button must be present');
+const bnPoly1 = compatibility.getNextPolymorph('BN', null);
+assert.equal(bnPoly1.polymorph.id, 'h-BN', 'first BN polymorph must be hexagonal h-BN');
+const bnPoly2 = compatibility.getNextPolymorph('BN', 'h-BN');
+assert.equal(bnPoly2.polymorph.id, 'c-BN', 'second BN polymorph must be cubic c-BN');
+const synk1 = compatibility.evaluateSynkroniaState('SrTiO₃', 1, 298);
+const synk5 = compatibility.evaluateSynkroniaState('SrTiO₃', 5, 298);
+assert.ok(synk5.synapticWeight > synk1.synapticWeight, 'STDP pulse sequence must increase synaptic weight via LTP');
+assert.ok(synk5.conductanceMicroS > synk1.conductanceMicroS, 'STDP potentiation must increase synaptic conductance');
 const dtCompatibility = compatibility.nuclear({reaction:nuclear.fusion['H+H'][0],isotopes:nuclear.isotopes});
 assert.equal(dtCompatibility.status, 'EXOENERGETIC_CHANNEL_KINETICS_UNEVALUATED');
 assert.equal(dtCompatibility.confidence, null, 'Q and contact barrier do not justify a probability score');
