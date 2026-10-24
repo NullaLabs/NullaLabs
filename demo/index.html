@@ -38,6 +38,10 @@
     .shader-btn, .fusion-btn, .fusion-btn-undo, .fusion-btn-clear, .mol-chip, .stat-chip, .experience-mode-btn,
     .hud-collapse-btn, .hud-restore-pill {
       position:relative; overflow:hidden;
+      font-family:'Orbitron',sans-serif;
+      font-size:8px;
+      font-weight:700;
+      letter-spacing:0.6px;
       border-radius:10px !important;
       border:1px solid rgba(255,255,255,0.52) !important;
       background:linear-gradient(180deg, #24354b 0%, #172435 24%, #0d1520 50%, #121c29 76%, #080d15 100%) !important;
@@ -48,6 +52,15 @@
                  inset 0 -3px 5px rgba(0,0,0,0.88), inset 0 -1px 2px rgba(0,0,0,0.98) !important;
       text-shadow:0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,240,255,0.45) !important;
       transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+      cursor:pointer;
+    }
+    #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr {
+      padding:4px 8px;
+      font-family:'Orbitron',sans-serif;
+      font-size:8px;
+      font-weight:700;
+      letter-spacing:0.6px;
+      white-space:nowrap;
     }
     #btn-tutorial, #btn-share-url, #btn-export-cif, #btn-synkronia, #btn-segre-inject-isotope {
       border-color:rgba(0,255,157,0.72) !important;
@@ -120,18 +133,19 @@
 
     /* ─── HEADER (PURE TRANSPARENT CRYSTAL) ─── */
     .hud-header {
-      position:fixed; top:0; left:0; right:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
-      padding:10px 22px; backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
+      position:fixed; top:0; left:0; right:0; z-index:10; display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:7px 18px; backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
       background:linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(8,16,32,0.06) 55%, rgba(0,240,255,0.03) 100%);
       border-bottom:1px solid rgba(255,255,255,0.34);
       box-shadow:0 8px 28px rgba(0,0,0,0.38), inset 0 1px 1px rgba(255,255,255,0.45);
+      box-sizing:border-box;
     }
-    .hud-title { font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#FFFFFF; text-shadow:0 0 12px rgba(0,240,255,0.75), 0 1px 3px rgba(0,0,0,0.9); }
-    .hud-badge { padding:4px 12px; border-radius:10px; font-size:9px; letter-spacing:1px; background:linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(0,240,255,0.08) 100%); color:#FFFFFF; border:1px solid rgba(255,255,255,0.42); font-weight:600; box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.65); }
+    .hud-title { font-family:'Orbitron',sans-serif; font-size:9.5px; letter-spacing:1.5px; text-transform:uppercase; color:#FFFFFF; text-shadow:0 0 12px rgba(0,240,255,0.75), 0 1px 3px rgba(0,0,0,0.9); white-space:nowrap; }
+    .hud-badge { padding:3px 9px; border-radius:9px; font-size:8px; letter-spacing:0.8px; background:linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(0,240,255,0.08) 100%); color:#FFFFFF; border:1px solid rgba(255,255,255,0.42); font-weight:600; box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.65); white-space:nowrap; }
 
     /* ─── TELEMETRY PANEL (PURE TRANSPARENT CRYSTAL) ─── */
     #molecular-hud {
-      position:fixed; top:60px; left:14px; z-index:10; width:310px;
+      position:fixed; top:54px; left:14px; z-index:10; width:310px;
       backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
       background:linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(8,18,36,0.06) 50%, rgba(0,240,255,0.03) 100%);
       border:1px solid rgba(255,255,255,0.36); border-radius:16px; padding:16px;
@@ -146,8 +160,13 @@
       max-width:calc(100vw - 24px); max-height:calc(100dvh - 24px); overflow-y:auto;
     }
     #btn-reassemble, #btn-open-pt {
-      width:100%; padding:7px 0; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700;
-      letter-spacing:1.2px; cursor:pointer;
+      width:100%; padding:6px 0; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700;
+      letter-spacing:1px; cursor:pointer;
+    }
+    #btn-orbitals, #btn-visual-mode, #btn-ftir, #btn-xrd, #btn-synkronia, #btn-polymorph, #btn-export-cif,
+    #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-inspect-in-segre, #btn-homo-lumo, #btn-mep, #btn-export-xyz {
+      padding:6px 4px; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700;
+      letter-spacing:0.5px; cursor:pointer; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
     }
 
     /* ─── FOOTER STATS (3D iOS CRYSTAL PILLS) ─── */
@@ -169,16 +188,16 @@
        ═══════════════════════════════════════════════════════════════ */
     #pt-hud-panel {
       position:fixed; bottom:14px; right:14px; z-index:10;
-      width:560px; backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
+      width:min(680px, calc(100vw - 20px)); backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
       background:linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(8,18,36,0.06) 50%, rgba(0,240,255,0.03) 100%);
       border:1px solid rgba(255,255,255,0.36); border-radius:18px;
-      padding:12px 14px; display:flex; flex-direction:column; gap:8px;
+      padding:10px 12px; display:flex; flex-direction:column; gap:6px;
       box-shadow:0 18px 46px rgba(0,0,0,0.45), inset 0 1.5px 1px rgba(255,255,255,0.58), inset 0 -1px 2px rgba(0,240,255,0.2);
-      box-sizing:border-box; overflow:hidden;
+      box-sizing:border-box;
     }
     
     .pt-panel-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.26); padding-bottom:5px; margin-bottom:2px; }
-    .pt-panel-title { font-family:'Orbitron',sans-serif; font-size:11px; color:#FFFFFF; letter-spacing:2px; text-transform:uppercase; text-shadow:0 0 10px rgba(0,240,255,0.7), 0 1px 3px rgba(0,0,0,0.9); }
+    .pt-panel-title { font-family:'Orbitron',sans-serif; font-size:10px; color:#FFFFFF; letter-spacing:2px; text-transform:uppercase; text-shadow:0 0 10px rgba(0,240,255,0.7), 0 1px 3px rgba(0,0,0,0.9); }
 
     /* Grid Layout — 18 columns for the standard IUPAC periodic table */
     .pt-grid {
@@ -230,22 +249,22 @@
 
     /* ─── FUSION BAR (TRANSPARENT CRYSTAL) ─── */
     .fusion-bar {
-      display:flex; align-items:center; justify-content:space-between; gap:5px;
-      padding:6px 10px; border-radius:12px;
+      display:flex; align-items:center; justify-content:flex-start; flex-wrap:wrap; gap:4px;
+      padding:5px 8px; border-radius:12px;
       background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,240,255,0.03));
       border:1px solid rgba(255,255,255,0.32);
       box-shadow:inset 0 1px 1px rgba(255,255,255,0.45), 0 4px 14px rgba(0,0,0,0.3);
-      margin-top:4px; box-sizing:border-box; width:100%; overflow:hidden;
+      margin-top:3px; box-sizing:border-box; width:100%;
     }
     .fusion-slot {
-      min-width:28px; height:28px; padding:0 5px; border-radius:9px; display:flex; align-items:center; justify-content:center;
-      font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700;
+      min-width:26px; height:26px; padding:0 4px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:700;
       border:1px solid rgba(255,255,255,0.45);
       background:linear-gradient(180deg, rgba(255,255,255,0.26) 0%, rgba(0,240,255,0.08) 100%);
       color:#FFFFFF; box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.68), 0 3px 8px rgba(0,0,0,0.38); flex-shrink:0;
     }
     .mol-tray-bar {
-      display:flex; align-items:center; gap:4px; margin-top:5px; padding:4px 8px;
+      display:flex; align-items:center; gap:4px; margin-top:3px; padding:3px 7px;
       border-radius:11px; background:linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,240,255,0.04));
       border:1px solid rgba(0,240,255,0.38);
       box-shadow:inset 0 1px 1px rgba(255,255,255,0.42);
@@ -269,15 +288,15 @@
       font-family:'Orbitron',sans-serif; font-size:7.5px;
     }
     .fusion-plus { font-size:13px; color:rgba(255,255,255,0.85); }
-    .fusion-btn, .fusion-btn-undo, .fusion-btn-clear {
-      padding:6px 9px; border-radius:10px; border:1px solid rgba(255,255,255,0.48);
+    .fusion-btn, .fusion-btn-undo, .fusion-btn-clear, .nuclear-btn {
+      padding:4px 7px; border-radius:9px; border:1px solid rgba(255,255,255,0.48);
       background:linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.16) 46%, rgba(0,240,255,0.12) 100%);
-      color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:0.8px; cursor:pointer;
+      color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; letter-spacing:0.5px; cursor:pointer;
       transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink:0; white-space:nowrap;
-      box-shadow:0 5px 14px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.82), inset 0 -2px 4px rgba(0,0,0,0.38);
+      box-shadow:0 4px 12px rgba(0,0,0,0.4), inset 0 1.5px 1px rgba(255,255,255,0.82), inset 0 -2px 4px rgba(0,0,0,0.38);
       text-shadow:0 1px 2px rgba(0,0,0,0.85);
     }
-    .fusion-btn:hover, .fusion-btn-undo:hover, .fusion-btn-clear:hover {
+    .fusion-btn:hover, .fusion-btn-undo:hover, .fusion-btn-clear:hover, .nuclear-btn:hover {
       transform:translateY(-2px) scale(1.02);
       background:linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.24) 46%, rgba(0,240,255,0.22) 100%);
       box-shadow:0 8px 22px rgba(0,240,255,0.28), inset 0 2px 2px rgba(255,255,255,0.95);
@@ -285,13 +304,14 @@
     }
     #btn-mix { border-color:rgba(112,190,255,.68); text-shadow:0 0 8px rgba(112,190,255,.85); }
     .nuclear-mode-bar {
-      display:flex; gap:5px; margin-top:4px; padding:5px 8px; border-radius:11px;
+      display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin-top:3px; padding:4px 7px; border-radius:11px;
       background:linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,110,0,0.04));
       border:1px solid rgba(255,140,40,.42);
       box-shadow:inset 0 1px 1px rgba(255,255,255,0.42);
+      box-sizing:border-box; width:100%;
     }
-    .nuclear-btn { flex:1; }
-    #nuclear-route-selector { width:168px; min-width:118px; padding:4px 5px; border-radius:8px; color:#fff; border:1px solid rgba(255,215,0,.55); background:rgba(8,14,26,0.45); backdrop-filter:blur(12px); font:700 7.5px 'Fira Code',monospace; box-shadow:inset 0 1px 1px rgba(255,255,255,0.45); }
+    .nuclear-btn { flex:0 0 auto; }
+    #nuclear-route-selector { width:160px; min-width:110px; padding:3px 5px; border-radius:8px; color:#fff; border:1px solid rgba(255,215,0,.55); background:rgba(8,14,26,0.45); backdrop-filter:blur(12px); font:700 7.5px 'Fira Code',monospace; box-shadow:inset 0 1px 1px rgba(255,255,255,0.45); }
     #btn-nuclear-fusion { border-color:rgba(0,240,255,.68); background:linear-gradient(180deg,rgba(255,255,255,.38) 0%,rgba(0,240,255,.22) 50%,rgba(0,180,255,.08) 100%); text-shadow:0 0 8px #00F0FF; }
     #btn-nuclear-fission { border-color:rgba(255,95,20,.72); background:linear-gradient(180deg,rgba(255,255,255,.38) 0%,rgba(255,80,0,.24) 50%,rgba(200,40,0,.09) 100%); text-shadow:0 0 8px #FF5500; }
     #language-selector { max-width:92px; padding:3px 5px; border-radius:8px; color:#fff; border:1px solid rgba(0,240,255,.52); background:rgba(8,16,30,0.38); backdrop-filter:blur(12px); font:700 8px 'Orbitron',sans-serif; box-shadow:inset 0 1px 1px rgba(255,255,255,0.5); }
@@ -353,7 +373,6 @@
       #pt-hud-panel { width:calc(100vw - 24px) !important; right:12px !important; bottom:10px !important; transform:scale(.82); transform-origin:bottom right; }
       .hud-stats { transform:scale(.86); transform-origin:bottom left; }
     }
-    @media (max-width: 1350px) { #active-synthesis-banner { display:none; } }
     @media (max-width: 600px) {
       .hud-header {
         min-height:44px; height:44px; padding:6px 8px; flex-wrap:nowrap;
@@ -491,17 +510,17 @@
 
   <!-- HEADER -->
   <div class="hud-header">
-    <div style="display:flex; align-items:center; gap:8px;">
+    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
       <span class="hud-title">NULLA-LABS // IUPAC 3D SYNTHESIS</span>
       <select id="language-selector" data-i18n-aria-label="languageLabel" aria-label="Language"></select>
-      <div class="experience-science" style="display:flex; gap:3px; margin-left:6px;">
+      <div class="experience-science" style="display:flex; gap:3px; margin-left:4px;">
         <button id="btn-quality-low" style="padding:2px 5px; border-radius:5px; border:1px solid rgba(255,255,255,0.25); background:rgba(18,24,36,0.8); color:#FFFFFF; font-size:7.5px; font-weight:700; cursor:pointer;">LOW</button>
         <button id="btn-quality-med" style="padding:2px 5px; border-radius:5px; border:1px solid rgba(0,240,255,0.6); background:rgba(0,240,255,0.2); color:#FFFFFF; font-size:7.5px; font-weight:700; cursor:pointer;">MED</button>
         <button id="btn-quality-ultra" style="padding:2px 5px; border-radius:5px; border:1px solid rgba(255,255,255,0.25); background:rgba(18,24,36,0.8); color:#FFFFFF; font-size:7.5px; font-weight:700; cursor:pointer;">ULTRA</button>
       </div>
     </div>
-    <div id="active-synthesis-banner" style="position:absolute; left:50%; transform:translateX(-50%); font-family:'Orbitron',sans-serif; font-size:13px; font-weight:900; letter-spacing:3px; color:#FFFFFF; text-transform:uppercase; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(0,240,255,0.08) 100%); backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85); border:1px solid rgba(255,255,255,0.48); border-radius:13px; padding:6px 24px; box-shadow:0 8px 24px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.75); text-shadow:0 0 14px rgba(0,240,255,0.85), 0 1px 3px rgba(0,0,0,0.9); pointer-events:none;">B-DNA DOUBLE HELIX</div>
-    <div style="display:flex; align-items:center; gap:6px;">
+    <div id="active-synthesis-banner" style="font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:800; letter-spacing:1.5px; color:#FFFFFF; text-transform:uppercase; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(0,240,255,0.08) 100%); backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85); border:1px solid rgba(255,255,255,0.48); border-radius:10px; padding:4px 14px; box-shadow:0 6px 18px rgba(0,0,0,0.4), inset 0 1.5px 1px rgba(255,255,255,0.75); text-shadow:0 0 12px rgba(0,240,255,0.8), 0 1px 3px rgba(0,0,0,0.9); pointer-events:none; flex:0 1 auto; max-width:260px; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">B-DNA DOUBLE HELIX</div>
+    <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
       <button id="btn-tutorial" data-i18n="tutorial">🚀 TUTORIAL</button>
       <button id="btn-docs" data-i18n="docs">📖 DOCS</button>
       <button id="btn-quiz" data-i18n="quiz">🎓 QUIZ EDUCATIVO</button>
@@ -797,12 +816,14 @@
 
     <!-- FUSION BAR -->
     <div class="fusion-bar" id="reaction-actions">
-      <span class="fusion-label">TRAY:</span>
-      <div id="multi-tray-container" style="display:flex; gap:3px;">
-        <div class="fusion-slot" id="slot-0">—</div>
-        <div class="fusion-slot" id="slot-1">—</div>
-        <div class="fusion-slot" id="slot-2">—</div>
-        <div class="fusion-slot" id="slot-3">—</div>
+      <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+        <span class="fusion-label">TRAY:</span>
+        <div id="multi-tray-container" style="display:flex; gap:3px;">
+          <div class="fusion-slot" id="slot-0">—</div>
+          <div class="fusion-slot" id="slot-1">—</div>
+          <div class="fusion-slot" id="slot-2">—</div>
+          <div class="fusion-slot" id="slot-3">—</div>
+        </div>
       </div>
       <button class="fusion-btn" id="btn-fuse">🧪 COMBINAR</button>
       <button class="fusion-btn" id="btn-mix" data-i18n="mixButton">◌ MEZCLAR</button>
