@@ -350,6 +350,24 @@ const synk1 = compatibility.evaluateSynkroniaState('SrTiO₃', 1, 298);
 const synk5 = compatibility.evaluateSynkroniaState('SrTiO₃', 5, 298);
 assert.ok(synk5.synapticWeight > synk1.synapticWeight, 'STDP pulse sequence must increase synaptic weight via LTP');
 assert.ok(synk5.conductanceMicroS > synk1.conductanceMicroS, 'STDP potentiation must increase synaptic conductance');
+assert.match(html, /id="btn-visual-mode"/, '3D visual representation switcher button must be present');
+assert.match(html, /id="btn-xrd"/, 'Bragg XRD diffraction button must be present');
+assert.match(html, /id="btn-collapse-left-hud"/, 'left telemetry panel collapse button must be present');
+assert.match(html, /id="btn-restore-left-hud"/, 'left telemetry panel restore button must be present');
+assert.match(html, /id="btn-collapse-pt-hud"/, 'bottom periodic table collapse button must be present');
+assert.match(html, /id="btn-restore-pt-hud"/, 'bottom periodic table restore button must be present');
+const xrdSample = compatibility.computeBraggXRDPattern([
+  { z: 11, x: 0, y: 0, zCoord: 0 },
+  { z: 17, x: 2.82, y: 0, zCoord: 0 },
+  { z: 11, x: 0, y: 2.82, zCoord: 0 },
+  { z: 17, x: 2.82, y: 2.82, zCoord: 0 }
+], 1.5406);
+assert.ok(xrdSample && Array.isArray(xrdSample.peaks) && xrdSample.peaks.length >= 1, 'Bragg XRD pattern must produce diffraction peaks');
+assert.equal(xrdSample.peaks[0].intensity, 100, 'strongest Bragg XRD peak must be normalized to 100%');
+const chargePlus = compatibility.computePaulingPartialCharge(0.93, 2.05);
+const chargeMinus = compatibility.computePaulingPartialCharge(3.16, 2.05);
+assert.ok(chargePlus.q > 0 && chargePlus.hexColor === 0x38BDF8, 'electropositive atom must receive positive partial charge and electrophilic blue color');
+assert.ok(chargeMinus.q < 0 && chargeMinus.hexColor === 0xF43F5E, 'electronegative atom must receive negative partial charge and nucleophilic red color');
 const dtCompatibility = compatibility.nuclear({reaction:nuclear.fusion['H+H'][0],isotopes:nuclear.isotopes});
 assert.equal(dtCompatibility.status, 'EXOENERGETIC_CHANNEL_KINETICS_UNEVALUATED');
 assert.equal(dtCompatibility.confidence, null, 'Q and contact barrier do not justify a probability score');

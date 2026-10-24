@@ -572,6 +572,84 @@
     };
   }
 
+  // Bragg Powder X-Ray Diffraction (XRD) Simulator (Cu Kα λ = 1.5406 Å, nλ = 2d·sinθ)
+  function computeBraggXRDPattern(coordsAngstrom = [], wavelengthA = 1.5406) {
+    if (!Array.isArray(coordsAngstrom) || coordsAngstrom.length < 2) {
+      return { radiation: `Cu Kα (λ=${wavelengthA} Å)`, peaks: [], chronolithSeal: computeChronolithSeal('XRD|EMPTY') };
+    }
+    const bins = new Map();
+    const maxAtoms = Math.min(coordsAngstrom.length, 48);
+    for (let i = 0; i < maxAtoms; i++) {
+      const a = coordsAngstrom[i];
+      const az = a.zCoord !== undefined ? a.zCoord : (a.zPos || 0);
+      for (let j = i + 1; j < maxAtoms; j++) {
+        const b = coordsAngstrom[j];
+        const bz = b.zCoord !== undefined ? b.zCoord : (b.zPos || 0);
+        const dist = Math.hypot((a.x || 0) - (b.x || 0), (a.y || 0) - (b.y || 0), az - bz);
+        if (dist < 0.85 || dist > 6.5) continue;
+        // Consider fundamental plane spacing d and second-order d/2
+        [dist, dist * 0.5].forEach((dVal, orderIdx) => {
+          if (dVal <= wavelengthA * 0.52) return;
+          const dKey = Math.round(dVal * 25) / 25;
+          const weight = ((a.z || 6) * (b.z || 6)) / (orderIdx === 0 ? 1 : 2.2);
+          bins.set(dKey, (bins.get(dKey) || 0) + weight);
+        });
+      }
+    }
+    const rawPeaks = [];
+    for (const [dA, rawIntensity] of bins.entries()) {
+      const sinTheta = wavelengthA / (2 * dA);
+      if (sinTheta <= 0.05 || sinTheta >= 0.98) continue;
+      const twoThetaDeg = (2 * Math.asin(sinTheta) * 180) / Math.PI;
+      // Lorentz-polarization factor approximation
+      const thetaRad = Math.asin(sinTheta);
+      const lpFactor = (1 + Math.pow(Math.cos(2 * thetaRad), 2)) / (Math.pow(Math.sin(thetaRad), 2) * Math.cos(thetaRad));
+      rawPeaks.push({
+        dA: Number(dA.toFixed(3)),
+        twoThetaDeg: Number(twoThetaDeg.toFixed(1)),
+        score: rawIntensity * Math.min(8.0, lpFactor * 0.25)
+      });
+    }
+    rawPeaks.sort((u, v) => v.score - u.score);
+    const maxScore = rawPeaks[0]?.score || 1;
+    const hklLabels = ['(111)', '(200)', '(220)', '(311)', '(222)'];
+    const peaks = rawPeaks.slice(0, 4).map((p, idx) => {
+      const intensity = Math.max(8, Math.round((p.score / maxScore) * 100));
+      return {
+        hkl: hklLabels[idx] || `(hkl_${idx + 1})`,
+        dA: p.dA,
+        dSpacingA: p.dA,
+        twoThetaDeg: p.twoThetaDeg,
+        intensity,
+        intensityPct: intensity
+      };
+    });
+    const seal = computeChronolithSeal(`XRD|${wavelengthA}|${peaks.map(p => p.twoThetaDeg).join(',')}`);
+    return {
+      radiation: `Cu Kα (λ=${wavelengthA} Å)`,
+      peaks,
+      chronolithSeal: seal
+    };
+  }
+
+  function computePaulingPartialCharge(atomEN, meanEN) {
+    if (!Number.isFinite(atomEN) || !Number.isFinite(meanEN)) {
+      return { q: 0, hexColor: 0xE2E8F0, label: 'δ⁰ (Neutro)' };
+    }
+    const diff = meanEN - atomEN;
+    const q = Number(Math.max(-1, Math.min(1, diff / 1.65)).toFixed(3));
+    let hexColor = 0xE2E8F0;
+    let label = 'δ⁰ (Covalente Apolar)';
+    if (q >= 0.12) {
+      hexColor = 0x38BDF8;
+      label = `δ⁺ (+${q}e · Sitio Electrofílico)`;
+    } else if (q <= -0.12) {
+      hexColor = 0xF43F5E;
+      label = `δ⁻ (${q}e · Sitio Nucleofílico)`;
+    }
+    return { q, hexColor, label };
+  }
+
   root.NULLA_COMPATIBILITY = Object.freeze({
     chemical,
     nuclear,
@@ -582,6 +660,8 @@
     POLYMORPH_FAMILIES,
     getNextPolymorph,
     SYNKRONIA_PROFILES,
-    evaluateSynkroniaState
+    evaluateSynkroniaState,
+    computeBraggXRDPattern,
+    computePaulingPartialCharge
   });
 })(globalThis);

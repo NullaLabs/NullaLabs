@@ -576,9 +576,10 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // ATOMIC ORBITAL DENSITY CLOUD GENERATOR (s, p, d, f Probability Maps)
+  // ATOMIC ORBITAL DENSITY CLOUD GENERATOR (Spherical Harmonics Y_l^m & ±ψ Phase)
   // ═══════════════════════════════════════════════════════════════
   let orbitalParticleSystem = null;
+  let orbitalCycleIndex = 0;
 
   function generateAtomicOrbitalCloud(z) {
     if (orbitalParticleSystem) {
@@ -588,72 +589,93 @@ window.addEventListener('DOMContentLoaded', function() {
       orbitalParticleSystem = null;
     }
 
-    const count = 3500;
+    const count = 4200;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
 
     const el = EL[z] || EL[1];
-    const baseColor = new THREE.Color(el.col);
+    const posPhaseColor = new THREE.Color(0x00F0FF); // +ψ wavefunction lobe (Electric Cyan)
+    const negPhaseColor = new THREE.Color(0xFF007F); // -ψ wavefunction lobe (Quantum Magenta)
+    const nodeGlowColor = new THREE.Color(0xFFD700); // Nodal boundary accent
 
-    for (let i = 0; i < count; i++) {
-      let x = 0, y = 0, zPos = 0;
+    // Determine quantum orbital symmetry (n, l, m_l) from atomic number Z + interactive cycle
+    let orbitalLabel = '1s · Y₀⁰ (l=0, m=0)';
+    let mode = '1s';
+    if (z <= 2) {
+      mode = orbitalCycleIndex % 2 === 0 ? '1s' : '2s';
+      orbitalLabel = mode === '1s' ? '1s · Y₀⁰ (l=0, m=0 · Simetría Esférica)' : '2s · Y₀⁰ (Nodo Radial r=r₀ · ±ψ)';
+    } else if (z <= 10 || (z >= 13 && z <= 18)) {
+      mode = orbitalCycleIndex % 2 === 0 ? '2pz' : '2px';
+      orbitalLabel = mode === '2pz' ? '2p_z · Y₁⁰ ∝ cos(θ) (Plano Nodal z=0 · ±ψ)' : '2p_x · Y₁±¹ ∝ sin(θ)cos(φ) (±ψ)';
+    } else if (z >= 57 && z <= 71 || z >= 89) {
+      mode = '4fxyz';
+      orbitalLabel = '4f_xyz · Y₃±² ∝ sin²(θ)cos(θ)sin(2φ) (8 Octantes ±ψ)';
+    } else {
+      mode = orbitalCycleIndex % 2 === 0 ? '3dx2y2' : '3dz2';
+      orbitalLabel = mode === '3dx2y2'
+        ? '3d_(x²-y²) · Y₂±² ∝ sin²(θ)cos(2φ) (4 Lóbulos ±ψ)'
+        : '3d_z² · Y₂⁰ ∝ (3cos²θ - 1) (Lóbulos Polares +ψ / Toro Ecuatorial -ψ)';
+    }
+    orbitalCycleIndex++;
 
-      if (z <= 2) {
-        // 1s Spherical Orbital
-        const u = Math.random();
-        const v = Math.random();
-        const theta = u * 2.0 * Math.PI;
-        const phi = Math.acos(2.0 * v - 1.0);
-        const r = Math.pow(Math.random(), 2.0) * 14.0;
-        x = r * Math.sin(phi) * Math.cos(theta);
-        y = r * Math.sin(phi) * Math.sin(theta);
-        zPos = r * Math.cos(phi);
-      } else if (z <= 10) {
-        // 2p Dumbbell Lobes
-        const axis = Math.floor(Math.random() * 3);
-        const angle = Math.random() * Math.PI * 2;
-        if (axis === 0) {
-          x = (Math.random() > 0.5 ? 1 : -1) * (4.0 + Math.random() * 10.0);
-          y = Math.sin(angle) * 3.5;
-          zPos = Math.cos(angle) * 3.5;
-        } else if (axis === 1) {
-          y = (Math.random() > 0.5 ? 1 : -1) * (4.0 + Math.random() * 10.0);
-          x = Math.sin(angle) * 3.5;
-          zPos = Math.cos(angle) * 3.5;
-        } else {
-          zPos = (Math.random() > 0.5 ? 1 : -1) * (4.0 + Math.random() * 10.0);
-          x = Math.sin(angle) * 3.5;
-          y = Math.cos(angle) * 3.5;
-        }
+    let accepted = 0;
+    let attempts = 0;
+    while (accepted < count && attempts < count * 18) {
+      attempts++;
+      const u = Math.random();
+      const v = Math.random();
+      const phi = u * 2.0 * Math.PI;
+      const cosTheta = 2.0 * v - 1.0;
+      const sinTheta = Math.sqrt(Math.max(0, 1.0 - cosTheta * cosTheta));
+      const r = Math.pow(Math.random(), 0.72) * 18.0;
+
+      let psi = 1.0;
+      if (mode === '1s') {
+        psi = Math.exp(-r / 5.5);
+      } else if (mode === '2s') {
+        psi = (1.0 - r / 6.5) * Math.exp(-r / 6.5);
+      } else if (mode === '2pz') {
+        psi = (r / 5.0) * Math.exp(-r / 5.8) * cosTheta;
+      } else if (mode === '2px') {
+        psi = (r / 5.0) * Math.exp(-r / 5.8) * sinTheta * Math.cos(phi);
+      } else if (mode === '3dz2') {
+        psi = (r * r / 28.0) * Math.exp(-r / 5.2) * (3.0 * cosTheta * cosTheta - 1.0) * 0.65;
+      } else if (mode === '3dx2y2') {
+        psi = (r * r / 26.0) * Math.exp(-r / 5.2) * (sinTheta * sinTheta * Math.cos(2.0 * phi));
       } else {
-        // 3d Cloverleaf Lobes
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.random() * Math.PI;
-        const r = Math.sin(2 * theta) * 15.0 + (Math.random() - 0.5) * 3.0;
-        x = r * Math.sin(phi) * Math.cos(theta);
-        y = r * Math.sin(phi) * Math.sin(theta);
-        zPos = r * Math.cos(phi);
+        // 4f_xyz octupolar
+        psi = (r * r * r / 120.0) * Math.exp(-r / 4.8) * (sinTheta * sinTheta * cosTheta * Math.sin(2.0 * phi)) * 1.6;
       }
 
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = zPos;
+      const prob = psi * psi;
+      if (Math.random() > Math.min(1.0, prob * 3.2)) continue;
 
-      const c = baseColor.clone().lerp(new THREE.Color(0x00FFFF), Math.random() * 0.4);
-      colors[i * 3] = c.r;
-      colors[i * 3 + 1] = c.g;
-      colors[i * 3 + 2] = c.b;
+      const x = r * sinTheta * Math.cos(phi);
+      const y = r * cosTheta;
+      const zPos = r * sinTheta * Math.sin(phi);
+
+      positions[accepted * 3] = x;
+      positions[accepted * 3 + 1] = y;
+      positions[accepted * 3 + 2] = zPos;
+
+      const phaseColor = Math.abs(psi) < 0.04
+        ? nodeGlowColor
+        : (psi >= 0 ? posPhaseColor : negPhaseColor);
+      colors[accepted * 3] = phaseColor.r;
+      colors[accepted * 3 + 1] = phaseColor.g;
+      colors[accepted * 3 + 2] = phaseColor.b;
+      accepted++;
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 0.8,
+      size: 0.88,
       vertexColors: true,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.86,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -663,9 +685,9 @@ window.addEventListener('DOMContentLoaded', function() {
 
     updateTelemetry(
       `${el.s} · ORBITAL MOTIF · ${tr('referenceModel')}`,
-      `Nvisual=${count}`,
-      `CONFIG: ${el.sh}`,
-      `|ψ|²: N/D`,
+      `Armónico Esférico: ${orbitalLabel} · N=${count}`,
+      `CONFIG: ${el.sh} · Paridad de Fase: +ψ (Cian) / -ψ (Magenta)`,
+      `|ψ(r,θ,φ)|² Monte Carlo Sampling`,
       tr('referenceModel')
     );
   }
@@ -752,6 +774,21 @@ window.addEventListener('DOMContentLoaded', function() {
       : tr('atoms', {count});
   }
 
+  let activeVisualMode = 'BALL_STICK';
+  let activeVisualOverlays = [];
+
+  function clearVisualOverlays() {
+    activeVisualOverlays.forEach(obj => {
+      moleculeGroup.remove(obj);
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+        else obj.material.dispose();
+      }
+    });
+    activeVisualOverlays = [];
+  }
+
   // Smoothly spawn atoms at positions with scale-up animation
   function spawnAtoms(atomList, explicitBondPairs = null) {
     // atomList: [{z, pos: Vector3, col: hex, scale: float, startPos: Vector3, isElectron: bool, noLabel: bool, parent, orbitR, ...}]
@@ -785,6 +822,7 @@ window.addEventListener('DOMContentLoaded', function() {
       activeBonds = activeBonds.filter(b => !b.removing);
 
       // Clear old instanced meshes and orbit lines
+      clearVisualOverlays();
       activeInstancedMeshes.forEach(im => moleculeGroup.remove(im));
       activeInstancedMeshes = [];
       if (activeBondInstancedMesh) {
@@ -876,8 +914,10 @@ window.addEventListener('DOMContentLoaded', function() {
             targetPos: item.pos.clone(),
             currentScale: initScale,
             targetScale: scale,
+            baseScale: scale,
             z: item.z,
             col: grp.col,
+            baseCol: grp.col,
             elData,
             isElectron: item.isElectron || false,
             nucleonType: item.nucleonType || null,
@@ -975,6 +1015,9 @@ window.addEventListener('DOMContentLoaded', function() {
           }
         }
         spawnBonds(newBonds);
+        if (activeVisualMode !== 'BALL_STICK') {
+          applyVisualRepresentationMode(false);
+        }
       }
 
       if (atomCountEl) atomCountEl.textContent = formatParticleCount(activeAtoms.length);
@@ -987,7 +1030,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Spawn chemical bonds using a single InstancedMesh
+  // Spawn chemical bonds using a single InstancedMesh with Pauling Δχ & bond-order color coding
   function spawnBonds(bondPairs) {
     let totalCylinders = 0;
     bondPairs.forEach(bp => {
@@ -1014,29 +1057,51 @@ window.addEventListener('DOMContentLoaded', function() {
     moleculeGroup.add(bondInstMesh);
     activeBondInstancedMesh = bondInstMesh;
 
+    const tmpColor = new THREE.Color();
     let instIdx = 0;
     bondPairs.forEach(bp => {
       let order = bp.order || 1;
-      if (!bp.order && !isDnaMode && activeAtoms[bp.a] && activeAtoms[bp.b]) {
+      let deltaEN = 0;
+      if (!isDnaMode && activeAtoms[bp.a] && activeAtoms[bp.b]) {
         const zA = activeAtoms[bp.a].z;
         const zB = activeAtoms[bp.b].z;
-        const symA = EL[zA].s;
-        const symB = EL[zB].s;
-        if ((symA === 'O' && symB === 'O') || (symA === 'C' && symB === 'O') || (symA === 'O' && symB === 'C')) {
-          order = 2;
-        } else if (symA === 'N' && symB === 'N') {
-          order = 3;
+        const elA = EL[zA] || EL[1];
+        const elB = EL[zB] || EL[1];
+        deltaEN = Math.abs((elA.electronegativity || 2.0) - (elB.electronegativity || 2.0));
+        if (!bp.order) {
+          const symA = elA.s;
+          const symB = elB.s;
+          if ((symA === 'O' && symB === 'O') || (symA === 'C' && symB === 'O') || (symA === 'O' && symB === 'C')) {
+            order = 2;
+          } else if (symA === 'N' && symB === 'N') {
+            order = 3;
+          }
         }
+      }
+      let bondHex = 0xE2EEFF;
+      if (!isDnaMode) {
+        if (order === 3) bondHex = 0xE066FF;
+        else if (order === 2) bondHex = 0x00FFCC;
+        else if (deltaEN >= 1.7) bondHex = 0xFFD166;
+        else if (deltaEN >= 0.5) bondHex = 0x55E6FF;
+      }
+      tmpColor.setHex(bondHex);
+      for (let c = 0; c < order; c++) {
+        bondInstMesh.setColorAt(instIdx + c, tmpColor);
       }
       activeBonds.push({
         aIdx: bp.a,
         bIdx: bp.b,
         order,
+        deltaEN,
         startIdx: instIdx,
         removing: false
       });
       instIdx += order;
     });
+    if (bondInstMesh.instanceColor) {
+      bondInstMesh.instanceColor.needsUpdate = true;
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -4006,6 +4071,299 @@ window.addEventListener('DOMContentLoaded', function() {
   const btnSynkronia = document.getElementById('btn-synkronia');
   if (btnSynkronia) {
     btnSynkronia.addEventListener('click', triggerSynkroniaPulse);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 4-MODE SCIENTIFIC 3D VISUALIZATION ENGINE + BRAGG XRD + COLLAPSIBLE CRYSTAL PANELS
+  // ═══════════════════════════════════════════════════════════════
+  const VISUAL_MODES = ['BALL_STICK', 'VDW_CPK', 'POLYHEDRA_CELL', 'CHARGE_MAP'];
+  const VISUAL_MODE_LABELS = {
+    BALL_STICK: '👁️ VISTA: BALL & STICK',
+    VDW_CPK: '👁️ VISTA: VDW ESPACIAL (CPK)',
+    POLYHEDRA_CELL: '👁️ VISTA: POLIEDROS + CELDA',
+    CHARGE_MAP: '👁️ VISTA: MAPA CARGA (δ+/δ-)'
+  };
+
+  function applyVisualRepresentationMode(announce = true) {
+    clearVisualOverlays();
+    const btnVis = document.getElementById('btn-visual-mode');
+    if (btnVis) {
+      btnVis.textContent = VISUAL_MODE_LABELS[activeVisualMode] || VISUAL_MODE_LABELS.BALL_STICK;
+    }
+
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (realAtoms.length === 0) return;
+
+    // Restore base material colors & instance colors first
+    const whiteCol = new THREE.Color(0xFFFFFF);
+    activeInstancedMeshes.forEach(im => {
+      if (im.userData && im.userData.col !== undefined && im.material) {
+        im.material.color.setHex(im.userData.col);
+      }
+      if (im.instanceColor) {
+        for (let i = 0; i < im.count; i++) {
+          im.setColorAt(i, whiteCol);
+        }
+        im.instanceColor.needsUpdate = true;
+      }
+    });
+
+    if (activeVisualMode === 'BALL_STICK') {
+      realAtoms.forEach(a => {
+        a.targetScale = a.baseScale || (1.2 + (a.elData?.r || 1.0) * 0.4);
+      });
+      if (activeBondInstancedMesh) activeBondInstancedMesh.visible = true;
+      if (announce && hudConditions) {
+        hudConditions.textContent = 'VISTA 3D: Ball & Stick (Radios Covalentes + Enlaces Polarizados Δχ)';
+      }
+    } else if (activeVisualMode === 'VDW_CPK') {
+      realAtoms.forEach(a => {
+        const base = a.baseScale || (1.2 + (a.elData?.r || 1.0) * 0.4);
+        a.targetScale = base * 1.92;
+      });
+      if (activeBondInstancedMesh) activeBondInstancedMesh.visible = false;
+      if (announce && hudConditions) {
+        hudConditions.textContent = 'VISTA 3D: CPK / Van der Waals Space-Filling (Volumen Estérico Electrónico Real)';
+      }
+    } else if (activeVisualMode === 'POLYHEDRA_CELL') {
+      realAtoms.forEach(a => {
+        const base = a.baseScale || (1.2 + (a.elData?.r || 1.0) * 0.4);
+        a.targetScale = base * 0.9;
+      });
+      if (activeBondInstancedMesh) activeBondInstancedMesh.visible = true;
+
+      // 1. Build 3D Crystallographic Unit Cell Bounding Box (a × b × c)
+      let minX = Infinity, minY = Infinity, minZ = Infinity;
+      let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+      realAtoms.forEach(a => {
+        const p = a.targetPos;
+        if (p.x < minX) minX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.z < minZ) minZ = p.z;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y > maxY) maxY = p.y;
+        if (p.z > maxZ) maxZ = p.z;
+      });
+      const pad = 1.6;
+      const sizeX = Math.max(4.0, (maxX - minX) + pad * 2);
+      const sizeY = Math.max(4.0, (maxY - minY) + pad * 2);
+      const sizeZ = Math.max(4.0, (maxZ - minZ) + pad * 2);
+      const center = new THREE.Vector3((minX + maxX) * 0.5, (minY + maxY) * 0.5, (minZ + maxZ) * 0.5);
+
+      const boxGeo = new THREE.BoxGeometry(sizeX, sizeY, sizeZ);
+      const edgesGeo = new THREE.EdgesGeometry(boxGeo);
+      boxGeo.dispose();
+      const edgesMat = new THREE.LineBasicMaterial({
+        color: 0x00F0FF,
+        transparent: true,
+        opacity: 0.62
+      });
+      const cellWireframe = new THREE.LineSegments(edgesGeo, edgesMat);
+      cellWireframe.position.copy(center);
+      moleculeGroup.add(cellWireframe);
+      activeVisualOverlays.push(cellWireframe);
+
+      // Crystallographic Axes (a = Red, b = Green, c = Blue) at unit cell origin corner
+      const originCorner = new THREE.Vector3(center.x - sizeX * 0.5, center.y - sizeY * 0.5, center.z - sizeZ * 0.5);
+      const axisSpecs = [
+        { dir: new THREE.Vector3(Math.min(sizeX * 0.45, 10), 0, 0), col: 0xFF3366 },
+        { dir: new THREE.Vector3(0, Math.min(sizeY * 0.45, 10), 0), col: 0x00FF9D },
+        { dir: new THREE.Vector3(0, 0, Math.min(sizeZ * 0.45, 10)), col: 0x38BDF8 }
+      ];
+      axisSpecs.forEach(ax => {
+        const axGeo = new THREE.BufferGeometry().setFromPoints([originCorner, originCorner.clone().add(ax.dir)]);
+        const axMat = new THREE.LineBasicMaterial({ color: ax.col, transparent: true, opacity: 0.95 });
+        const axLine = new THREE.Line(axGeo, axMat);
+        moleculeGroup.add(axLine);
+        activeVisualOverlays.push(axLine);
+      });
+
+      // 2. Build VESTA-Style Translucent Coordination Polyhedra ([MO6] / [MO4])
+      let polyhedraBuilt = 0;
+      for (let i = 0; i < realAtoms.length && polyhedraBuilt < 14; i++) {
+        const centerAtom = realAtoms[i];
+        const neighbors = [];
+        for (let j = 0; j < realAtoms.length; j++) {
+          if (i === j) continue;
+          const d = centerAtom.targetPos.distanceTo(realAtoms[j].targetPos);
+          if (d > 0.5 && d <= 11.2) {
+            neighbors.push({ atom: realAtoms[j], dist: d });
+          }
+        }
+        neighbors.sort((a, b) => a.dist - b.dist);
+        const coordNeighbors = neighbors.slice(0, 6);
+        if (coordNeighbors.length >= 4) {
+          const avgDist = coordNeighbors.reduce((s, n) => s + n.dist, 0) / coordNeighbors.length;
+          const polyRadius = avgDist * 0.78;
+          const polyGeo = coordNeighbors.length >= 6
+            ? new THREE.OctahedronGeometry(polyRadius, 0)
+            : new THREE.TetrahedronGeometry(polyRadius, 0);
+          const polyMat = new THREE.MeshPhysicalMaterial({
+            color: centerAtom.baseCol || 0x00F0FF,
+            transparent: true,
+            opacity: 0.24,
+            roughness: 0.12,
+            metalness: 0.1,
+            clearcoat: 1.0,
+            side: THREE.DoubleSide,
+            depthWrite: false
+          });
+          const polyMesh = new THREE.Mesh(polyGeo, polyMat);
+          polyMesh.position.copy(centerAtom.targetPos);
+          moleculeGroup.add(polyMesh);
+          activeVisualOverlays.push(polyMesh);
+
+          const polyEdgesGeo = new THREE.EdgesGeometry(polyGeo);
+          const polyEdgesMat = new THREE.LineBasicMaterial({
+            color: 0xFFFFFF,
+            transparent: true,
+            opacity: 0.48
+          });
+          const polyEdges = new THREE.LineSegments(polyEdgesGeo, polyEdgesMat);
+          polyEdges.position.copy(centerAtom.targetPos);
+          moleculeGroup.add(polyEdges);
+          activeVisualOverlays.push(polyEdges);
+          polyhedraBuilt++;
+        }
+      }
+
+      const scaleA = angstromPerWorldUnit || 0.42;
+      const cellStr = `a=${(sizeX * scaleA).toFixed(2)} Å · b=${(sizeY * scaleA).toFixed(2)} Å · c=${(sizeZ * scaleA).toFixed(2)} Å`;
+      if (announce && hudConditions) {
+        hudConditions.textContent = `VISTA 3D: Celda Unidad (${cellStr}) + ${polyhedraBuilt} Poliedros de Coordinación VESTA`;
+      }
+    } else if (activeVisualMode === 'CHARGE_MAP') {
+      realAtoms.forEach(a => {
+        const base = a.baseScale || (1.2 + (a.elData?.r || 1.0) * 0.4);
+        a.targetScale = base * 1.15;
+      });
+      if (activeBondInstancedMesh) activeBondInstancedMesh.visible = true;
+
+      // Set base material color to white so per-instance Pauling charge color renders accurately
+      activeInstancedMeshes.forEach(im => {
+        if (im.material) im.material.color.setHex(0xFFFFFF);
+      });
+
+      const meanEN = realAtoms.reduce((acc, a) => acc + (a.elData?.electronegativity || 2.0), 0) / Math.max(1, realAtoms.length);
+      const tmpColor = new THREE.Color();
+      realAtoms.forEach(a => {
+        const atomEN = a.elData?.electronegativity || 2.0;
+        const chargeData = window.NULLA_COMPATIBILITY && window.NULLA_COMPATIBILITY.computePaulingPartialCharge
+          ? window.NULLA_COMPATIBILITY.computePaulingPartialCharge(atomEN, meanEN)
+          : { q: 0, hexColor: 0xE2E8F0 };
+        tmpColor.setHex(chargeData.hexColor);
+        if (a.instancedMesh) {
+          a.instancedMesh.setColorAt(a.instIdx, tmpColor);
+        }
+      });
+      activeInstancedMeshes.forEach(im => {
+        if (im.instanceColor) im.instanceColor.needsUpdate = true;
+      });
+      if (announce && hudConditions) {
+        hudConditions.textContent = `VISTA 3D: Mapa Electrostático de Carga Parcial de Pauling (Azul δ+ Electrofílico · Rojo δ- Nucleofílico · χ̄=${meanEN.toFixed(2)})`;
+      }
+    }
+  }
+
+  function cycleVisualRepresentationMode() {
+    playTone(680, 'sine', 0.12, 0.08);
+    const idx = VISUAL_MODES.indexOf(activeVisualMode);
+    activeVisualMode = VISUAL_MODES[(idx + 1) % VISUAL_MODES.length];
+    applyVisualRepresentationMode(true);
+  }
+
+  function triggerBraggXRDAnalysis() {
+    if (!window.NULLA_COMPATIBILITY || !window.NULLA_COMPATIBILITY.computeBraggXRDPattern) return;
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (realAtoms.length < 2) return;
+    playTone(820, 'triangle', 0.18, 0.10);
+
+    const scaleA = angstromPerWorldUnit || 0.42;
+    const coordsAngstrom = realAtoms.map(a => ({
+      z: a.z,
+      x: a.targetPos.x * scaleA,
+      y: a.targetPos.y * scaleA,
+      zCoord: a.targetPos.z * scaleA
+    }));
+
+    const xrd = window.NULLA_COMPATIBILITY.computeBraggXRDPattern(coordsAngstrom, 1.5406);
+    if (!xrd || !xrd.peaks || xrd.peaks.length === 0) return;
+
+    // Render 3D Debye-Scherrer diffraction rings around the crystal center
+    clearVisualOverlays();
+    xrd.peaks.slice(0, 4).forEach((pk, idx) => {
+      const ringRadius = 10.0 + idx * 3.8;
+      const ringGeo = new THREE.RingGeometry(ringRadius, ringRadius + 0.18 + (pk.intensity / 450), 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: idx === 0 ? 0x38BDF8 : (idx === 1 ? 0x00FF9D : 0xC084FC),
+        transparent: true,
+        opacity: Math.max(0.22, (pk.intensity / 100) * 0.55),
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI * 0.32;
+      moleculeGroup.add(ringMesh);
+      activeVisualOverlays.push(ringMesh);
+    });
+
+    const peakSummary = xrd.peaks
+      .map(p => `2θ=${p.twoThetaDeg}° (d=${p.dSpacingA}Å, I=${p.intensity}%)`)
+      .join(' · ');
+
+    if (hudConditions) {
+      hudConditions.textContent = `📊 XRD BRAGG (${xrd.radiation}): ${peakSummary} · [${xrd.chronolithSeal}]`;
+    }
+    if (hudCompatibility) {
+      hudCompatibility.textContent = `PICO PRINCIPAL 2θ = ${xrd.peaks[0].twoThetaDeg}° (d = ${xrd.peaks[0].dSpacingA} Å)`;
+      hudCompatibility.style.color = '#38BDF8';
+    }
+  }
+
+  const btnVisualMode = document.getElementById('btn-visual-mode');
+  if (btnVisualMode) {
+    btnVisualMode.addEventListener('click', cycleVisualRepresentationMode);
+  }
+  const btnXrd = document.getElementById('btn-xrd');
+  if (btnXrd) {
+    btnXrd.addEventListener('click', triggerBraggXRDAnalysis);
+  }
+
+  // Collapsible Left Telemetry Panel & Bottom Periodic Table Panel
+  const leftHudPanel = document.getElementById('molecular-hud');
+  const btnCollapseLeftHud = document.getElementById('btn-collapse-left-hud');
+  const btnRestoreLeftHud = document.getElementById('btn-restore-left-hud');
+  if (btnCollapseLeftHud && leftHudPanel) {
+    btnCollapseLeftHud.addEventListener('click', (e) => {
+      e.stopPropagation();
+      leftHudPanel.classList.add('hud-collapsed-left');
+      if (btnRestoreLeftHud) btnRestoreLeftHud.classList.add('visible');
+    });
+  }
+  if (btnRestoreLeftHud && leftHudPanel) {
+    btnRestoreLeftHud.addEventListener('click', (e) => {
+      e.stopPropagation();
+      leftHudPanel.classList.remove('hud-collapsed-left');
+      btnRestoreLeftHud.classList.remove('visible');
+    });
+  }
+
+  const ptHudCollapsePanel = document.getElementById('pt-hud-panel');
+  const btnCollapsePtHud = document.getElementById('btn-collapse-pt-hud');
+  const btnRestorePtHud = document.getElementById('btn-restore-pt-hud');
+  if (btnCollapsePtHud && ptHudCollapsePanel) {
+    btnCollapsePtHud.addEventListener('click', (e) => {
+      e.stopPropagation();
+      ptHudCollapsePanel.classList.add('hud-collapsed-bottom');
+      if (btnRestorePtHud) btnRestorePtHud.classList.add('visible');
+    });
+  }
+  if (btnRestorePtHud && ptHudCollapsePanel) {
+    btnRestorePtHud.addEventListener('click', (e) => {
+      e.stopPropagation();
+      ptHudCollapsePanel.classList.remove('hud-collapsed-bottom');
+      btnRestorePtHud.classList.remove('visible');
+    });
   }
 
   document.querySelectorAll('#molecular-tray-bar [data-mol-id]').forEach(chip => {

@@ -13,88 +13,127 @@
     body[data-experience="basic"] .experience-lab,
     body[data-experience="basic"] .experience-science,
     body[data-experience="lab"] .experience-science { display:none !important; }
-    .experience-mode-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; margin:-2px 0 8px; padding:4px; border:1px solid rgba(0,240,255,.22); border-radius:11px; background:rgba(3,8,16,.72); }
-    .experience-mode-btn { min-height:28px; padding:5px 4px; border-radius:8px; border:1px solid rgba(255,255,255,.2); color:#fff; background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(10,15,25,.88)); font:800 7.5px 'Orbitron',sans-serif; letter-spacing:.4px; cursor:pointer; }
-    .experience-mode-btn[aria-checked="true"] { color:#00FFCF; border-color:#00F0FF; background:linear-gradient(180deg,rgba(0,240,255,.24),rgba(8,18,28,.95)); box-shadow:0 0 14px rgba(0,240,255,.2),inset 0 1px rgba(255,255,255,.3); }
-    #experience-mode-description { min-height:25px; margin:0 0 8px; color:rgba(255,255,255,.8); font-size:8.5px; line-height:1.4; }
+    .experience-mode-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; margin:-2px 0 8px; padding:4px; border:1px solid rgba(0,240,255,.32); border-radius:12px; background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,240,255,.03)); backdrop-filter:blur(14px) saturate(1.8); -webkit-backdrop-filter:blur(14px) saturate(1.8); box-shadow:inset 0 1px 1px rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.35); }
+    .experience-mode-btn { min-height:28px; padding:5px 4px; border-radius:9px; border:1px solid rgba(255,255,255,.34); color:#fff; background:linear-gradient(180deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,.10) 48%,rgba(12,22,38,.18) 100%); font:800 7.5px 'Orbitron',sans-serif; letter-spacing:.4px; cursor:pointer; box-shadow:inset 0 1.5px 1px rgba(255,255,255,.72),inset 0 -2px 4px rgba(0,0,0,.38),0 4px 10px rgba(0,0,0,.32); transition:all .2s cubic-bezier(.175,.885,.32,1.275); }
+    .experience-mode-btn:hover { transform:translateY(-1px); border-color:rgba(255,255,255,.65); box-shadow:inset 0 1.5px 2px rgba(255,255,255,.88),0 6px 14px rgba(0,240,255,.22); }
+    .experience-mode-btn[aria-checked="true"] { color:#00FFCF; border-color:#00F0FF; background:linear-gradient(180deg,rgba(0,240,255,.42) 0%,rgba(0,240,255,.14) 50%,rgba(8,24,38,.28) 100%); box-shadow:0 0 16px rgba(0,240,255,.32),inset 0 1.5px 1px rgba(255,255,255,.82),inset 0 -2px 4px rgba(0,180,255,.3); }
+    #experience-mode-description { min-height:25px; margin:0 0 8px; color:rgba(255,255,255,.88); font-size:8.5px; line-height:1.4; text-shadow:0 1px 3px rgba(0,0,0,.9); }
     .thermal-status { width:100%; margin-top:4px; }
-    .thermal-meter { height:4px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.12); }
+    .thermal-meter { height:4px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.16); box-shadow:inset 0 1px 2px rgba(0,0,0,.6); }
     #phase-progress-fill { display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,#00A8FF,#00FF9D,#FFB000,#FF325F); transition:width .25s ease; }
-    #phase-transition-status { display:block; margin-top:3px; color:rgba(255,255,255,.72); font-size:7.5px; line-height:1.35; }
-    .tutorial-objective { margin:8px 0 12px; padding:7px 9px; border-radius:8px; font-size:8.5px; line-height:1.35; border:1px solid rgba(255,215,0,.35); background:rgba(255,215,0,.08); color:#FFE38B; }
-    .tutorial-objective[data-complete="true"] { border-color:rgba(0,255,157,.5); background:rgba(0,255,157,.1); color:#8CFFD4; }
+    #phase-transition-status { display:block; margin-top:3px; color:rgba(255,255,255,.82); font-size:7.5px; line-height:1.35; text-shadow:0 1px 2px rgba(0,0,0,.85); }
+    .tutorial-objective { margin:8px 0 12px; padding:7px 9px; border-radius:9px; font-size:8.5px; line-height:1.35; border:1px solid rgba(255,215,0,.45); background:linear-gradient(180deg,rgba(255,215,0,.18),rgba(255,215,0,.04)); color:#FFE38B; box-shadow:inset 0 1px 1px rgba(255,255,255,.4); }
+    .tutorial-objective[data-complete="true"] { border-color:rgba(0,255,157,.58); background:linear-gradient(180deg,rgba(0,255,157,.22),rgba(0,255,157,.05)); color:#8CFFD4; }
     .tutorial-highlight { outline:2px solid #00FF9D !important; outline-offset:4px; animation:tutorialPulse 1.2s ease-in-out infinite alternate; }
     @keyframes tutorialPulse { from { filter:drop-shadow(0 0 4px rgba(0,255,157,.35)); } to { filter:drop-shadow(0 0 14px rgba(0,255,157,.85)); } }
     .sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important; }
 
     #webgl-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; display:block; z-index:0; touch-action:none; }
 
-    /* ─── HEADER ─── */
+    /* ─── NEXT-GEN 3D iOS / VISION-OS CRYSTAL BUTTON SYSTEM ─── */
+    .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd,
+    #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif,
+    #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr,
+    #btn-quality-low, #btn-quality-med, #btn-quality-ultra {
+      position:relative; overflow:hidden;
+      border-radius:10px !important;
+      border:1px solid rgba(255,255,255,0.44) !important;
+      background:linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.14) 46%, rgba(255,255,255,0.03) 52%, rgba(0,240,255,0.12) 100%) !important;
+      backdrop-filter:blur(14px) saturate(1.9); -webkit-backdrop-filter:blur(14px) saturate(1.9);
+      box-shadow:0 6px 16px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.82), inset 0 -2px 4px rgba(0,0,0,0.38) !important;
+      text-shadow:0 1px 3px rgba(0,0,0,0.85);
+      transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    }
+    #btn-tutorial, #btn-share-url, #btn-export-cif {
+      border-color:rgba(0,255,157,0.62) !important;
+      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(0,255,157,0.24) 48%, rgba(0,255,157,0.08) 100%) !important;
+      box-shadow:0 6px 16px rgba(0,255,157,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,120,80,0.42) !important;
+    }
+    #btn-docs, #btn-quality-med, #btn-visual-mode {
+      border-color:rgba(0,240,255,0.62) !important;
+      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(0,240,255,0.24) 48%, rgba(0,240,255,0.08) 100%) !important;
+      box-shadow:0 6px 16px rgba(0,240,255,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,110,160,0.42) !important;
+    }
+    #btn-quiz, #btn-xrd {
+      border-color:rgba(255,215,0,0.62) !important;
+      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,215,0,0.24) 48%, rgba(255,180,0,0.08) 100%) !important;
+      box-shadow:0 6px 16px rgba(255,215,0,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(140,95,0,0.42) !important;
+    }
+    #btn-webxr {
+      border-color:rgba(191,0,255,0.62) !important;
+      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(191,0,255,0.25) 48%, rgba(140,0,220,0.09) 100%) !important;
+      box-shadow:0 6px 16px rgba(191,0,255,0.2), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(95,0,140,0.42) !important;
+    }
+    #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover,
+    #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover,
+    #btn-tutorial:hover, #btn-docs:hover, #btn-quiz:hover, #btn-share-url:hover, #btn-webxr:hover,
+    #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover {
+      transform:translateY(-2px) scale(1.015);
+      border-color:rgba(255,255,255,0.85) !important;
+      box-shadow:0 10px 24px rgba(0,240,255,0.28), inset 0 2px 2px rgba(255,255,255,0.95), inset 0 -2px 5px rgba(0,0,0,0.4) !important;
+    }
+
+    /* ─── HEADER (PURE TRANSPARENT CRYSTAL) ─── */
     .hud-header {
       position:fixed; top:0; left:0; right:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
-      padding:10px 22px; backdrop-filter:blur(20px) saturate(1.6); -webkit-backdrop-filter:blur(20px) saturate(1.6);
-      background:linear-gradient(145deg, rgba(14,18,26,0.90) 0%, rgba(4,6,12,0.95) 100%);
-      border-bottom:1px solid rgba(255,255,255,0.22);
-      box-shadow:0 8px 32px rgba(0,0,0,0.85);
+      padding:10px 22px; backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
+      background:linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(8,16,32,0.06) 55%, rgba(0,240,255,0.03) 100%);
+      border-bottom:1px solid rgba(255,255,255,0.34);
+      box-shadow:0 8px 28px rgba(0,0,0,0.38), inset 0 1px 1px rgba(255,255,255,0.45);
     }
-    .hud-title { font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#FFFFFF; text-shadow:0 0 10px rgba(255,255,255,0.8); }
-    .hud-badge { padding:4px 12px; border-radius:10px; font-size:9px; letter-spacing:1px; background:linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%); color:#FFFFFF; border:1px solid rgba(255,255,255,0.3); font-weight:600; box-shadow:inset 0 1px 1px rgba(255,255,255,0.3); }
+    .hud-title { font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#FFFFFF; text-shadow:0 0 12px rgba(0,240,255,0.75), 0 1px 3px rgba(0,0,0,0.9); }
+    .hud-badge { padding:4px 12px; border-radius:10px; font-size:9px; letter-spacing:1px; background:linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(0,240,255,0.08) 100%); color:#FFFFFF; border:1px solid rgba(255,255,255,0.42); font-weight:600; box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.65); }
 
-    /* ─── TELEMETRY PANEL ─── */
+    /* ─── TELEMETRY PANEL (PURE TRANSPARENT CRYSTAL) ─── */
     #molecular-hud {
       position:fixed; top:60px; left:14px; z-index:10; width:310px;
-      backdrop-filter:blur(20px) saturate(1.6); -webkit-backdrop-filter:blur(20px) saturate(1.6);
-      background:linear-gradient(145deg, rgba(14,18,26,0.90) 0%, rgba(4,6,12,0.95) 100%);
-      border:1px solid rgba(255,255,255,0.22); border-radius:14px; padding:16px;
-      box-shadow:0 12px 40px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.2);
+      backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
+      background:linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(8,18,36,0.06) 50%, rgba(0,240,255,0.03) 100%);
+      border:1px solid rgba(255,255,255,0.36); border-radius:16px; padding:16px;
+      box-shadow:0 16px 42px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -1px 2px rgba(0,240,255,0.18);
     }
-    #molecular-hud h3 { font-family:'Orbitron',sans-serif; font-size:10px; color:#FFFFFF; letter-spacing:2px; margin-bottom:12px; text-shadow:0 0 8px rgba(255,255,255,0.6); }
-    .hud-row { display:flex; font-size:10.5px; margin-bottom:6px; }
-    .hud-label { color:rgba(255,255,255,0.65); width:90px; flex-shrink:0; }
+    #molecular-hud h3 { font-family:'Orbitron',sans-serif; font-size:10px; color:#FFFFFF; letter-spacing:2px; margin-bottom:12px; text-shadow:0 0 10px rgba(0,240,255,0.7), 0 1px 3px rgba(0,0,0,0.9); }
+    .hud-row { display:flex; font-size:10.5px; margin-bottom:6px; text-shadow:0 1px 3px rgba(0,0,0,0.92); }
+    .hud-label { color:rgba(255,255,255,0.78); width:90px; flex-shrink:0; }
     .hud-val { color:#FFFFFF; flex:1; overflow-wrap:anywhere; font-weight:600; }
     .scientific-token { direction:ltr; unicode-bidi:isolate; }
     #onboarding-overlay, #docs-modal, #quiz-modal, #suggestion-modal {
       max-width:calc(100vw - 24px); max-height:calc(100dvh - 24px); overflow-y:auto;
     }
     #btn-reassemble, #btn-open-pt {
-      width:100%; margin-top:10px; padding:9px 0; border:1px solid rgba(255,255,255,0.35); border-radius:10px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%);
-      color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:700;
-      letter-spacing:2px; cursor:pointer; transition:all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow:0 4px 14px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.6);
-      text-shadow:0 1px 3px rgba(0,0,0,0.8);
-    }
-    #btn-reassemble:hover, #btn-open-pt:hover {
-      transform:translateY(-2px);
-      background:linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 45%, rgba(28,38,56,0.95) 100%);
-      box-shadow:0 8px 22px rgba(255,255,255,0.2), inset 0 1px 2px rgba(255,255,255,0.7), inset 0 -2px 4px rgba(0,0,0,0.6);
-      border-color:rgba(255,255,255,0.6);
+      width:100%; padding:7px 0; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700;
+      letter-spacing:1.2px; cursor:pointer;
     }
 
-    /* ─── FOOTER STATS ─── */
-    .hud-stats { position:fixed; bottom:14px; left:14px; z-index:10; display:flex; gap:12px; }
+    /* ─── FOOTER STATS (3D iOS CRYSTAL PILLS) ─── */
+    .hud-stats { position:fixed; bottom:14px; left:14px; z-index:10; display:flex; gap:10px; }
     .stat-chip {
-      padding:6px 14px; border-radius:10px; font-size:9.5px; font-weight:700; letter-spacing:1px; color:#FFFFFF;
-      background:linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 45%, rgba(18,24,36,0.9) 100%);
-      border:1px solid rgba(255,255,255,0.3); backdrop-filter:blur(16px);
-      box-shadow:0 4px 12px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.4);
+      padding:6px 14px; border-radius:11px; font-size:9.5px; font-weight:700; letter-spacing:1px; color:#FFFFFF;
+      background:linear-gradient(180deg, rgba(255,255,255,0.36) 0%, rgba(255,255,255,0.10) 48%, rgba(0,240,255,0.08) 100%);
+      border:1px solid rgba(255,255,255,0.44); backdrop-filter:blur(16px) saturate(1.8); -webkit-backdrop-filter:blur(16px) saturate(1.8);
+      box-shadow:0 6px 16px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.78), inset 0 -2px 4px rgba(0,0,0,0.35);
+      text-shadow:0 1px 3px rgba(0,0,0,0.85); transition:all 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    button.stat-chip:hover {
+      transform:translateY(-2px); border-color:#00F0FF;
+      box-shadow:0 8px 20px rgba(0,240,255,0.28), inset 0 2px 2px rgba(255,255,255,0.92);
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       PERIODIC TABLE HUD PANEL (Bottom-Right)
+       PERIODIC TABLE HUD PANEL (Bottom-Right · PURE TRANSPARENT CRYSTAL)
        ═══════════════════════════════════════════════════════════════ */
     #pt-hud-panel {
       position:fixed; bottom:14px; right:14px; z-index:10;
-      width:560px; backdrop-filter:blur(22px) saturate(1.7); -webkit-backdrop-filter:blur(22px) saturate(1.7);
-      background:linear-gradient(145deg, rgba(14,18,26,0.92) 0%, rgba(4,6,12,0.96) 100%);
-      border:1px solid rgba(255,255,255,0.25); border-radius:16px;
+      width:560px; backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85);
+      background:linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(8,18,36,0.06) 50%, rgba(0,240,255,0.03) 100%);
+      border:1px solid rgba(255,255,255,0.36); border-radius:18px;
       padding:12px 14px; display:flex; flex-direction:column; gap:8px;
-      box-shadow:0 14px 45px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.25);
+      box-shadow:0 18px 46px rgba(0,0,0,0.45), inset 0 1.5px 1px rgba(255,255,255,0.58), inset 0 -1px 2px rgba(0,240,255,0.2);
       box-sizing:border-box; overflow:hidden;
     }
     
-    .pt-panel-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.18); padding-bottom:5px; margin-bottom:2px; }
-    .pt-panel-title { font-family:'Orbitron',sans-serif; font-size:11px; color:#FFFFFF; letter-spacing:2px; text-transform:uppercase; text-shadow:0 0 10px rgba(255,255,255,0.7); }
+    .pt-panel-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.26); padding-bottom:5px; margin-bottom:2px; }
+    .pt-panel-title { font-family:'Orbitron',sans-serif; font-size:11px; color:#FFFFFF; letter-spacing:2px; text-transform:uppercase; text-shadow:0 0 10px rgba(0,240,255,0.7), 0 1px 3px rgba(0,0,0,0.9); }
 
     /* Grid Layout — 18 columns for the standard IUPAC periodic table */
     .pt-grid {
@@ -104,147 +143,159 @@
 
     .pt-el {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:3px 0px; border-radius:6px; cursor:pointer;
-      min-height:25px; border:1px solid rgba(255,255,255,0.18);
-      transition: all 0.2s ease; position:relative;
-      box-shadow:inset 0 1px 1px rgba(255,255,255,0.25);
+      padding:3px 0px; border-radius:7px; cursor:pointer;
+      min-height:25px; border:1px solid rgba(255,255,255,0.34);
+      transition: all 0.2s cubic-bezier(0.175,0.885,0.32,1.275); position:relative;
+      box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.62), inset 0 -1.5px 3px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.3);
+      text-shadow:0 1px 2px rgba(0,0,0,0.9);
     }
-    .pt-el:hover { transform:scale(1.32); z-index:5; box-shadow:0 0 16px currentColor; border-color:currentColor; }
+    .pt-el:hover { transform:scale(1.34) translateY(-1px); z-index:5; box-shadow:0 0 18px currentColor, inset 0 1.5px 2px rgba(255,255,255,0.9); border-color:#FFFFFF; }
     .pt-el:focus-visible {
       outline:2px solid #FFFFFF; outline-offset:2px; z-index:6;
-      transform:scale(1.2); box-shadow:0 0 18px currentColor;
+      transform:scale(1.22); box-shadow:0 0 18px currentColor;
     }
     .pt-scroll { width:100%; overflow-x:hidden; overflow-y:visible; }
-    .pt-el-num { font-size:6px; color:rgba(255,255,255,0.75); line-height:1; }
+    .pt-el-num { font-size:6px; color:rgba(255,255,255,0.88); line-height:1; }
     .pt-el-sym { font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:700; line-height:1; margin-top:1px; }
 
-    /* Category Colors */
-    .cat-nonmetal   { background:rgba(0,240,255,0.18); color:#FFFFFF; }
-    .cat-noble      { background:rgba(191,0,255,0.18); color:#FFFFFF; }
-    .cat-alkali     { background:rgba(255,215,0,0.18); color:#FFFFFF; }
-    .cat-alkaline   { background:rgba(255,153,0,0.18); color:#FFFFFF; }
-    .cat-transition { background:rgba(0,212,255,0.18); color:#FFFFFF; }
-    .cat-post       { background:rgba(170,170,170,0.18); color:#FFFFFF; }
-    .cat-metalloid  { background:rgba(0,255,157,0.18); color:#FFFFFF; }
-    .cat-halogen    { background:rgba(255,0,85,0.18); color:#FFFFFF; }
-    .cat-lanthanide { background:rgba(255,105,180,0.18); color:#FFFFFF; }
-    .cat-actinide   { background:rgba(255,100,50,0.18); color:#FFFFFF; }
+    /* Category Colors — 3D Tinted iOS Crystal Tiles */
+    .cat-nonmetal   { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(0,240,255,0.28) 55%, rgba(0,180,255,0.12) 100%); border-color:rgba(0,240,255,0.52); color:#FFFFFF; }
+    .cat-noble      { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(191,0,255,0.28) 55%, rgba(140,0,220,0.12) 100%); border-color:rgba(191,0,255,0.52); color:#FFFFFF; }
+    .cat-alkali     { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,215,0,0.28) 55%, rgba(200,150,0,0.12) 100%); border-color:rgba(255,215,0,0.52); color:#FFFFFF; }
+    .cat-alkaline   { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,153,0,0.28) 55%, rgba(200,100,0,0.12) 100%); border-color:rgba(255,153,0,0.52); color:#FFFFFF; }
+    .cat-transition { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(0,212,255,0.26) 55%, rgba(0,140,220,0.10) 100%); border-color:rgba(0,212,255,0.48); color:#FFFFFF; }
+    .cat-post       { background:linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(185,200,220,0.26) 55%, rgba(120,140,165,0.10) 100%); border-color:rgba(200,215,235,0.48); color:#FFFFFF; }
+    .cat-metalloid  { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(0,255,157,0.28) 55%, rgba(0,180,110,0.12) 100%); border-color:rgba(0,255,157,0.52); color:#FFFFFF; }
+    .cat-halogen    { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,0,85,0.28) 55%, rgba(190,0,60,0.12) 100%); border-color:rgba(255,0,85,0.52); color:#FFFFFF; }
+    .cat-lanthanide { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,105,180,0.28) 55%, rgba(200,60,140,0.12) 100%); border-color:rgba(255,105,180,0.52); color:#FFFFFF; }
+    .cat-actinide   { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,100,50,0.28) 55%, rgba(200,60,20,0.12) 100%); border-color:rgba(255,100,50,0.52); color:#FFFFFF; }
 
     /* Lanthanide/Actinide separator indicator */
     .pt-spacer { grid-column: span 18; height:4px; }
     .pt-la-label, .pt-ac-label {
       grid-column: 1 / 4; display:flex; align-items:center; justify-content:center;
       font-size:7.5px; letter-spacing:0.5px; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-weight:600;
+      text-shadow:0 1px 3px rgba(0,0,0,0.9);
     }
 
-    /* ─── FUSION BAR ─── */
+    /* ─── FUSION BAR (TRANSPARENT CRYSTAL) ─── */
     .fusion-bar {
       display:flex; align-items:center; justify-content:space-between; gap:5px;
-      padding:6px 10px; border-radius:12px; background:rgba(8,12,20,0.8); border:1px solid rgba(255,255,255,0.22);
+      padding:6px 10px; border-radius:12px;
+      background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(0,240,255,0.03));
+      border:1px solid rgba(255,255,255,0.32);
+      box-shadow:inset 0 1px 1px rgba(255,255,255,0.45), 0 4px 14px rgba(0,0,0,0.3);
       margin-top:4px; box-sizing:border-box; width:100%; overflow:hidden;
     }
     .fusion-slot {
-      min-width:28px; height:28px; padding:0 5px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      min-width:28px; height:28px; padding:0 5px; border-radius:9px; display:flex; align-items:center; justify-content:center;
       font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700;
-      border:1px solid rgba(255,255,255,0.32); background:linear-gradient(145deg, rgba(20,26,38,0.9) 0%, rgba(8,12,20,0.95) 100%);
-      color:#FFFFFF; box-shadow:inset 0 2px 4px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.5); flex-shrink:0;
+      border:1px solid rgba(255,255,255,0.45);
+      background:linear-gradient(180deg, rgba(255,255,255,0.26) 0%, rgba(0,240,255,0.08) 100%);
+      color:#FFFFFF; box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.68), 0 3px 8px rgba(0,0,0,0.38); flex-shrink:0;
     }
     .mol-tray-bar {
       display:flex; align-items:center; gap:4px; margin-top:5px; padding:4px 8px;
-      border-radius:10px; background:rgba(8,14,24,0.86); border:1px solid rgba(0,240,255,0.28);
+      border-radius:11px; background:linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,240,255,0.04));
+      border:1px solid rgba(0,240,255,0.38);
+      box-shadow:inset 0 1px 1px rgba(255,255,255,0.42);
       overflow-x:auto; scrollbar-width:thin; scrollbar-color:rgba(0,240,255,0.45) transparent;
     }
     .mol-chip {
-      padding:3px 6px; border-radius:6px; border:1px solid rgba(0,240,255,0.38);
-      background:linear-gradient(180deg, rgba(0,240,255,0.16), rgba(14,20,32,0.94));
-      color:#E8FBFF; font:700 8px 'Fira Code',monospace; cursor:pointer; flex-shrink:0;
-      transition:all 0.16s ease; white-space:nowrap;
+      padding:3px 7px; border-radius:8px; border:1px solid rgba(0,240,255,0.52);
+      background:linear-gradient(180deg, rgba(255,255,255,0.36) 0%, rgba(0,240,255,0.22) 50%, rgba(0,180,255,0.08) 100%);
+      color:#FFFFFF; font:700 8px 'Fira Code',monospace; cursor:pointer; flex-shrink:0;
+      box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.75), 0 3px 8px rgba(0,0,0,0.32);
+      text-shadow:0 1px 2px rgba(0,0,0,0.85);
+      transition:all 0.18s cubic-bezier(0.175,0.885,0.32,1.275); white-space:nowrap;
     }
     .mol-chip:hover {
-      border-color:#00FF9D; color:#00FF9D; transform:translateY(-1px);
-      box-shadow:0 0 10px rgba(0,255,157,0.28);
+      border-color:#00FF9D; color:#00FF9D; transform:translateY(-1.5px) scale(1.04);
+      box-shadow:0 5px 14px rgba(0,255,157,0.32), inset 0 1.5px 2px rgba(255,255,255,0.92);
     }
     .mol-chip-stage {
-      border-color:rgba(255,215,0,0.55); color:#FFD700;
-      background:linear-gradient(180deg, rgba(255,215,0,0.2), rgba(18,22,32,0.95));
+      border-color:rgba(255,215,0,0.68); color:#FFD700;
+      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,215,0,0.28) 50%, rgba(200,140,0,0.10) 100%);
       font-family:'Orbitron',sans-serif; font-size:7.5px;
     }
-    .fusion-plus { font-size:13px; color:rgba(255,255,255,0.75); }
+    .fusion-plus { font-size:13px; color:rgba(255,255,255,0.85); }
     .fusion-btn, .fusion-btn-undo, .fusion-btn-clear {
-      padding:6px 9px; border-radius:9px; border:1px solid rgba(255,255,255,0.38);
-      background:linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.09) 45%, rgba(18,24,36,0.92) 100%);
+      padding:6px 9px; border-radius:10px; border:1px solid rgba(255,255,255,0.48);
+      background:linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.16) 46%, rgba(0,240,255,0.12) 100%);
       color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:0.8px; cursor:pointer;
-      transition:all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink:0; white-space:nowrap;
-      box-shadow:0 4px 12px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 2px rgba(0,0,0,0.6);
-      text-shadow:0 1px 2px rgba(0,0,0,0.8);
+      transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink:0; white-space:nowrap;
+      box-shadow:0 5px 14px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.82), inset 0 -2px 4px rgba(0,0,0,0.38);
+      text-shadow:0 1px 2px rgba(0,0,0,0.85);
     }
     .fusion-btn:hover, .fusion-btn-undo:hover, .fusion-btn-clear:hover {
-      transform:translateY(-1.5px);
-      background:linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.18) 45%, rgba(28,38,56,0.98) 100%);
-      box-shadow:0 8px 20px rgba(255,255,255,0.22), inset 0 1px 2px rgba(255,255,255,0.7);
-      border-color:rgba(255,255,255,0.65);
+      transform:translateY(-2px) scale(1.02);
+      background:linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.24) 46%, rgba(0,240,255,0.22) 100%);
+      box-shadow:0 8px 22px rgba(0,240,255,0.28), inset 0 2px 2px rgba(255,255,255,0.95);
+      border-color:rgba(255,255,255,0.85);
     }
-    #btn-mix { border-color:rgba(112,190,255,.55); text-shadow:0 0 8px rgba(112,190,255,.8); }
+    #btn-mix { border-color:rgba(112,190,255,.68); text-shadow:0 0 8px rgba(112,190,255,.85); }
     .nuclear-mode-bar {
-      display:flex; gap:5px; margin-top:4px; padding:5px 8px; border-radius:10px;
-      background:rgba(8,12,20,.84); border:1px solid rgba(255,110,0,.26);
+      display:flex; gap:5px; margin-top:4px; padding:5px 8px; border-radius:11px;
+      background:linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,110,0,0.04));
+      border:1px solid rgba(255,140,40,.42);
+      box-shadow:inset 0 1px 1px rgba(255,255,255,0.42);
     }
     .nuclear-btn { flex:1; }
-    #nuclear-route-selector { width:168px; min-width:118px; padding:4px 5px; border-radius:7px; color:#fff; border:1px solid rgba(255,215,0,.42); background:#090D16; font:700 7.5px 'Fira Code',monospace; }
-    #btn-nuclear-fusion { border-color:rgba(0,240,255,.55); text-shadow:0 0 8px #00F0FF; }
-    #btn-nuclear-fission { border-color:rgba(255,80,0,.65); text-shadow:0 0 8px #FF5500; }
-    #language-selector { max-width:92px; padding:3px 5px; border-radius:6px; color:#fff; border:1px solid rgba(0,240,255,.4); background:#0A101A; font:700 8px 'Orbitron',sans-serif; }
-    .fusion-label { font-size:8.5px; color:#FFFFFF; letter-spacing:1px; font-weight:bold; flex-shrink:0; }
-    .fusion-label { font-size:8px; color:#FFFFFF; letter-spacing:1px; font-weight:bold; flex-shrink:0; }
+    #nuclear-route-selector { width:168px; min-width:118px; padding:4px 5px; border-radius:8px; color:#fff; border:1px solid rgba(255,215,0,.55); background:rgba(8,14,26,0.45); backdrop-filter:blur(12px); font:700 7.5px 'Fira Code',monospace; box-shadow:inset 0 1px 1px rgba(255,255,255,0.45); }
+    #btn-nuclear-fusion { border-color:rgba(0,240,255,.68); background:linear-gradient(180deg,rgba(255,255,255,.38) 0%,rgba(0,240,255,.22) 50%,rgba(0,180,255,.08) 100%); text-shadow:0 0 8px #00F0FF; }
+    #btn-nuclear-fission { border-color:rgba(255,95,20,.72); background:linear-gradient(180deg,rgba(255,255,255,.38) 0%,rgba(255,80,0,.24) 50%,rgba(200,40,0,.09) 100%); text-shadow:0 0 8px #FF5500; }
+    #language-selector { max-width:92px; padding:3px 5px; border-radius:8px; color:#fff; border:1px solid rgba(0,240,255,.52); background:rgba(8,16,30,0.38); backdrop-filter:blur(12px); font:700 8px 'Orbitron',sans-serif; box-shadow:inset 0 1px 1px rgba(255,255,255,0.5); }
+    .fusion-label { font-size:8px; color:#FFFFFF; letter-spacing:1px; font-weight:bold; flex-shrink:0; text-shadow:0 1px 3px rgba(0,0,0,0.9); }
 
     /* ─── LEGEND ─── */
     .pt-legend {
       display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; justify-content:center;
     }
-    .pt-legend-item { display:flex; align-items:center; gap:3px; font-size:6.5px; letter-spacing:0.3px; color:#FFFFFF; font-weight:500; }
-    .pt-legend-dot { width:6px; height:6px; border-radius:50%; box-shadow:0 0 4px currentColor; }
+    .pt-legend-item { display:flex; align-items:center; gap:3px; font-size:6.5px; letter-spacing:0.3px; color:#FFFFFF; font-weight:500; text-shadow:0 1px 2px rgba(0,0,0,0.9); }
+    .pt-legend-dot { width:6px; height:6px; border-radius:50%; box-shadow:0 0 5px currentColor; }
 
-    /* ─── HOVER TOOLTIP ─── */
+    /* ─── HOVER TOOLTIP (PURE CRYSTAL) ─── */
     #pt-tooltip {
       position:fixed; z-index:100; pointer-events:none; display:none;
-      padding:10px 14px; border-radius:12px;
-      backdrop-filter:blur(20px) saturate(1.6); -webkit-backdrop-filter:blur(20px) saturate(1.6);
-      background:linear-gradient(145deg, rgba(14,18,26,0.95) 0%, rgba(4,6,12,0.98) 100%);
-      border:1px solid rgba(255,255,255,0.3);
-      box-shadow:0 8px 32px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.3);
+      padding:10px 14px; border-radius:14px;
+      backdrop-filter:blur(18px) saturate(1.9); -webkit-backdrop-filter:blur(18px) saturate(1.9);
+      background:linear-gradient(145deg, rgba(255,255,255,0.10) 0%, rgba(8,18,36,0.22) 100%);
+      border:1px solid rgba(255,255,255,0.48);
+      box-shadow:0 12px 32px rgba(0,0,0,0.55), inset 0 1.5px 1px rgba(255,255,255,0.72);
     }
-    .tt-header { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:#FFFFFF; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:3px; text-shadow:0 0 6px rgba(255,255,255,0.5); }
-    .tt-row { font-size:10px; color:#FFFFFF; margin-bottom:3px; display:flex; justify-content:space-between; gap:14px; }
-    .tt-label { color:rgba(255,255,255,0.65); }
+    .tt-header { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:#FFFFFF; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.28); padding-bottom:3px; text-shadow:0 0 8px rgba(0,240,255,0.65); }
+    .tt-row { font-size:10px; color:#FFFFFF; margin-bottom:3px; display:flex; justify-content:space-between; gap:14px; text-shadow:0 1px 2px rgba(0,0,0,0.9); }
+    .tt-label { color:rgba(255,255,255,0.78); }
 
-    /* MATERIALS LAB — same shader/glass language as the existing HUD */
+    /* MATERIALS LAB — 3D iOS Crystal Shader Buttons */
     .material-lab {
-      margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,240,255,0.25);
+      margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,240,255,0.32);
     }
     .material-lab-title {
       margin-bottom:6px; color:#00F0FF; font:900 8.5px 'Orbitron',sans-serif;
-      letter-spacing:1.4px; text-shadow:0 0 10px rgba(0,240,255,0.65);
+      letter-spacing:1.4px; text-shadow:0 0 10px rgba(0,240,255,0.75);
     }
     .material-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; }
     .shader-btn {
-      position:relative; overflow:hidden; padding:6px 4px; border-radius:8px;
-      border:1px solid rgba(0,240,255,0.42);
-      background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(18,24,36,.92));
+      position:relative; overflow:hidden; padding:6px 4px; border-radius:10px;
+      border:1px solid rgba(0,240,255,0.55);
+      background:linear-gradient(180deg,rgba(255,255,255,.38) 0%,rgba(0,240,255,.16) 48%,rgba(12,24,42,.18) 100%);
+      backdrop-filter:blur(14px) saturate(1.8); -webkit-backdrop-filter:blur(14px) saturate(1.8);
       color:#fff; font:800 8px 'Orbitron',sans-serif; cursor:pointer;
-      box-shadow:inset 0 1px rgba(255,255,255,.32),0 4px 12px rgba(0,0,0,.35);
-      text-shadow:0 0 7px rgba(0,240,255,.65); transition:.2s ease;
+      box-shadow:inset 0 1.5px 1px rgba(255,255,255,.78),inset 0 -2px 4px rgba(0,0,0,.38),0 5px 14px rgba(0,0,0,.36);
+      text-shadow:0 0 8px rgba(0,240,255,.75),0 1px 2px rgba(0,0,0,.85); transition:all .22s cubic-bezier(.175,.885,.32,1.275);
     }
     .shader-btn::before {
       content:""; position:absolute; inset:-60% auto -60% -45%; width:35%;
-      background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.68),transparent);
       transform:rotate(18deg); transition:left .45s ease;
     }
     .shader-btn:hover,.shader-btn:focus-visible {
-      transform:translateY(-1px); border-color:#00F0FF;
-      box-shadow:0 0 15px rgba(0,240,255,.24),inset 0 1px rgba(255,255,255,.42);
+      transform:translateY(-2px) scale(1.02); border-color:#FFFFFF;
+      box-shadow:0 8px 20px rgba(0,240,255,.32),inset 0 2px 2px rgba(255,255,255,.95);
     }
     .shader-btn:hover::before,.shader-btn:focus-visible::before { left:120%; }
-    .shader-btn[aria-pressed="true"] { border-color:#00FF9D; color:#00FF9D; }
+    .shader-btn[aria-pressed="true"] { border-color:#00FF9D; color:#00FF9D; box-shadow:0 0 18px rgba(0,255,157,.38),inset 0 1.5px 2px rgba(255,255,255,.9); }
     @media (max-width: 900px) {
       .hud-header { flex-wrap:wrap; height:auto; min-height:42px; gap:4px; }
       #active-synthesis-banner { display:none; }
@@ -290,6 +341,46 @@
       #nuclear-route-selector { flex:0 0 168px; }
       .nuclear-mode-bar .nuclear-btn { flex:0 0 auto; }
     }
+    /* ─── COLLAPSIBLE PANEL TRANSITIONS & 3D CRYSTAL RESTORE TABS ─── */
+    #molecular-hud, #pt-hud-panel {
+      transition:transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+    }
+    #molecular-hud.hud-collapsed-left {
+      transform:translateX(calc(-100% - 28px)) !important;
+      opacity:0; pointer-events:none;
+    }
+    #pt-hud-panel.hud-collapsed-bottom {
+      transform:translateY(calc(100% + 28px)) !important;
+      opacity:0; pointer-events:none;
+    }
+    .hud-collapse-btn {
+      padding:3px 8px; border-radius:8px;
+      border:1px solid rgba(255,255,255,0.48);
+      background:linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(0,240,255,0.18) 50%, rgba(0,180,255,0.06) 100%);
+      color:#FFFFFF; font:800 7.5px 'Orbitron',sans-serif; letter-spacing:0.6px; cursor:pointer;
+      box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.82), 0 3px 10px rgba(0,0,0,0.38);
+      text-shadow:0 1px 2px rgba(0,0,0,0.85);
+      transition:all 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    .hud-collapse-btn:hover {
+      transform:translateY(-1px) scale(1.04); border-color:#00FF9D; color:#00FF9D;
+      box-shadow:0 6px 16px rgba(0,255,157,0.32), inset 0 1.5px 2px rgba(255,255,255,0.95);
+    }
+    .hud-restore-pill {
+      position:fixed; z-index:15; display:none;
+      padding:7px 14px; border-radius:12px;
+      border:1px solid rgba(0,240,255,0.62);
+      background:linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(0,240,255,0.22) 50%, rgba(8,20,36,0.18) 100%);
+      backdrop-filter:blur(16px) saturate(1.9); -webkit-backdrop-filter:blur(16px) saturate(1.9);
+      color:#FFFFFF; font:800 8.5px 'Orbitron',sans-serif; letter-spacing:1px; cursor:pointer;
+      box-shadow:0 8px 24px rgba(0,0,0,0.45), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,120,180,0.38);
+      text-shadow:0 0 8px rgba(0,240,255,0.8), 0 1px 2px rgba(0,0,0,0.9);
+      transition:all 0.22s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    .hud-restore-pill:hover {
+      transform:scale(1.05); border-color:#00FF9D; color:#00FF9D;
+      box-shadow:0 10px 28px rgba(0,255,157,0.35), inset 0 2px 2px rgba(255,255,255,0.95);
+    }
     @media (prefers-reduced-motion: reduce) {
       *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
     }
@@ -298,6 +389,10 @@
 <body data-experience="basic">
   <canvas id="webgl-canvas" tabindex="0" data-i18n-aria-label="sceneLabel" aria-label="Interactive three-dimensional scientific scene"></canvas>
   <output id="runtime-diagnostics" hidden aria-hidden="true"></output>
+
+  <!-- FLOATING CRYSTAL RESTORE PILLS FOR HIDDEN PANELS -->
+  <button id="btn-restore-left-hud" class="hud-restore-pill" style="top:66px; left:14px;" title="Mostrar panel de telemetría molecular">▶ TELEMETRÍA</button>
+  <button id="btn-restore-pt-hud" class="hud-restore-pill" style="bottom:14px; right:14px;" title="Mostrar tabla periódica y controlador de síntesis">▲ TABLA IUPAC</button>
 
   <!-- TOOLTIP -->
   <div id="pt-tooltip"></div>
@@ -313,7 +408,7 @@
         <button id="btn-quality-ultra" style="padding:2px 5px; border-radius:5px; border:1px solid rgba(255,255,255,0.25); background:rgba(18,24,36,0.8); color:#FFFFFF; font-size:7.5px; font-weight:700; cursor:pointer;">ULTRA</button>
       </div>
     </div>
-    <div id="active-synthesis-banner" style="position:absolute; left:50%; transform:translateX(-50%); font-family:'Orbitron',sans-serif; font-size:13px; font-weight:900; letter-spacing:3px; color:#FFFFFF; text-transform:uppercase; background:linear-gradient(135deg, rgba(14,18,26,0.95) 0%, rgba(4,6,12,0.98) 100%); border:1px solid rgba(255,255,255,0.35); border-radius:12px; padding:6px 24px; box-shadow:0 8px 24px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow:0 0 14px rgba(255,255,255,0.9); pointer-events:none;">B-DNA DOUBLE HELIX</div>
+    <div id="active-synthesis-banner" style="position:absolute; left:50%; transform:translateX(-50%); font-family:'Orbitron',sans-serif; font-size:13px; font-weight:900; letter-spacing:3px; color:#FFFFFF; text-transform:uppercase; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(0,240,255,0.08) 100%); backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85); border:1px solid rgba(255,255,255,0.48); border-radius:13px; padding:6px 24px; box-shadow:0 8px 24px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.75); text-shadow:0 0 14px rgba(0,240,255,0.85), 0 1px 3px rgba(0,0,0,0.9); pointer-events:none;">B-DNA DOUBLE HELIX</div>
     <div style="display:flex; align-items:center; gap:6px;">
       <button id="btn-tutorial" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,255,157,0.5); background:rgba(0,255,157,0.25); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🚀 TUTORIAL</button>
       <button id="btn-docs" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,240,255,0.4); background:rgba(0,240,255,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">📖 DOCS</button>
@@ -326,7 +421,10 @@
 
   <!-- TELEMETRY PANEL -->
   <div id="molecular-hud" tabindex="0" data-i18n-aria-label="scientificTelemetryLabel" aria-label="Scientific telemetry" style="width:320px; max-height:calc(100vh - 110px); overflow-y:auto; scrollbar-width:thin;">
-    <h3>◆ MOLECULAR TELEMETRY</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h3 style="margin-bottom:0;">◆ MOLECULAR TELEMETRY</h3>
+      <button id="btn-collapse-left-hud" class="hud-collapse-btn" title="Esconder panel hacia la izquierda">◀ OCULTAR</button>
+    </div>
     <div id="experience-mode-bar" class="experience-mode-bar" role="radiogroup" data-i18n-aria-label="experienceLevelLabel" aria-label="Nivel de experiencia">
       <button class="experience-mode-btn" id="mode-basic" role="radio" data-experience-mode="basic" aria-checked="true">MODO BÁSICO</button>
       <button class="experience-mode-btn" id="mode-lab" role="radio" data-experience-mode="lab" aria-checked="false">LABORATORIO</button>
@@ -363,7 +461,11 @@
     
     <div class="experience-lab" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:8px;">
       <button id="btn-reassemble">🧬 ADN</button>
-      <button id="btn-orbitals" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">⚛️ ORBITALES</button>
+      <button id="btn-orbitals" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">⚛️ ORBITALES (±ψ)</button>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-visual-mode" style="padding:6px 0; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;" title="Alternar modo visual 3D: Ball &amp; Stick, Van der Waals CPK, Poliedros VESTA + Celda Unidad, Mapa de Carga Pauling δ⁺/δ⁻">👁️ VISTA: BALL &amp; STICK</button>
+      <button id="btn-xrd" style="padding:6px 0; color:#FFD700; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;" title="Difracción de Rayos X en Polvo (Ley de Bragg Cu Kα = 1.5406 Å · Conos 2θ)">📊 XRD BRAGG (2θ)</button>
     </div>
     <div class="experience-science" id="global-tools" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:4px;">
       <button id="btn-measure" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">📏 MEDIR 3D</button>
@@ -407,6 +509,7 @@
   <div id="pt-hud-panel">
     <div class="pt-panel-header">
       <span class="pt-panel-title">SYNTHESIS CONTROLLER</span>
+      <button id="btn-collapse-pt-hud" class="hud-collapse-btn" title="Esconder tabla periódica hacia abajo">▼ OCULTAR TABLA</button>
     </div>
  
     <div class="pt-scroll">
@@ -634,8 +737,8 @@
   </div>
 
   <!-- VERIFIED CATALOGUE SUGGESTIONS MODAL -->
-  <div id="suggestion-modal" role="dialog" aria-modal="true" aria-labelledby="suggestion-modal-title" style="display:none; position:fixed; bottom:80px; right:20px; z-index:120; width:340px; background:linear-gradient(145deg, rgba(14,18,26,0.96) 0%, rgba(4,6,12,0.98) 100%); border:1px solid rgba(255,255,255,0.3); border-radius:14px; padding:14px; box-shadow:0 12px 40px rgba(0,0,0,0.9); backdrop-filter:blur(20px); font-family:'Orbitron',sans-serif;">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:6px; margin-bottom:10px;">
+  <div id="suggestion-modal" role="dialog" aria-modal="true" aria-labelledby="suggestion-modal-title" style="display:none; position:fixed; bottom:80px; right:20px; z-index:120; width:340px; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.16) 100%); border:1px solid rgba(255,255,255,0.45); border-radius:16px; padding:14px; box-shadow:0 16px 44px rgba(0,0,0,0.55), inset 0 1.5px 1px rgba(255,255,255,0.72); backdrop-filter:blur(20px) saturate(1.9); -webkit-backdrop-filter:blur(20px) saturate(1.9); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.28); padding-bottom:6px; margin-bottom:10px;">
       <span id="suggestion-modal-title" style="font-size:10px; font-weight:700; color:#FFFFFF; letter-spacing:1.5px;">💡 SUGERENCIAS VERIFICADAS</span>
       <button id="btn-close-suggest" data-i18n-aria-label="closeSuggestionsLabel" aria-label="Close suggestions" style="background:none; border:none; color:#FFFFFF; font-size:12px; cursor:pointer;">✕</button>
     </div>
@@ -643,8 +746,8 @@
   </div>
 
   <!-- INTERACTIVE GUIDED ONBOARDING TUTORIAL OVERLAY -->
-  <div id="onboarding-overlay" role="dialog" aria-modal="false" aria-labelledby="onboarding-title" aria-describedby="onboarding-instruction onboarding-objective" style="display:none; position:fixed; bottom:110px; left:50%; transform:translateX(-50%); z-index:200; width:460px; background:linear-gradient(145deg, rgba(14,18,26,0.98) 0%, rgba(4,6,12,0.99) 100%); border:2px solid #00FF9D; border-radius:16px; padding:18px; box-shadow:0 0 35px rgba(0,255,157,0.4), 0 16px 50px rgba(0,0,0,0.95); backdrop-filter:blur(25px); font-family:'Orbitron',sans-serif;">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px; margin-bottom:10px;">
+  <div id="onboarding-overlay" role="dialog" aria-modal="false" aria-labelledby="onboarding-title" aria-describedby="onboarding-instruction onboarding-objective" style="display:none; position:fixed; bottom:110px; left:50%; transform:translateX(-50%); z-index:200; width:460px; background:linear-gradient(145deg, rgba(255,255,255,0.09) 0%, rgba(8,22,38,0.18) 100%); border:2px solid rgba(0,255,157,0.75); border-radius:18px; padding:18px; box-shadow:0 0 32px rgba(0,255,157,0.32), 0 18px 48px rgba(0,0,0,0.55), inset 0 1.5px 1px rgba(255,255,255,0.78); backdrop-filter:blur(20px) saturate(1.9); -webkit-backdrop-filter:blur(20px) saturate(1.9); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.28); padding-bottom:8px; margin-bottom:10px;">
       <span id="onboarding-title" tabindex="-1" style="font-size:11px; font-weight:900; color:#00FF9D; letter-spacing:1.5px;">🚀 TUTORIAL GUIADO INTERACTIVO</span>
       <button id="btn-close-onboarding" style="background:none; border:none; color:#FFFFFF; font-size:11px; font-weight:bold; cursor:pointer;">✕ OMITIR</button>
     </div>
@@ -654,14 +757,14 @@
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <span id="onboarding-step-indicator" style="font-size:9px; color:#FFD700; font-weight:bold;">PASO 1 / 3</span>
       <div style="display:flex; gap:6px;">
-        <button id="btn-prev-onboarding" style="padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.08); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; cursor:pointer;">← ANTERIOR</button>
-        <button id="btn-next-onboarding" style="padding:6px 16px; border-radius:8px; border:1px solid #00FF9D; background:rgba(0,255,157,0.25); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; cursor:pointer;">SIGUIENTE ➔</button>
+        <button id="btn-prev-onboarding" class="ios-crystal-btn" style="padding:6px 12px; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; cursor:pointer;">← ANTERIOR</button>
+        <button id="btn-next-onboarding" class="ios-crystal-btn" style="padding:6px 16px; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; cursor:pointer;">SIGUIENTE ➔</button>
       </div>
     </div>
   </div>
 
   <!-- TECHNICAL DOCUMENTATION MODAL -->
-  <div id="docs-modal" role="dialog" aria-modal="true" aria-labelledby="docs-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:160; width:520px; max-height:80vh; overflow-y:auto; background:linear-gradient(145deg, rgba(14,18,26,0.98) 0%, rgba(4,6,12,0.99) 100%); border:1px solid rgba(0,240,255,0.5); border-radius:16px; padding:20px; box-shadow:0 16px 60px rgba(0,0,0,0.95); backdrop-filter:blur(25px); font-family:'Orbitron',sans-serif;">
+  <div id="docs-modal" role="dialog" aria-modal="true" aria-labelledby="docs-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:160; width:520px; max-height:80vh; overflow-y:auto; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.18) 100%); border:1px solid rgba(0,240,255,0.62); border-radius:18px; padding:20px; box-shadow:0 18px 54px rgba(0,0,0,0.58), inset 0 1.5px 1px rgba(255,255,255,0.75); backdrop-filter:blur(22px) saturate(1.9); -webkit-backdrop-filter:blur(22px) saturate(1.9); font-family:'Orbitron',sans-serif;">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:10px; margin-bottom:14px;">
       <span id="docs-modal-title" style="font-size:12px; font-weight:900; color:#00F0FF; letter-spacing:2px;">📖 GUÍA TÉCNICA Y DOCUMENTACIÓN IUPAC 3D</span>
       <button id="btn-close-docs" data-i18n-aria-label="closeDocsLabel" aria-label="Close documentation" style="background:none; border:none; color:#FFFFFF; font-size:16px; cursor:pointer;">✕</button>
@@ -699,7 +802,7 @@
   </div>
 
   <!-- EDUCATIONAL QUIZ MODAL -->
-  <div id="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:150; width:420px; background:linear-gradient(145deg, rgba(14,18,26,0.98) 0%, rgba(4,6,12,0.99) 100%); border:1px solid rgba(255,215,0,0.5); border-radius:16px; padding:18px; box-shadow:0 16px 50px rgba(0,0,0,0.95); backdrop-filter:blur(25px); font-family:'Orbitron',sans-serif;">
+  <div id="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:150; width:420px; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.18) 100%); border:1px solid rgba(255,215,0,0.62); border-radius:18px; padding:18px; box-shadow:0 18px 52px rgba(0,0,0,0.58), inset 0 1.5px 1px rgba(255,255,255,0.75); backdrop-filter:blur(22px) saturate(1.9); -webkit-backdrop-filter:blur(22px) saturate(1.9); font-family:'Orbitron',sans-serif;">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px; margin-bottom:12px;">
       <span id="quiz-modal-title" style="font-size:11px; font-weight:700; color:#FFD700; letter-spacing:1.5px;">🎓 MODO EDUCATIVO // CHEMICAL QUIZ</span>
       <button id="btn-close-quiz" data-i18n-aria-label="closeQuizLabel" aria-label="Close quiz" style="background:none; border:none; color:#FFFFFF; font-size:14px; cursor:pointer;">✕</button>
