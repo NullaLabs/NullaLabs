@@ -5532,6 +5532,311 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // ATOMIC EMISSION SPECTROSCOPY (BOHR / RYDBERG) CONTROLLER
+  // ═══════════════════════════════════════════════════════════════
+  const btnSpectroscopy = document.getElementById('btn-spectroscopy');
+  const spectroscopyModal = document.getElementById('spectroscopy-modal');
+  const btnCloseSpectroscopy = document.getElementById('btn-close-spectroscopy');
+  const spectroscopyCanvas = document.getElementById('spectroscopy-canvas');
+  const spectroscopyLinesList = document.getElementById('spectroscopy-lines-list');
+  const rydbergN1 = document.getElementById('rydberg-input-n1');
+  const rydbergN2 = document.getElementById('rydberg-input-n2');
+  const rydbergCalcLambda = document.getElementById('rydberg-calc-lambda');
+  const rydbergCalcEnergy = document.getElementById('rydberg-calc-energy');
+  const rydbergCalcSeries = document.getElementById('rydberg-calc-series');
+  const rydbergCalcRegion = document.getElementById('rydberg-calc-region');
+
+  let currentSpecElement = 'H';
+  let isSpecAbsorption = false;
+
+  function refreshSpectroscopyView() {
+    if (!spectroscopyCanvas || !window.NULLA_QUANTUM_SPECTROSCOPY) return;
+    const qs = window.NULLA_QUANTUM_SPECTROSCOPY;
+    const ctx = spectroscopyCanvas.getContext('2d');
+    const w = spectroscopyCanvas.width;
+    const h = spectroscopyCanvas.height;
+
+    const elemData = qs.ELEMENT_EMISSION_SPECTRA[currentSpecElement] || qs.ELEMENT_EMISSION_SPECTRA.H;
+    const lines = elemData.lines || [];
+
+    qs.drawEmissionSpectrum(ctx, w, h, lines, { absorption: isSpecAbsorption });
+
+    if (spectroscopyLinesList) {
+      spectroscopyLinesList.innerHTML = '';
+      lines.forEach(l => {
+        const rgb = qs.wavelengthToRGB(l.wavelengthNm);
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; background:rgba(255,255,255,0.06);';
+        row.innerHTML = `<span style="display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${rgb.hex}; box-shadow:0 0 6px ${rgb.hex};"></span><strong style="color:#FFF;">${l.wavelengthNm.toFixed(2)} nm</strong></span> <span style="color:#00FFCF; font-size:7.5px;">${l.transition}</span> <span style="color:#FFD700; font-size:7px;">I = ${l.relativeIntensity}%</span>`;
+        spectroscopyLinesList.appendChild(row);
+      });
+    }
+
+    const n1 = parseInt(rydbergN1 ? rydbergN1.value : 2, 10) || 2;
+    const n2 = parseInt(rydbergN2 ? rydbergN2.value : 3, 10) || 3;
+    const trans = qs.calculateRydbergTransition(n1, n2, 1);
+    if (trans.valid) {
+      if (rydbergCalcLambda) {
+        rydbergCalcLambda.textContent = `${trans.wavelengthNm} nm`;
+        rydbergCalcLambda.style.color = trans.color.hex || '#FFD700';
+      }
+      if (rydbergCalcEnergy) rydbergCalcEnergy.textContent = `${trans.energyEv} eV`;
+      if (rydbergCalcSeries) rydbergCalcSeries.textContent = trans.seriesName;
+      if (rydbergCalcRegion) rydbergCalcRegion.textContent = trans.spectralRegion;
+    }
+  }
+
+  if (btnSpectroscopy) {
+    btnSpectroscopy.addEventListener('click', () => {
+      playTone(660, 'sine', 0.15);
+      openDialog(spectroscopyModal, btnSpectroscopy);
+      setTimeout(refreshSpectroscopyView, 50);
+    });
+  }
+  if (btnCloseSpectroscopy) {
+    btnCloseSpectroscopy.addEventListener('click', () => {
+      closeDialog(spectroscopyModal);
+    });
+  }
+
+  const specElemButtons = [
+    { id: 'btn-spec-elem-h', elem: 'H' },
+    { id: 'btn-spec-elem-he', elem: 'He' },
+    { id: 'btn-spec-elem-na', elem: 'Na' },
+    { id: 'btn-spec-elem-hg', elem: 'Hg' },
+    { id: 'btn-spec-elem-ne', elem: 'Ne' }
+  ];
+  specElemButtons.forEach(b => {
+    const btn = document.getElementById(b.id);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        currentSpecElement = b.elem;
+        specElemButtons.forEach(x => {
+          const el = document.getElementById(x.id);
+          if (el) el.classList.toggle('active', x.id === b.id);
+        });
+        playTone(520, 'sine', 0.08);
+        refreshSpectroscopyView();
+      });
+    }
+  });
+
+  const btnSpecEmission = document.getElementById('btn-spec-mode-emission');
+  const btnSpecAbsorption = document.getElementById('btn-spec-mode-absorption');
+  if (btnSpecEmission) {
+    btnSpecEmission.addEventListener('click', () => {
+      isSpecAbsorption = false;
+      btnSpecEmission.classList.add('active');
+      if (btnSpecAbsorption) btnSpecAbsorption.classList.remove('active');
+      playTone(540, 'sine', 0.08);
+      refreshSpectroscopyView();
+    });
+  }
+  if (btnSpecAbsorption) {
+    btnSpecAbsorption.addEventListener('click', () => {
+      isSpecAbsorption = true;
+      btnSpecAbsorption.classList.add('active');
+      if (btnSpecEmission) btnSpecEmission.classList.remove('active');
+      playTone(480, 'sine', 0.08);
+      refreshSpectroscopyView();
+    });
+  }
+
+  if (rydbergN1) rydbergN1.addEventListener('input', refreshSpectroscopyView);
+  if (rydbergN2) rydbergN2.addEventListener('input', refreshSpectroscopyView);
+
+  // ═══════════════════════════════════════════════════════════════
+  // VSEPR 3D MOLECULAR GEOMETRY & HYBRIDIZATION CONTROLLER
+  // ═══════════════════════════════════════════════════════════════
+  const btnVsepr = document.getElementById('btn-vsepr');
+  const vseprModal = document.getElementById('vsepr-modal');
+  const btnCloseVsepr = document.getElementById('btn-close-vsepr');
+  const vseprCanvas = document.getElementById('vsepr-canvas');
+  const vseprFormulaTitle = document.getElementById('vsepr-formula-title');
+  const vseprCodeBadge = document.getElementById('vsepr-code-badge');
+  const vseprSnVal = document.getElementById('vsepr-sn-val');
+  const vseprHybVal = document.getElementById('vsepr-hyb-val');
+  const vseprBpVal = document.getElementById('vsepr-bp-val');
+  const vseprLpVal = document.getElementById('vsepr-lp-val');
+  const vseprEgVal = document.getElementById('vsepr-eg-val');
+  const vseprMgVal = document.getElementById('vsepr-mg-val');
+  const vseprAngleVal = document.getElementById('vsepr-angle-val');
+  const vseprBondLenVal = document.getElementById('vsepr-bond-len-val');
+
+  let currentVseprMol = 'H2O';
+  let vseprRotAngle = 0.45;
+
+  function refreshVseprView() {
+    if (!vseprCanvas || !window.NULLA_VSEPR) return;
+    const vsepr = window.NULLA_VSEPR;
+    const mol = vsepr.VSEPR_MOLECULAR_DATABASE[currentVseprMol] || vsepr.VSEPR_MOLECULAR_DATABASE.H2O;
+    const geom = vsepr.generateVSEPR3DCoordinates(mol.bp, mol.lp, mol.bondLengthA);
+    if (!geom.valid) return;
+
+    if (vseprFormulaTitle) vseprFormulaTitle.textContent = mol.formula;
+    if (vseprCodeBadge) vseprCodeBadge.textContent = geom.classification.code;
+    if (vseprSnVal) vseprSnVal.textContent = geom.classification.stericNumber;
+    if (vseprHybVal) vseprHybVal.textContent = geom.classification.hybridization;
+    if (vseprBpVal) vseprBpVal.textContent = geom.classification.bondingDomains;
+    if (vseprLpVal) vseprLpVal.textContent = geom.classification.lonePairs;
+    if (vseprEgVal) vseprEgVal.textContent = geom.classification.electronGeometry;
+    if (vseprMgVal) vseprMgVal.textContent = geom.classification.molecularGeometry;
+    if (vseprAngleVal) vseprAngleVal.textContent = `${geom.classification.idealAngleDegrees}°`;
+    if (vseprBondLenVal) vseprBondLenVal.textContent = `${mol.bondLengthA} Å`;
+
+    drawVseprCanvas(geom, mol);
+  }
+
+  function drawVseprCanvas(geom, mol) {
+    const ctx = vseprCanvas.getContext('2d');
+    const w = vseprCanvas.width;
+    const h = vseprCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, w / 2);
+    bgGrad.addColorStop(0, '#10061a');
+    bgGrad.addColorStop(1, '#050208');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w / 2;
+    const cy = h / 2;
+    const scale = 75;
+
+    const cosA = Math.cos(vseprRotAngle);
+    const sinA = Math.sin(vseprRotAngle);
+    const cosB = Math.cos(0.35);
+    const sinB = Math.sin(0.35);
+
+    function project(x, y, z) {
+      const x1 = x * cosA - z * sinA;
+      const z1 = x * sinA + z * cosA;
+      const y1 = y * cosB - z1 * sinB;
+      const z2 = y * sinB + z1 * cosB;
+      return {
+        px: cx + x1 * scale,
+        py: cy - y1 * scale,
+        depth: z2
+      };
+    }
+
+    (geom.lonePairLobes || []).forEach(lp => {
+      const p = project(lp.tipX, lp.tipY, lp.tipZ);
+      const lobeGrad = ctx.createRadialGradient(p.px, p.py, 4, p.px, p.py, 28);
+      lobeGrad.addColorStop(0, 'rgba(255, 0, 110, 0.7)');
+      lobeGrad.addColorStop(0.5, 'rgba(191, 0, 255, 0.35)');
+      lobeGrad.addColorStop(1, 'rgba(191, 0, 255, 0)');
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(p.px, p.py);
+      ctx.strokeStyle = 'rgba(255, 0, 110, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(p.px, p.py, 22, 0, Math.PI * 2);
+      ctx.fillStyle = lobeGrad;
+      ctx.fill();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(p.px - 5, p.py, 2.5, 0, Math.PI * 2);
+      ctx.arc(p.px + 5, p.py, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    (geom.ligandAtoms || []).forEach(lig => {
+      const p = project(lig.x, lig.y, lig.z);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(p.px, p.py);
+      ctx.strokeStyle = '#00F0FF';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(p.px, p.py);
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    (geom.ligandAtoms || []).forEach(lig => {
+      const p = project(lig.x, lig.y, lig.z);
+      const rad = 14;
+      const grad = ctx.createRadialGradient(p.px - 4, p.py - 4, 2, p.px, p.py, rad);
+      grad.addColorStop(0, '#FFFFFF');
+      grad.addColorStop(0.3, '#00FFCF');
+      grad.addColorStop(1, '#005577');
+
+      ctx.beginPath();
+      ctx.arc(p.px, p.py, rad, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.strokeStyle = '#00F0FF';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 9px Orbitron, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(mol.ligands || 'X', p.px, p.py);
+    });
+
+    const cRad = 20;
+    const cGrad = ctx.createRadialGradient(cx - 6, cy - 6, 3, cx, cy, cRad);
+    cGrad.addColorStop(0, '#FFFFFF');
+    cGrad.addColorStop(0.3, '#BF00FF');
+    cGrad.addColorStop(1, '#3b005e');
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, cRad, 0, Math.PI * 2);
+    ctx.fillStyle = cGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#FF00CF';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 11px Orbitron, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(mol.central || 'A', cx, cy);
+  }
+
+  if (btnVsepr) {
+    btnVsepr.addEventListener('click', () => {
+      playTone(640, 'sine', 0.15);
+      openDialog(vseprModal, btnVsepr);
+      setTimeout(refreshVseprView, 50);
+    });
+  }
+  if (btnCloseVsepr) {
+    btnCloseVsepr.addEventListener('click', () => {
+      closeDialog(vseprModal);
+    });
+  }
+
+  const vseprMolButtons = document.querySelectorAll('#vsepr-molecule-selectors button');
+  vseprMolButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const molKey = btn.getAttribute('data-vsepr-mol');
+      if (molKey) {
+        currentVseprMol = molKey;
+        vseprMolButtons.forEach(b => b.classList.toggle('active', b === btn));
+        playTone(560, 'sine', 0.08);
+        refreshVseprView();
+      }
+    });
+  });
+
   // SUGGEST Button
   if (btnSuggest) {
     btnSuggest.addEventListener('click', showVerifiedSuggestions);

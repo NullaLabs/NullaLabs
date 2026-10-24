@@ -69,6 +69,18 @@ shown as unavailable; they are never silently estimated.
 | Graphene | single hexagonal sheet, no degree-1 carbon |
 | Solvation | Na + 12 H2O, 37 atoms, 24 explicit O–H bonds, 104.5° model angle |
 
+## VSEPR and quantum spectroscopy contracts
+
+- VSEPR geometry calculations follow the Gillespie-Nyholm model for steric numbers 2 through 6.
+  Orbital hybridizations ($sp, sp^2, sp^3, sp^3d, sp^3d^2$) are assigned deterministically based on
+  bonding domains and lone pairs. Lone-pair repulsions reduce ideal bond angles (e.g. 104.5° for $H_2O$).
+- Quantum spectroscopy transitions for hydrogen-like systems are calculated with the CODATA
+  Rydberg constant $R_\infty = 1.0973731568508 \times 10^7\text{ m}^{-1}$.
+- Multi-electron atomic spectra ($He, Na, Hg, Ne$) use reference emission lines from the NIST
+  Atomic Spectra Database.
+- Physical wavelength-to-sRGB mapping covers $380\text{ nm} - 780\text{ nm}$ with physiological
+  eye sensitivity fall-off and $\gamma=0.8$ gamma correction.
+
 ## Thermodynamics and measurement
 
 The phase selector applies only where the entity has an explicit profile. Solid,

@@ -8,8 +8,10 @@ The deployed demo remains a static, dependency-free GitHub Pages application. Mo
 |---|---|---|
 | `src/nuclear/nuclear-data.js` | Curated isotope channels, mass-derived fusion Q-values and A/Z validator | Exposes immutable `NULLA_NUCLEAR` |
 | `src/chemistry/verified-reactions.js` | Catalogued binary compounds with explicit evidence level | Exposes immutable `NULLA_VERIFIED_REACTIONS` |
+| `src/chemistry/vsepr-engine.js` | Gillespie-Nyholm VSEPR classification (steric 2-6), orbital hybridization and 3D coordinate generation | Exposes immutable `NULLA_VSEPR` |
 | `src/analysis/compatibility-engine.js` | Evidence vectors and contact-barrier estimates without arbitrary probability scores | Exposes immutable `NULLA_COMPATIBILITY` |
-| `src/physics/thermodynamics.js` | Pure phase boundary, profile validity, progress and Lennard-Jones functions | Exposes immutable `NULLA_THERMODYNAMICS` |
+| `src/physics/quantum-spectroscopy.js` | Rydberg transitions, Bohr series, wavelength-to-RGB mapping and NIST atomic emission spectra | Exposes immutable `NULLA_QUANTUM_SPECTROSCOPY` |
+| `src/physics/thermodynamics.js` | Pure phase boundary, profile validity, progress, Gibbs energy, Arrhenius/Eyring kinetics and Lennard-Jones | Exposes immutable `NULLA_THERMODYNAMICS` |
 | `src/physics/measurement.js` | Pure distance, Å/pm conversion and three-point angle functions | Exposes immutable `NULLA_MEASUREMENT` |
 | `src/i18n/i18n.js` | Eleven-locale static UI catalogue and locale lifecycle | Updates translated DOM bindings |
 | `src/i18n/runtime-i18n.js` | Runtime status translations and interpolation | Extends the i18n façade |

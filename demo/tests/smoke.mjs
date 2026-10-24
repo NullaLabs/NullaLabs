@@ -20,6 +20,8 @@ const chemistrySource = readFileSync(new URL('../src/chemistry/verified-reaction
 const compatibilitySource = readFileSync(new URL('../src/analysis/compatibility-engine.js', import.meta.url), 'utf8');
 const thermodynamicsSource = readFileSync(new URL('../src/physics/thermodynamics.js', import.meta.url), 'utf8');
 const measurementSource = readFileSync(new URL('../src/physics/measurement.js', import.meta.url), 'utf8');
+const quantumSpectroscopySource = readFileSync(new URL('../src/physics/quantum-spectroscopy.js', import.meta.url), 'utf8');
+const vseprSource = readFileSync(new URL('../src/chemistry/vsepr-engine.js', import.meta.url), 'utf8');
 
 for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {
   const sourcePath = match[1].split('?')[0];
@@ -372,6 +374,15 @@ assert.match(app, /function generateMEPSurface\(/, 'generateMEPSurface must be d
 assert.match(app, /function generateDipoleArrow\(/, 'generateDipoleArrow must be defined in runtime');
 assert.match(app, /function refreshMEPSpectroscopy\(/, 'refreshMEPSpectroscopy must be defined in runtime');
 assert.match(app, /function drawMEPCanvas\(/, 'drawMEPCanvas must be defined in runtime');
+assert.match(html, /id="btn-spectroscopy"/, 'quantum spectroscopy button must be present');
+assert.match(html, /id="spectroscopy-modal"/, 'quantum spectroscopy modal must be present');
+assert.match(html, /id="spectroscopy-canvas"/, 'quantum spectroscopy canvas must be present');
+assert.match(html, /id="btn-vsepr"/, 'VSEPR geometry button must be present');
+assert.match(html, /id="vsepr-modal"/, 'VSEPR geometry modal must be present');
+assert.match(html, /id="vsepr-canvas"/, 'VSEPR geometry canvas must be present');
+assert.match(app, /function refreshSpectroscopyView\(/, 'refreshSpectroscopyView must be defined in runtime');
+assert.match(app, /function refreshVseprView\(/, 'refreshVseprView must be defined in runtime');
+assert.match(app, /function drawVseprCanvas\(/, 'drawVseprCanvas must be defined in runtime');
 
 const ftirWater = compatibility.computeFTIRVibrationalSpectrum([
   { z: 8, symbol: 'O', x: 0, y: 0, zCoord: 0, mass: 15.999 },
@@ -492,5 +503,123 @@ assert.equal(unitDistance.picometer,100);
 assert.ok(Math.abs(measurement.angleDegrees({x:1,y:0,z:0},{x:0,y:0,z:0},{x:0,y:1,z:0})-90) < 1e-12);
 assert.ok(Math.abs(measurement.angleDegrees({x:1,y:0,z:0},{x:0,y:0,z:0},{x:-1,y:0,z:0})-180) < 1e-12);
 assert.equal(measurement.angleDegrees({x:0,y:0,z:0},{x:0,y:0,z:0},{x:1,y:0,z:0}),null);
+
+// Nuclear AME2020 / CODATA Mass Defect and Q-Value
+const dtDefect = nuclear.calculateMassDefectAndQ(['D', 'T'], [['He4', 1], ['n', 1]]);
+assert.equal(dtDefect.valid, true);
+assert.equal(dtDefect.conservationValid, true);
+assert.ok(Math.abs(dtDefect.qMeV - 17.589) < 0.05, 'D-T Q-value must agree with reference 17.589 MeV');
+assert.equal(dtDefect.isExoenergetic, true);
+
+// Stability Line & Nuclear Decay Prediction
+assert.equal(nuclear.getStabilityLineN(1), 1);
+assert.equal(nuclear.getStabilityLineN(20), 20);
+assert.ok(nuclear.getStabilityLineN(92) > 140, 'Uranium stable N must be > 140');
+assert.equal(nuclear.predictDecayMode(92, 146), 'alpha', 'U-238 must decay via alpha');
+assert.equal(nuclear.predictDecayMode(6, 8), 'beta_minus', 'C-14 must decay via beta-minus');
+assert.equal(nuclear.predictDecayMode(6, 5), 'beta_plus', 'C-11 must decay via beta-plus');
+assert.equal(nuclear.predictDecayMode(2, 2), 'stable', 'He-4 must be stable');
+
+const decayRemaining = nuclear.calculateRadioactiveDecayRemaining(100, 10, 20);
+assert.equal(decayRemaining.remaining, 25);
+assert.equal(decayRemaining.decayed, 75);
+assert.equal(decayRemaining.elapsedHalfLives, 2);
+
+const stepU238 = nuclear.simulateDecayStep('U238');
+assert.equal(stepU238.found, true);
+assert.equal(stepU238.daughter, 'Th234');
+assert.equal(stepU238.mode, 'alpha');
+
+// Quantum Spectroscopy & Rydberg Transitions
+const spectroscopySandbox = {};
+spectroscopySandbox.globalThis = spectroscopySandbox;
+vm.runInNewContext(quantumSpectroscopySource, spectroscopySandbox);
+const spectroscopy = spectroscopySandbox.NULLA_QUANTUM_SPECTROSCOPY;
+
+const hAlpha = spectroscopy.calculateRydbergTransition(2, 3);
+assert.equal(hAlpha.valid, true);
+assert.ok(Math.abs(hAlpha.wavelengthNm - 656.28) < 0.2, 'H-alpha wavelength must be ~656.3 nm');
+assert.equal(hAlpha.seriesName, 'Balmer Series');
+assert.equal(hAlpha.spectralRegion, 'Visible (VIS)');
+assert.ok(hAlpha.color && hAlpha.color.visible === true);
+assert.ok(hAlpha.color.r > 150 && hAlpha.color.g < 50 && hAlpha.color.b < 50, 'H-alpha must be red');
+
+const lymanAlpha = spectroscopy.calculateRydbergTransition(1, 2);
+assert.ok(Math.abs(lymanAlpha.wavelengthNm - 121.57) < 0.2, 'Lyman-alpha wavelength must be ~121.6 nm');
+assert.equal(lymanAlpha.seriesName, 'Lyman Series');
+assert.equal(lymanAlpha.spectralRegion, 'Ultraviolet (UV)');
+
+const rgbRed = spectroscopy.wavelengthToRGB(656);
+assert.equal(rgbRed.visible, true);
+assert.ok(rgbRed.r > 200);
+
+const rgbCyan = spectroscopy.wavelengthToRGB(486);
+assert.equal(rgbCyan.visible, true);
+assert.ok(rgbCyan.b > 150 && rgbCyan.g > 150);
+
+assert.ok(spectroscopy.ELEMENT_EMISSION_SPECTRA.H.lines.length >= 4);
+assert.ok(spectroscopy.ELEMENT_EMISSION_SPECTRA.Na.lines.some(l => Math.abs(l.wavelengthNm - 589.0) < 0.5));
+
+// Chemical Thermodynamics & Eyring/Arrhenius Kinetics
+const gibbs = physics.calculateGibbsFreeEnergy(-285.8, -163.3, 298.15);
+assert.equal(gibbs.valid, true);
+assert.ok(Math.abs(gibbs.deltaG_kJ_mol - (-237.1)) < 0.3, 'Water formation Delta G must be ~ -237.1 kJ/mol');
+assert.equal(gibbs.regime, 'EXERGONIC_SPONTANEOUS');
+assert.equal(gibbs.isSpontaneous, true);
+
+const keq = physics.calculateEquilibriumConstant(-237.1, 298.15);
+assert.equal(keq.valid, true);
+assert.equal(keq.favorProducts, true);
+assert.ok(keq.keq > 1e30);
+
+const arrhenius = physics.calculateArrheniusRate(1e11, 50, 300);
+assert.equal(arrhenius.valid, true);
+assert.ok(arrhenius.rateConstantK > 0);
+
+const rxnCoord = physics.generateReactionCoordinateCurve(0, 75, -25);
+assert.equal(rxnCoord.activationEnergyForward, 75);
+assert.equal(rxnCoord.activationEnergyReverse, 100);
+assert.equal(rxnCoord.deltaHReaction, -25);
+assert.equal(rxnCoord.curve.length, 101);
+
+// VSEPR 3D Molecular Geometry & Hybridization
+const vseprSandbox = {};
+vseprSandbox.globalThis = vseprSandbox;
+vm.runInNewContext(vseprSource, vseprSandbox);
+const vsepr = vseprSandbox.NULLA_VSEPR;
+
+const tet = vsepr.classifyStericGeometry(4, 0);
+assert.equal(tet.valid, true);
+assert.equal(tet.hybridization, 'sp³');
+assert.equal(tet.molecularGeometry, 'Tetrahedral');
+assert.equal(tet.idealAngleDegrees, 109.47);
+
+const bentWater = vsepr.classifyStericGeometry(2, 2);
+assert.equal(bentWater.valid, true);
+assert.equal(bentWater.hybridization, 'sp³');
+assert.equal(bentWater.molecularGeometry, 'Bent / Angular');
+assert.equal(bentWater.idealAngleDegrees, 104.5);
+
+const trigBip = vsepr.classifyStericGeometry(5, 0);
+assert.equal(trigBip.hybridization, 'sp³d');
+assert.equal(trigBip.molecularGeometry, 'Trigonal Bipyramidal');
+
+const octa = vsepr.classifyStericGeometry(6, 0);
+assert.equal(octa.hybridization, 'sp³d²');
+assert.equal(octa.molecularGeometry, 'Octahedral');
+
+const coordsCH4 = vsepr.generateVSEPR3DCoordinates(4, 0, 1.09);
+assert.equal(coordsCH4.valid, true);
+assert.equal(coordsCH4.ligandAtoms.length, 4);
+assert.equal(coordsCH4.lonePairLobes.length, 0);
+
+const coordsH2O = vsepr.generateVSEPR3DCoordinates(2, 2, 0.96);
+assert.equal(coordsH2O.valid, true);
+assert.equal(coordsH2O.ligandAtoms.length, 2);
+assert.equal(coordsH2O.lonePairLobes.length, 2);
+
+assert.ok(vsepr.VSEPR_MOLECULAR_DATABASE.H2O);
+assert.ok(vsepr.VSEPR_MOLECULAR_DATABASE.CO2);
+assert.ok(vsepr.VSEPR_MOLECULAR_DATABASE.SF6);
 
 console.log('Smoke contracts passed.');

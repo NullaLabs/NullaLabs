@@ -309,6 +309,144 @@
     return SEGRE_NUCLIDES.find(nuc => nuc.Z === Z && nuc.N === N) || null;
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // AME2020 / CODATA NUCLEAR DECAY & MASS DEFECT SUITE
+  // ═══════════════════════════════════════════════════════════════
+  const U_TO_MEV = 931.49410242; // CODATA 2018/2022 unified atomic mass constant (MeV/c²)
+
+  function calculateMassDefectAndQ(reactantIds, productEntries) {
+    if (!Array.isArray(reactantIds) || !Array.isArray(productEntries)) {
+      return { valid: false, error: 'INVALID_INPUT_ARRAYS' };
+    }
+    let leftMassU = 0;
+    let rightMassU = 0;
+    let leftA = 0;
+    let leftZ = 0;
+    let rightA = 0;
+    let rightZ = 0;
+
+    for (const rId of reactantIds) {
+      const iso = isotopes[rId];
+      if (!iso) return { valid: false, error: `UNKNOWN_REACTANT_${rId}` };
+      leftA += iso.A;
+      leftZ += iso.Z;
+      if (Number.isFinite(iso.massU)) leftMassU += iso.massU;
+      else leftMassU = NaN;
+    }
+
+    for (const entry of productEntries) {
+      const pId = Array.isArray(entry) ? entry[0] : entry.id;
+      const count = Array.isArray(entry) ? (entry[1] || 1) : (entry.count || 1);
+      const iso = isotopes[pId];
+      if (!iso) return { valid: false, error: `UNKNOWN_PRODUCT_${pId}` };
+      rightA += iso.A * count;
+      rightZ += iso.Z * count;
+      if (Number.isFinite(iso.massU)) rightMassU += iso.massU * count;
+      else rightMassU = NaN;
+    }
+
+    const conservationValid = (leftA === rightA) && (leftZ === rightZ);
+    const massDefectU = (Number.isFinite(leftMassU) && Number.isFinite(rightMassU)) ? (leftMassU - rightMassU) : null;
+    const qMeV = massDefectU !== null ? massDefectU * U_TO_MEV : null;
+
+    return {
+      valid: conservationValid,
+      conservationValid,
+      leftA,
+      leftZ,
+      rightA,
+      rightZ,
+      leftMassU: Number.isFinite(leftMassU) ? parseFloat(leftMassU.toFixed(8)) : null,
+      rightMassU: Number.isFinite(rightMassU) ? parseFloat(rightMassU.toFixed(8)) : null,
+      massDefectU: massDefectU !== null ? parseFloat(massDefectU.toFixed(8)) : null,
+      qMeV: qMeV !== null ? parseFloat(qMeV.toFixed(4)) : null,
+      isExoenergetic: qMeV !== null ? qMeV > 0 : null
+    };
+  }
+
+  function getStabilityLineN(Z) {
+    if (!Number.isFinite(Z) || Z < 0) return 0;
+    if (Z === 0) return 1;
+    if (Z <= 20) return Z; // N = Z for light stable nuclei up to ⁴⁰Ca
+    // Calibrated beta-stability valley curve above Calcium (reaches ²⁰⁸Pb N=126 and ²³⁸U N=146)
+    return parseFloat((20 + (Z - 20) * 1.75).toFixed(2));
+  }
+
+  function predictDecayMode(Z, N) {
+    if (!Number.isFinite(Z) || !Number.isFinite(N) || Z < 0 || N < 0) return 'unknown';
+    if (Z === 0 && N === 1) return 'beta_minus';
+    if (Z === 1 && N === 0) return 'stable';
+    const known = getNuclide(Z, N);
+    if (known && known.decayMode) return known.decayMode;
+
+    const A = Z + N;
+    if (A > 208 || Z > 82) return 'alpha'; // Heavy nuclei decay primarily via alpha emission or fission
+    const nStable = getStabilityLineN(Z);
+    const deltaN = N - nStable;
+    if (deltaN > 1.4) return 'beta_minus'; // Excess neutrons: n → p + e⁻ + ν̄_e
+    if (deltaN < -1.4) return 'beta_plus';  // Deficit neutrons (excess protons): p → n + e⁺ + ν_e
+    return 'stable';
+  }
+
+  function calculateRadioactiveDecayRemaining(N0, halfLifeSeconds, elapsedTimeSeconds) {
+    if (![N0, halfLifeSeconds, elapsedTimeSeconds].every(Number.isFinite) || N0 < 0 || halfLifeSeconds <= 0 || elapsedTimeSeconds < 0) {
+      return { remaining: 0, decayed: 0, fractionRemaining: 0, elapsedHalfLives: 0 };
+    }
+    const lambda = Math.LN2 / halfLifeSeconds;
+    const remaining = N0 * Math.exp(-lambda * elapsedTimeSeconds);
+    const decayed = N0 - remaining;
+    const fractionRemaining = remaining / Math.max(1e-12, N0);
+    const elapsedHalfLives = elapsedTimeSeconds / halfLifeSeconds;
+    return {
+      remaining: parseFloat(remaining.toFixed(6)),
+      decayed: parseFloat(decayed.toFixed(6)),
+      fractionRemaining: parseFloat(fractionRemaining.toFixed(6)),
+      elapsedHalfLives: parseFloat(elapsedHalfLives.toFixed(3))
+    };
+  }
+
+  function simulateDecayStep(nuclideId) {
+    const chainStep = URANIUM_DECAY_CHAIN.find(s => s.from === nuclideId);
+    if (chainStep) {
+      return {
+        found: true,
+        parent: chainStep.from,
+        daughter: chainStep.to,
+        mode: chainStep.mode,
+        deltaZ: chainStep.dZ,
+        deltaN: chainStep.dN,
+        particle: chainStep.particle
+      };
+    }
+    const nuc = SEGRE_NUCLIDES.find(n => n.id === nuclideId || n.symbol === nuclideId);
+    if (!nuc) return { found: false, error: 'NUCLIDE_NOT_FOUND' };
+    if (nuc.decayMode === 'stable') {
+      return { found: true, parent: nuc.id, daughter: nuc.id, mode: 'stable', deltaZ: 0, deltaN: 0, particle: 'Estable' };
+    }
+    let dZ = 0;
+    let dN = 0;
+    let particle = '';
+    if (nuc.decayMode === 'alpha') {
+      dZ = -2; dN = -2; particle = '⁴He (α)';
+    } else if (nuc.decayMode === 'beta_minus') {
+      dZ = +1; dN = -1; particle = 'e⁻ + ν̄_e (β⁻)';
+    } else if (nuc.decayMode === 'beta_plus') {
+      dZ = -1; dN = +1; particle = 'e⁺ + ν_e (β⁺)';
+    } else if (nuc.decayMode === 'fission') {
+      return { found: true, parent: nuc.id, daughter: 'Fission Fragments', mode: 'fission', deltaZ: 0, deltaN: 0, particle: 'Neutrones rápidos + Fragmentos' };
+    }
+    const daughter = getNuclide(nuc.Z + dZ, nuc.N + dN);
+    return {
+      found: true,
+      parent: nuc.id,
+      daughter: daughter ? daughter.id : `Z${nuc.Z + dZ}_N${nuc.N + dN}`,
+      mode: nuc.decayMode,
+      deltaZ: dZ,
+      deltaN: dN,
+      particle
+    };
+  }
+
   root.NULLA_NUCLEAR = Object.freeze({
     isotopes,
     fusion,
@@ -320,6 +458,12 @@
     SEGRE_NUCLIDES,
     URANIUM_DECAY_CHAIN,
     calculateSEMF,
-    getNuclide
+    getNuclide,
+    U_TO_MEV,
+    calculateMassDefectAndQ,
+    getStabilityLineN,
+    predictDecayMode,
+    calculateRadioactiveDecayRemaining,
+    simulateDecayStep
   });
 })(globalThis);

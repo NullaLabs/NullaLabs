@@ -33,6 +33,7 @@
     /* ─── NEXT-GEN 3D iOS / VISION-OS SOLID CRYSTAL BUTTON SYSTEM (NO SE TRANSPARENTAN) ─── */
     .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph, #btn-ftir, #btn-homo-lumo, #btn-mep,
     #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif, #btn-segre-inject-isotope, #btn-inspect-in-segre,
+    #btn-spectroscopy, #btn-vsepr,
     #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr,
     #btn-quality-low, #btn-quality-med, #btn-quality-ultra,
     .shader-btn, .fusion-btn, .fusion-btn-undo, .fusion-btn-clear, .mol-chip, .stat-chip, .experience-mode-btn,
@@ -69,7 +70,7 @@
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt, #btn-segre-chart, #btn-inspect-in-segre, #btn-mep {
+    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt, #btn-segre-chart, #btn-inspect-in-segre, #btn-mep, #btn-spectroscopy {
       border-color:rgba(0,240,255,0.72) !important;
       background:linear-gradient(180deg, #16465c 0%, #103345 24%, #081e2b 50%, #0d2a3a 76%, #041018 100%) !important;
       box-shadow:0 4px 14px rgba(0,240,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
@@ -95,7 +96,7 @@
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-webxr, #btn-ftir {
+    #btn-webxr, #btn-ftir, #btn-vsepr {
       border-color:rgba(191,0,255,0.72) !important;
       background:linear-gradient(180deg, #431f54 0%, #2f143c 24%, #1a0922 50%, #260e32 76%, #0e0314 100%) !important;
       box-shadow:0 4px 14px rgba(191,0,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
@@ -111,6 +112,7 @@
     }
     .ios-crystal-btn:hover, #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover, #btn-ftir:hover, #btn-homo-lumo:hover, #btn-mep:hover,
     #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover, #btn-segre-inject-isotope:hover, #btn-inspect-in-segre:hover,
+    #btn-spectroscopy:hover, #btn-vsepr:hover,
     #btn-tutorial:hover, #btn-docs:hover, #btn-quiz:hover, #btn-share-url:hover, #btn-webxr:hover,
     #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover,
     .shader-btn:hover, .fusion-btn:hover, .fusion-btn-undo:hover, .fusion-btn-clear:hover, .mol-chip:hover, button.stat-chip:hover, .experience-mode-btn:hover,
@@ -122,6 +124,7 @@
     }
     .ios-crystal-btn:active, #btn-reassemble:active, #btn-open-pt:active, #btn-orbitals:active, #btn-visual-mode:active, #btn-xrd:active, #btn-synkronia:active, #btn-polymorph:active, #btn-ftir:active, #btn-homo-lumo:active, #btn-mep:active,
     #btn-segre-inject-isotope:active, #btn-inspect-in-segre:active,
+    #btn-spectroscopy:active, #btn-vsepr:active,
     #btn-measure:active, #btn-export-gltf:active, #btn-export-usdz:active, #btn-export-xyz:active, #btn-export-cif:active,
     #btn-tutorial:active, #btn-docs:active, #btn-quiz:active, #btn-share-url:active, #btn-webxr:active,
     .shader-btn:active, .fusion-btn:active, .fusion-btn-undo:active, .fusion-btn-clear:active, .mol-chip:active, button.stat-chip:active, .experience-mode-btn:active,
@@ -164,7 +167,8 @@
       letter-spacing:1px; cursor:pointer;
     }
     #btn-orbitals, #btn-visual-mode, #btn-ftir, #btn-xrd, #btn-synkronia, #btn-polymorph, #btn-export-cif,
-    #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-inspect-in-segre, #btn-homo-lumo, #btn-mep, #btn-export-xyz {
+    #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-inspect-in-segre, #btn-homo-lumo, #btn-mep, #btn-export-xyz,
+    #btn-spectroscopy, #btn-vsepr {
       padding:6px 4px; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700;
       letter-spacing:0.5px; cursor:pointer; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
     }
@@ -597,6 +601,10 @@
     <div class="experience-science" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
       <button id="btn-mep" data-i18n="mepSurface" title="Superficie de Potencial Electrostático Molecular (MEP / ESP) en Envoltura de Van der Waals, Momento Dipolar μ y Sitios de Enlace de H">🌐 SUPERFICIE MEP (ESP)</button>
       <button id="btn-export-xyz" data-i18n="exportXyz">💾 EXPORTAR .XYZ</button>
+    </div>
+    <div class="experience-science" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-spectroscopy" data-i18n="quantumSpectroscopy" title="Espectroscopía Atómica Cuántica (Transiciones de Bohr / Rydberg y Líneas de Emisión NIST)">🌈 ESPECTROSCOPÍA (BOHR)</button>
+      <button id="btn-vsepr" data-i18n="vseprGeometry" title="Geometría Molecular VSEPR e Hibridación Orbital 3D (sp, sp², sp³, sp³d, sp³d²)">📐 GEOMETRÍA VSEPR 3D</button>
     </div>
 
     <div class="material-lab" data-i18n-aria-label="materialsBarLabel" aria-label="Barra de materiales">
@@ -1183,6 +1191,128 @@
     </div>
   </div>
 
+  <!-- ATOMIC EMISSION SPECTROSCOPY & RYDBERG QUANTUM TRANSITIONS MODAL -->
+  <div id="spectroscopy-modal" role="dialog" aria-modal="true" aria-labelledby="spectroscopy-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:180; width:min(960px, calc(100vw - 20px)); max-height:88vh; overflow-y:auto; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.18) 100%); border:1px solid rgba(0,240,255,0.65); border-radius:20px; padding:18px; box-shadow:0 24px 64px rgba(0,0,0,0.68), inset 0 1.5px 1px rgba(255,255,255,0.8); backdrop-filter:blur(22px) saturate(1.9); -webkit-backdrop-filter:blur(22px) saturate(1.9); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.22); padding-bottom:8px; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="spectroscopy-modal-title" style="font-size:11.5px; font-weight:900; color:#00F0FF; letter-spacing:1.5px;">🌈 ESPECTROSCOPÍA ATÓMICA // MODELO DE BOHR &amp; RYDBERG</span>
+        <span class="hud-badge experience-science">NIST DATABASE · TRANSICIONES CUÁNTICAS · LÍNEAS DE EMISIÓN</span>
+      </div>
+      <button id="btn-close-spectroscopy" aria-label="Cerrar espectroscopía" style="background:none; border:none; color:#FFFFFF; font-size:16px; cursor:pointer; padding:2px 8px;">✕</button>
+    </div>
+
+    <!-- Element selector buttons -->
+    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <div style="display:flex; gap:5px; flex-wrap:wrap;" id="spectroscopy-element-selectors">
+        <button id="btn-spec-elem-h" class="segre-filter-btn active" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">H (HIDRÓGENO)</button>
+        <button id="btn-spec-elem-he" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">He (HELIO)</button>
+        <button id="btn-spec-elem-na" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">Na (SODIO - D₁/D₂)</button>
+        <button id="btn-spec-elem-hg" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">Hg (MERCURIO)</button>
+        <button id="btn-spec-elem-ne" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">Ne (NEÓN)</button>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button id="btn-spec-mode-emission" class="segre-filter-btn active" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">EMISIÓN</button>
+        <button id="btn-spec-mode-absorption" class="segre-filter-btn" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">ABSORCIÓN</button>
+      </div>
+    </div>
+
+    <!-- Canvas Spectrum view -->
+    <div style="position:relative; width:100%; height:90px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.3); margin-bottom:12px; background:#040608;">
+      <canvas id="spectroscopy-canvas" width="880" height="90" style="width:100%; height:100%; display:block;"></canvas>
+    </div>
+
+    <!-- Two-column telemetry and Rydberg calculator -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      <!-- Column 1: Live transition lines table -->
+      <div style="padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:linear-gradient(180deg, #101a28 0%, #060a10 100%);">
+        <div style="font-size:8.5px; font-weight:700; color:#00FFCF; margin-bottom:6px;">LÍNEAS ESPECTRALES ACTIVAS (NIST ASD)</div>
+        <div id="spectroscopy-lines-list" style="display:flex; flex-direction:column; gap:4px; max-height:160px; overflow-y:auto; font-family:'Fira Code',monospace; font-size:8px;">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Column 2: Bohr / Rydberg Formula Transition Calculator -->
+      <div style="padding:10px 12px; border-radius:14px; border:1px solid rgba(0,240,255,0.35); background:linear-gradient(180deg, #091a26 0%, #03080e 100%);">
+        <div style="font-size:8.5px; font-weight:700; color:#00F0FF; margin-bottom:6px;">CALCULADORA DE RYDBERG (H-LIKE)</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; font-size:8px;">
+          <div>
+            <label style="color:rgba(255,255,255,0.7); display:block; margin-bottom:2px;">NIVEL n₁ (INFERIOR):</label>
+            <input type="number" id="rydberg-input-n1" min="1" max="5" value="2" style="width:100%; padding:3px 6px; border-radius:6px; background:#0e1724; border:1px solid rgba(255,255,255,0.3); color:#FFF; font-family:'Orbitron',sans-serif; font-size:8.5px;">
+          </div>
+          <div>
+            <label style="color:rgba(255,255,255,0.7); display:block; margin-bottom:2px;">NIVEL n₂ (SUPERIOR):</label>
+            <input type="number" id="rydberg-input-n2" min="2" max="8" value="3" style="width:100%; padding:3px 6px; border-radius:6px; background:#0e1724; border:1px solid rgba(255,255,255,0.3); color:#FFF; font-family:'Orbitron',sans-serif; font-size:8.5px;">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:8px; font-family:'Fira Code',monospace;">
+          <div><span style="color:rgba(255,255,255,0.6);">LONGITUD λ:</span> <strong id="rydberg-calc-lambda" style="color:#FFD700;">656.28 nm</strong></div>
+          <div><span style="color:rgba(255,255,255,0.6);">ENERGÍA ΔE:</span> <strong id="rydberg-calc-energy" style="color:#00FFCF;">1.889 eV</strong></div>
+          <div><span style="color:rgba(255,255,255,0.6);">SERIE:</span> <strong id="rydberg-calc-series" style="color:#FFF;">Balmer Series</strong></div>
+          <div><span style="color:rgba(255,255,255,0.6);">REGIÓN:</span> <strong id="rydberg-calc-region" style="color:#FFF;">Visible (VIS)</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VSEPR 3D MOLECULAR GEOMETRY & HYBRIDIZATION MODAL -->
+  <div id="vsepr-modal" role="dialog" aria-modal="true" aria-labelledby="vsepr-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:180; width:min(960px, calc(100vw - 20px)); max-height:88vh; overflow-y:auto; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.18) 100%); border:1px solid rgba(191,0,255,0.65); border-radius:20px; padding:18px; box-shadow:0 24px 64px rgba(0,0,0,0.68), inset 0 1.5px 1px rgba(255,255,255,0.8); backdrop-filter:blur(22px) saturate(1.9); -webkit-backdrop-filter:blur(22px) saturate(1.9); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.22); padding-bottom:8px; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="vsepr-modal-title" style="font-size:11.5px; font-weight:900; color:#BF00FF; letter-spacing:1.5px;">📐 GEOMETRÍA MOLECULAR VSEPR // HIBRIDACIÓN 3D</span>
+        <span class="hud-badge experience-science">GILLESPIE-NYHOLM · REPULSIÓN DE PARES DE ELECTRONES · ÁNGULOS DE ENLACE</span>
+      </div>
+      <button id="btn-close-vsepr" aria-label="Cerrar analizador VSEPR" style="background:none; border:none; color:#FFFFFF; font-size:16px; cursor:pointer; padding:2px 8px;">✕</button>
+    </div>
+
+    <!-- Molecule selector pills -->
+    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:12px;" id="vsepr-molecule-selectors">
+      <button class="segre-filter-btn active" data-vsepr-mol="H2O" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">H₂O (AX₂E₂)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="CO2" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">CO₂ (AX₂)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="BF3" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">BF₃ (AX₃)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="SO2" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">SO₂ (AX₂E₁)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="CH4" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">CH₄ (AX₄)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="NH3" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">NH₃ (AX₃E₁)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="PCl5" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">PCl₅ (AX₅)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="SF4" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">SF₄ (AX₄E₁)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="ClF3" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">ClF₃ (AX₃E₂)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="XeF2" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">XeF₂ (AX₂E₃)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="SF6" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">SF₆ (AX₆)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="BrF5" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">BrF₅ (AX₅E₁)</button>
+      <button class="segre-filter-btn" data-vsepr-mol="XeF4" style="padding:4px 8px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">XeF₄ (AX₄E₂)</button>
+    </div>
+
+    <!-- Interactive VSEPR Canvas & Telemetry Grid -->
+    <div style="display:grid; grid-template-columns: 1fr 1.1fr; gap:12px;">
+      <!-- Canvas projection -->
+      <div style="position:relative; width:100%; height:240px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.25); background:#06080e;">
+        <canvas id="vsepr-canvas" width="440" height="240" style="width:100%; height:100%; display:block;"></canvas>
+      </div>
+
+      <!-- VSEPR Telemetry card -->
+      <div style="padding:10px 14px; border-radius:14px; border:1px solid rgba(191,0,255,0.4); background:linear-gradient(180deg, #150920 0%, #08030d 100%); display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.18); padding-bottom:5px; margin-bottom:8px;">
+            <span id="vsepr-formula-title" style="font-size:16px; font-weight:900; color:#FF00CF; letter-spacing:1px;">H₂O</span>
+            <span id="vsepr-code-badge" style="padding:2px 7px; border-radius:6px; font-size:7.5px; font-weight:700; background:#2c0c38; border:1px solid #BF00FF; color:#FF00CF;">AX₂E₂</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:8.5px; margin-bottom:8px;">
+            <div><span style="color:rgba(255,255,255,0.6);">Nº ESTÉRICO:</span> <strong id="vsepr-sn-val" style="color:#FFF;">4</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">HIBRIDACIÓN:</span> <strong id="vsepr-hyb-val" style="color:#FFD700;">sp³</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">PARES DE ENLACE:</span> <strong id="vsepr-bp-val" style="color:#00FFCF;">2</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">PARES SOLITARIOS:</span> <strong id="vsepr-lp-val" style="color:#FF0055;">2</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">GEOM. ELECTRÓNICA:</span> <strong id="vsepr-eg-val" style="color:#FFF;">Tetrahedral</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">GEOM. MOLECULAR:</span> <strong id="vsepr-mg-val" style="color:#00F0FF;">Bent / Angular</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">ÁNGULO IDEAL:</span> <strong id="vsepr-angle-val" style="color:#FFD700;">104.5°</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">LONG. ENLACE:</span> <strong id="vsepr-bond-len-val" style="color:#FFF;">0.96 Å</strong></div>
+          </div>
+        </div>
+        <div style="font-size:7.5px; color:rgba(255,255,255,0.7); line-height:1.3; border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px;">
+          💡 Regla de Gillespie: La repulsión disminuye en el orden <b>Par Solitario–Par Solitario &gt; Par Solitario–Enlace &gt; Enlace–Enlace</b>, provocando el cierre del ángulo de enlace respecto al valor tetraédrico ideal (109.47° → 104.5°).
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- VERIFIED CATALOGUE SUGGESTIONS MODAL -->
   <div id="suggestion-modal" role="dialog" aria-modal="true" aria-labelledby="suggestion-modal-title" style="display:none; position:fixed; bottom:80px; right:20px; z-index:120; width:340px; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.16) 100%); border:1px solid rgba(255,255,255,0.45); border-radius:16px; padding:14px; box-shadow:0 16px 44px rgba(0,0,0,0.55), inset 0 1.5px 1px rgba(255,255,255,0.72); backdrop-filter:blur(20px) saturate(1.9); -webkit-backdrop-filter:blur(20px) saturate(1.9); font-family:'Orbitron',sans-serif;">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.28); padding-bottom:6px; margin-bottom:10px;">
@@ -1280,7 +1410,9 @@
   <script src="src/experience/experience-mode.js?v=101.2"></script>
   <script src="src/nuclear/nuclear-data.js?v=101.2"></script>
   <script src="src/chemistry/verified-reactions.js?v=101.2"></script>
+  <script src="src/chemistry/vsepr-engine.js?v=101.2"></script>
   <script src="src/analysis/compatibility-engine.js?v=101.2"></script>
+  <script src="src/physics/quantum-spectroscopy.js?v=101.2"></script>
   <script src="src/physics/thermodynamics.js?v=101.2"></script>
   <script src="src/physics/measurement.js?v=101.2"></script>
   <script src="src/audio/procedural-audio.js?v=101.2"></script>
