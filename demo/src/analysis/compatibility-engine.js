@@ -838,6 +838,230 @@
     };
   }
 
+  // ─── FT-IR VIBRATIONAL SPECTROSCOPY & QUANTUM NORMAL MODES ENGINE ───
+  const FTIR_BOND_FORCE_CONSTANTS = {
+    'H-O': 720, 'O-H': 720,
+    'H-N': 620, 'N-H': 620,
+    'H-C': 480, 'C-H': 480,
+    'C=O': 1220, 'O=C': 1220,
+    'C-O': 450, 'O-C': 450,
+    'C=C': 980,
+    'C#C': 1600,
+    'C#N': 1650, 'N#C': 1650,
+    'C-N': 490, 'N-C': 490,
+    'C-C': 420,
+    'C-F': 560, 'F-C': 560,
+    'C-Cl': 340, 'Cl-C': 340,
+    'C-Br': 280, 'Br-C': 280,
+    'P=O': 1050, 'O=P': 1050,
+    'S=O': 1080, 'O=S': 1080,
+    'S-H': 320, 'H-S': 320
+  };
+
+  const STANDARD_ATOMIC_MASSES = {
+    1: 1.008, 2: 4.0026, 3: 6.94, 4: 9.0122, 5: 10.81, 6: 12.011, 7: 14.007, 8: 15.999,
+    9: 18.998, 10: 20.180, 11: 22.990, 12: 24.305, 13: 26.982, 14: 28.085, 15: 30.974,
+    16: 32.06, 17: 35.45, 18: 39.95, 19: 39.098, 20: 40.078, 26: 55.845, 29: 63.546,
+    30: 65.38, 35: 79.904, 53: 126.90, 92: 238.03
+  };
+
+  function computeFTIRVibrationalSpectrum(atomsList = [], bondsList = [], temperatureK = 298) {
+    if (!Array.isArray(atomsList) || atomsList.length === 0) {
+      return {
+        formula: 'VACÍO',
+        atomCount: 0,
+        modes: [],
+        spectrumCurve: [],
+        diagnosticBands: [],
+        chronolithSeal: computeChronolithSeal('FTIR|EMPTY')
+      };
+    }
+
+    const resolvedAtoms = atomsList.map((a, idx) => {
+      const z = Number(a.z) || 1;
+      const symbol = a.symbol || a.s || (root.NULLA_PERIODIC_TABLE?.[z]?.s) || 'X';
+      const mass = Number(a.mass) || Number(a.physicalMass) || STANDARD_ATOMIC_MASSES[z] || 12.0;
+      const pos = {
+        x: Number(a.x !== undefined ? a.x : (a.targetPos?.x ?? 0)),
+        y: Number(a.y !== undefined ? a.y : (a.targetPos?.y ?? 0)),
+        z: Number(a.zCoord !== undefined ? a.zCoord : (a.targetPos?.z ?? (a.zPos ?? 0)))
+      };
+      return { idx, z, symbol, mass, pos };
+    });
+
+    const resolvedBonds = [];
+    if (Array.isArray(bondsList) && bondsList.length > 0) {
+      bondsList.forEach(b => {
+        const aIdx = b.a !== undefined ? b.a : b.aIdx;
+        const bIdx = b.b !== undefined ? b.b : b.bIdx;
+        if (resolvedAtoms[aIdx] && resolvedAtoms[bIdx]) {
+          resolvedBonds.push({ a: aIdx, b: bIdx, order: Number(b.order) || 1 });
+        }
+      });
+    } else {
+      for (let i = 0; i < resolvedAtoms.length; i++) {
+        for (let j = i + 1; j < resolvedAtoms.length; j++) {
+          const dx = resolvedAtoms[i].pos.x - resolvedAtoms[j].pos.x;
+          const dy = resolvedAtoms[i].pos.y - resolvedAtoms[j].pos.y;
+          const dz = resolvedAtoms[i].pos.z - resolvedAtoms[j].pos.z;
+          const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+          const r1 = ATOMIC_RADII_ANGSTROM[resolvedAtoms[i].z] || 1.0;
+          const r2 = ATOMIC_RADII_ANGSTROM[resolvedAtoms[j].z] || 1.0;
+          const cutoff = (r1 + r2) * 1.35 * 5.0;
+          if (dist < cutoff && dist > 0.1) {
+            resolvedBonds.push({ a: i, b: j, order: 1 });
+          }
+        }
+      }
+    }
+
+    const modes = [];
+    const diagnosticBands = [];
+
+    resolvedBonds.forEach(bond => {
+      const atomA = resolvedAtoms[bond.a];
+      const atomB = resolvedAtoms[bond.b];
+      const symA = atomA.symbol;
+      const symB = atomB.symbol;
+      const pairKey = `${symA}-${symB}`;
+      const pairKeyRev = `${symB}-${symA}`;
+      const doubleKey = `${symA}=${symB}`;
+      const tripleKey = `${symA}#${symB}`;
+
+      let k = 450;
+      let groupName = `Enlace ${symA}-${symB}`;
+      let bandWidth = 40;
+
+      if (bond.order === 3 || FTIR_BOND_FORCE_CONSTANTS[tripleKey]) {
+        k = FTIR_BOND_FORCE_CONSTANTS[tripleKey] || 1600;
+        groupName = `Alquino / Nitrilo (${symA}≡${symB})`;
+        bandWidth = 35;
+      } else if (bond.order === 2 || (symA === 'O' && symB === 'C') || (symA === 'C' && symB === 'O')) {
+        k = FTIR_BOND_FORCE_CONSTANTS['C=O'] || 1220;
+        groupName = `Carbonilo (${symA}=${symB})`;
+        bandWidth = 45;
+      } else if (symA === 'H' || symB === 'H') {
+        const otherSym = symA === 'H' ? symB : symA;
+        if (otherSym === 'O') {
+          k = 720;
+          groupName = 'Hidroxilo O-H (Estiramiento)';
+          bandWidth = 90;
+        } else if (otherSym === 'N') {
+          k = 620;
+          groupName = 'Amina / Amida N-H (Estiramiento)';
+          bandWidth = 55;
+        } else if (otherSym === 'C') {
+          k = 480;
+          groupName = 'Alcano / Alqueno C-H (Estiramiento)';
+          bandWidth = 40;
+        } else {
+          k = 380;
+          groupName = `Hidruro ${otherSym}-H`;
+          bandWidth = 40;
+        }
+      } else if (FTIR_BOND_FORCE_CONSTANTS[pairKey] || FTIR_BOND_FORCE_CONSTANTS[pairKeyRev]) {
+        k = FTIR_BOND_FORCE_CONSTANTS[pairKey] || FTIR_BOND_FORCE_CONSTANTS[pairKeyRev];
+        groupName = `Esqueleto ${symA}-${symB}`;
+        bandWidth = 45;
+      }
+
+      const mu = (atomA.mass * atomB.mass) / (atomA.mass + atomB.mass);
+      const nuHarmonic = 130.28 * Math.sqrt(k / Math.max(0.1, mu));
+
+      const bondDir = {
+        x: atomB.pos.x - atomA.pos.x,
+        y: atomB.pos.y - atomA.pos.y,
+        z: atomB.pos.z - atomA.pos.z
+      };
+      const len = Math.sqrt(bondDir.x*bondDir.x + bondDir.y*bondDir.y + bondDir.z*bondDir.z) || 1.0;
+      bondDir.x /= len; bondDir.y /= len; bondDir.z /= len;
+
+      const symDisplacements = resolvedAtoms.map((at, i) => {
+        if (i === bond.a) return { dx: -bondDir.x * 0.45, dy: -bondDir.y * 0.45, dz: -bondDir.z * 0.45 };
+        if (i === bond.b) return { dx: bondDir.x * 0.45, dy: bondDir.y * 0.45, dz: bondDir.z * 0.45 };
+        return { dx: 0, dy: 0, dz: 0 };
+      });
+
+      const asymDisplacements = resolvedAtoms.map((at, i) => {
+        if (i === bond.a) return { dx: bondDir.x * 0.45, dy: bondDir.y * 0.45, dz: bondDir.z * 0.45 };
+        if (i === bond.b) return { dx: bondDir.x * 0.45, dy: bondDir.y * 0.45, dz: bondDir.z * 0.45 };
+        return { dx: 0, dy: 0, dz: 0 };
+      });
+
+      const wavenumberCm1 = Math.min(3980, Math.max(420, Math.round(nuHarmonic)));
+
+      modes.push({
+        id: `stretch_${bond.a}_${bond.b}`,
+        type: 'stretch',
+        name: `${groupName} (ν₁)`,
+        wavenumberCm1,
+        forceConstantNm: Math.round(k),
+        reducedMassU: Number(mu.toFixed(3)),
+        transmittancePct: Math.round(15 + (Math.abs(Math.sin(wavenumberCm1)) * 12)),
+        widthCm1: bandWidth,
+        bond: [bond.a, bond.b],
+        displacements: symDisplacements
+      });
+
+      const kBend = k * 0.32;
+      const nuBend = Math.min(1680, Math.max(450, Math.round(130.28 * Math.sqrt(kBend / Math.max(0.1, mu)))));
+      const orthoDir = Math.abs(bondDir.y) < 0.9 ? { x: -bondDir.z, y: 1, z: bondDir.x } : { x: 1, y: 0, z: 0 };
+      const oLen = Math.sqrt(orthoDir.x*orthoDir.x + orthoDir.y*orthoDir.y + orthoDir.z*orthoDir.z) || 1.0;
+      orthoDir.x /= oLen; orthoDir.y /= oLen; orthoDir.z /= oLen;
+
+      const bendDisplacements = resolvedAtoms.map((at, i) => {
+        if (i === bond.a) return { dx: orthoDir.x * 0.35, dy: orthoDir.y * 0.35, dz: orthoDir.z * 0.35 };
+        if (i === bond.b) return { dx: -orthoDir.x * 0.35, dy: -orthoDir.y * 0.35, dz: -orthoDir.z * 0.35 };
+        return { dx: 0, dy: 0, dz: 0 };
+      });
+
+      modes.push({
+        id: `bend_${bond.a}_${bond.b}`,
+        type: 'bend',
+        name: `Deformación / Tijera (${symA}-${symB}) (ν₂)`,
+        wavenumberCm1: nuBend,
+        forceConstantNm: Math.round(kBend),
+        reducedMassU: Number(mu.toFixed(3)),
+        transmittancePct: Math.round(35 + (Math.abs(Math.cos(nuBend)) * 18)),
+        widthCm1: 30,
+        bond: [bond.a, bond.b],
+        displacements: bendDisplacements
+      });
+
+      diagnosticBands.push({
+        group: groupName,
+        wavenumberCm1,
+        k: Math.round(k),
+        mu: Number(mu.toFixed(3))
+      });
+    });
+
+    const spectrumCurve = [];
+    for (let nu = 4000; nu >= 400; nu -= 4) {
+      let absorption = 0;
+      modes.forEach(m => {
+        const dNu = nu - m.wavenumberCm1;
+        const gamma = m.widthCm1;
+        const lorentzian = (gamma * gamma) / (dNu * dNu + gamma * gamma);
+        absorption += (100 - m.transmittancePct) * lorentzian;
+      });
+      const baseline = 96.0 - Math.sin(nu * 0.005) * 1.5;
+      const t = Math.max(5.0, Math.min(99.0, baseline - absorption));
+      spectrumCurve.push({ wavenumber: nu, transmittancePct: Number(t.toFixed(1)) });
+    }
+
+    return {
+      formula: atomsList.map(a => a.symbol || a.s || 'X').join(''),
+      atomCount: resolvedAtoms.length,
+      bondCount: resolvedBonds.length,
+      temperatureK,
+      modes,
+      spectrumCurve,
+      diagnosticBands,
+      chronolithSeal: computeChronolithSeal(`FTIR|${resolvedAtoms.length}|${modes.length}|${temperatureK}`)
+    };
+  }
+
   root.NULLA_COMPATIBILITY = Object.freeze({
     chemical,
     nuclear,
@@ -851,6 +1075,7 @@
     evaluateSynkroniaState,
     computeBraggXRDPattern,
     computePaulingPartialCharge,
-    relaxAtomicStructure
+    relaxAtomicStructure,
+    computeFTIRVibrationalSpectrum
   });
 })(globalThis);

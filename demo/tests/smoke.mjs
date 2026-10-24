@@ -351,9 +351,30 @@ const synk5 = compatibility.evaluateSynkroniaState('SrTiO₃', 5, 298);
 assert.ok(synk5.synapticWeight > synk1.synapticWeight, 'STDP pulse sequence must increase synaptic weight via LTP');
 assert.ok(synk5.conductanceMicroS > synk1.conductanceMicroS, 'STDP potentiation must increase synaptic conductance');
 assert.match(html, /id="btn-visual-mode"/, '3D visual representation switcher button must be present');
+assert.match(html, /id="btn-ftir"/, 'FT-IR vibrational spectroscopy button must be present');
 assert.match(html, /id="btn-xrd"/, 'Bragg XRD diffraction button must be present');
 assert.match(html, /id="btn-restore-left-hud"/, 'left telemetry panel drawer tab button must be present');
 assert.match(html, /id="btn-restore-pt-hud"/, 'bottom periodic table drawer tab button must be present');
+
+const ftirWater = compatibility.computeFTIRVibrationalSpectrum([
+  { z: 8, symbol: 'O', x: 0, y: 0, zCoord: 0, mass: 15.999 },
+  { z: 1, symbol: 'H', x: 0.95, y: 0, zCoord: 0, mass: 1.008 },
+  { z: 1, symbol: 'H', x: -0.24, y: 0.92, zCoord: 0, mass: 1.008 }
+], [{ a: 0, b: 1, order: 1 }, { a: 0, b: 2, order: 1 }], 298);
+assert.ok(ftirWater && Array.isArray(ftirWater.modes) && ftirWater.modes.length >= 2, 'FT-IR analysis must identify vibrational modes');
+const stretchH = ftirWater.modes.find(m => m.type === 'stretch');
+assert.ok(stretchH && stretchH.wavenumberCm1 > 3400 && stretchH.wavenumberCm1 < 3750, 'Water O-H stretch must be located in 3400-3750 cm^-1 region');
+
+const ftirHeavyWater = compatibility.computeFTIRVibrationalSpectrum([
+  { z: 8, symbol: 'O', x: 0, y: 0, zCoord: 0, mass: 15.999 },
+  { z: 1, symbol: 'H', x: 0.95, y: 0, zCoord: 0, mass: 2.014 },
+  { z: 1, symbol: 'H', x: -0.24, y: 0.92, zCoord: 0, mass: 2.014 }
+], [{ a: 0, b: 1, order: 1 }, { a: 0, b: 2, order: 1 }], 298);
+const stretchD = ftirHeavyWater.modes.find(m => m.type === 'stretch');
+assert.ok(stretchD && stretchD.wavenumberCm1 < stretchH.wavenumberCm1, 'Isotopic substitution (Deuterium) must down-shift stretching wavenumber');
+const isotopicRatio = stretchH.wavenumberCm1 / stretchD.wavenumberCm1;
+assert.ok(isotopicRatio >= 1.34 && isotopicRatio <= 1.42, 'Isotopic wavenumber ratio must conform to square root of reduced masses');
+assert.equal(ftirWater.spectrumCurve.length, 901, 'FT-IR continuous spectrum must span 4000 to 400 cm^-1 in 4 cm^-1 increments');
 const xrdSample = compatibility.computeBraggXRDPattern([
   { z: 11, x: 0, y: 0, zCoord: 0 },
   { z: 17, x: 2.82, y: 0, zCoord: 0 },

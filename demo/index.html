@@ -31,7 +31,7 @@
     #webgl-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; display:block; z-index:0; touch-action:none; }
 
     /* ─── NEXT-GEN 3D iOS / VISION-OS SOLID CRYSTAL BUTTON SYSTEM (NO SE TRANSPARENTAN) ─── */
-    .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph,
+    .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph, #btn-ftir,
     #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif,
     #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr,
     #btn-quality-low, #btn-quality-med, #btn-quality-ultra,
@@ -82,7 +82,7 @@
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-webxr {
+    #btn-webxr, #btn-ftir {
       border-color:rgba(191,0,255,0.72) !important;
       background:linear-gradient(180deg, #431f54 0%, #2f143c 24%, #1a0922 50%, #260e32 76%, #0e0314 100%) !important;
       box-shadow:0 4px 14px rgba(191,0,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
@@ -96,7 +96,7 @@
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    .ios-crystal-btn:hover, #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover,
+    .ios-crystal-btn:hover, #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover, #btn-ftir:hover,
     #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover,
     #btn-tutorial:hover, #btn-docs:hover, #btn-quiz:hover, #btn-share-url:hover, #btn-webxr:hover,
     #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover,
@@ -107,7 +107,7 @@
       border-color:#FFFFFF !important;
       box-shadow:0 8px 24px rgba(0,240,255,0.38), inset 0 2px 0.5px #FFFFFF, inset 0 3.5px 2px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    .ios-crystal-btn:active, #btn-reassemble:active, #btn-open-pt:active, #btn-orbitals:active, #btn-visual-mode:active, #btn-xrd:active, #btn-synkronia:active, #btn-polymorph:active,
+    .ios-crystal-btn:active, #btn-reassemble:active, #btn-open-pt:active, #btn-orbitals:active, #btn-visual-mode:active, #btn-xrd:active, #btn-synkronia:active, #btn-polymorph:active, #btn-ftir:active,
     #btn-measure:active, #btn-export-gltf:active, #btn-export-usdz:active, #btn-export-xyz:active, #btn-export-cif:active,
     #btn-tutorial:active, #btn-docs:active, #btn-quiz:active, #btn-share-url:active, #btn-webxr:active,
     .shader-btn:active, .fusion-btn:active, .fusion-btn-undo:active, .fusion-btn-clear:active, .mol-chip:active, button.stat-chip:active, .experience-mode-btn:active,
@@ -555,20 +555,23 @@
     </div>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
       <button id="btn-visual-mode" data-i18n="visualMode" title="Alternar modo visual 3D: Ball &amp; Stick, Van der Waals CPK, Poliedros VESTA + Celda Unidad, Mapa de Carga Pauling δ⁺/δ⁻">👁️ VISTA: BALL &amp; STICK</button>
-      <button id="btn-xrd" data-i18n="xrdBragg" title="Difracción de Rayos X en Polvo (Ley de Bragg Cu Kα = 1.5406 Å · Conos 2θ)">📊 XRD BRAGG (2θ)</button>
+      <button id="btn-ftir" data-i18n="ftirSpectrum" title="Espectroscopía Vibracional Infrarroja (FT-IR) y Modos Normales Cuánticos 3D (Oscilador Armónico k/μ)">〰️ FT-IR VIBRACIÓN (3D)</button>
     </div>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-xrd" data-i18n="xrdBragg" title="Difracción de Rayos X en Polvo (Ley de Bragg Cu Kα = 1.5406 Å · Conos 2θ)">📊 XRD BRAGG (2θ)</button>
       <button id="btn-synkronia" data-i18n="relaxLattice" title="Relajación energética 3D en tiempo real (Lennard-Jones 12-6 + Coulomb + Optimizador de gradiente por espigas ∇U → 0 sobre la estructura actual)">⚡ RELAJAR RED (∇U→0)</button>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
       <button id="btn-polymorph" data-i18n="crystalPhase" title="Evaluar transición de fase cristalográfica y polimorfismo bajo Presión y Temperatura (P, T) para la fórmula activa">🔄 FASE CRISTALINA (P,T)</button>
+      <button id="btn-export-cif" data-i18n="exportCif" title="Exportar archivo cristalográfico estándar IUCr (.CIF)">🔬 CRISTAL .CIF (IUCr)</button>
     </div>
     <div class="experience-science" id="global-tools" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:4px;">
       <button id="btn-measure" data-i18n="measure">📏 MEDIR 3D</button>
       <button id="btn-export-gltf" data-i18n="exportGltf">📱 GLTF COORDS</button>
       <button id="btn-export-usdz" data-i18n="exportUsda"> USDA SOURCE</button>
     </div>
-    <div class="experience-science" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+    <div class="experience-science" style="display:grid; grid-template-columns: 1fr; gap:4px; margin-top:4px;">
       <button id="btn-export-xyz" data-i18n="exportXyz">💾 EXPORTAR .XYZ</button>
-      <button id="btn-export-cif" data-i18n="exportCif" title="Exportar archivo cristalográfico estándar IUCr (.CIF)">🔬 CRISTAL .CIF (IUCr)</button>
     </div>
 
     <div class="material-lab" data-i18n-aria-label="materialsBarLabel" aria-label="Barra de materiales">
@@ -894,6 +897,89 @@
           <div style="display:flex; justify-content:space-between; font-size:7px; color:rgba(255,255,255,0.7); margin-top:4px;">
             <span style="color:#00FF9D;">◄ FUSIÓN (Q &gt; 0)</span>
             <span style="color:#FF3366;">FISIÓN (Q &gt; 0) ►</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FT-IR VIBRATIONAL SPECTROMETER & QUANTUM NORMAL MODES MODAL -->
+  <div id="ftir-modal" role="dialog" aria-modal="true" aria-labelledby="ftir-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:180; width:min(960px, calc(100vw - 20px)); max-height:88vh; overflow-y:auto; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.18) 100%); border:1px solid rgba(191,0,255,0.65); border-radius:20px; padding:18px; box-shadow:0 24px 64px rgba(0,0,0,0.68), inset 0 1.5px 1px rgba(255,255,255,0.8); backdrop-filter:blur(22px) saturate(1.9); -webkit-backdrop-filter:blur(22px) saturate(1.9); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.22); padding-bottom:8px; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="ftir-modal-title" style="font-size:11.5px; font-weight:900; color:#BF00FF; letter-spacing:1.5px;">〰️ ESPECTROMETRÍA INFRARROJA (FT-IR) // MODOS VIBRACIONALES 3D</span>
+        <span class="hud-badge experience-science">OSCILADOR ARMÓNICO · k/μ · 400 - 4000 cm⁻¹</span>
+      </div>
+      <button id="btn-close-ftir" data-i18n-aria-label="closeFtirLabel" aria-label="Cerrar espectrómetro FT-IR" style="background:none; border:none; color:#FFFFFF; font-size:16px; cursor:pointer; padding:2px 8px;">✕</button>
+    </div>
+
+    <!-- Quick action bar: Normal Mode selection & 3D Vibration toggles -->
+    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <div style="display:flex; gap:5px; flex-wrap:wrap;" id="ftir-mode-selectors">
+        <button id="btn-ftir-mode-all" class="segre-filter-btn active" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">TODOS (SUPERPOSICIÓN TÉRMICA)</button>
+        <button id="btn-ftir-mode-sym" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">ν₁ ESTIRAMIENTO SIMÉTRICO</button>
+        <button id="btn-ftir-mode-bend" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">ν₂ FLEXIÓN / TIJERA</button>
+        <button id="btn-ftir-mode-asym" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">ν₃ ESTIRAMIENTO ASIMÉTRICO</button>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <label style="font-size:8px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:4px;">
+          AMPLITUD:
+          <input type="range" id="ftir-amplitude-slider" min="0.2" max="2.5" step="0.1" value="1.0" style="width:70px; accent-color:#BF00FF; cursor:pointer; height:4px;">
+        </label>
+        <button id="btn-ftir-toggle-vib" class="ios-crystal-btn" data-i18n="ftirVibrate" style="padding:5px 12px; border-color:rgba(191,0,255,0.72) !important; color:#00FFCF !important; font-size:8.5px; font-weight:700; cursor:pointer;">▶ VIBRACIÓN 3D: ACTIVA</button>
+      </div>
+    </div>
+
+    <!-- Main grid: Spectrum Canvas on left, Inspector Card & Band Telemetry on right -->
+    <div style="display:grid; grid-template-columns: 1fr 310px; gap:14px; align-items:start;">
+      <!-- Canvas Container -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="position:relative; width:100%; border:1px solid rgba(255,255,255,0.22); border-radius:12px; background:linear-gradient(180deg, #070e18 0%, #03060a 100%); overflow:hidden; box-shadow:inset 0 0 20px rgba(0,0,0,0.8);">
+          <canvas id="ftir-spectrum-canvas" width="580" height="340" style="display:block; width:100%; height:auto; cursor:crosshair;"></canvas>
+          <div id="ftir-canvas-tooltip" style="display:none; position:absolute; pointer-events:none; padding:4px 8px; border-radius:6px; background:rgba(8,18,32,0.95); border:1px solid #BF00FF; color:#FFF; font-size:8.5px; font-family:'Fira Code',monospace; box-shadow:0 4px 12px rgba(0,0,0,0.8); z-index:10;"></div>
+        </div>
+        <!-- Legend of Diagnostic Infrared Regions -->
+        <div style="display:flex; flex-wrap:wrap; gap:8px; font-size:8px; justify-content:center; color:rgba(255,255,255,0.85);">
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:rgba(0,240,255,0.3); border:1px solid #00F0FF; display:inline-block;"></span> <span>O-H / N-H (3200-3650 cm⁻¹)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:rgba(0,255,157,0.3); border:1px solid #00FF9D; display:inline-block;"></span> <span>C-H (2850-3050 cm⁻¹)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:rgba(255,215,0,0.3); border:1px solid #FFD700; display:inline-block;"></span> <span>C≡C / C≡N (2100-2260 cm⁻¹)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:rgba(255,0,85,0.3); border:1px solid #FF0055; display:inline-block;"></span> <span>C=O (1680-1750 cm⁻¹)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:rgba(191,0,255,0.3); border:1px solid #BF00FF; display:inline-block;"></span> <span>Huella Dactilar (&lt;1400 cm⁻¹)</span></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Inspector Card & Quantum Telemetry -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Molecule FTIR Card -->
+        <div style="padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.25); background:linear-gradient(180deg, #162438 0%, #0a101a 100%); box-shadow:inset 0 1px 1px rgba(255,255,255,0.3);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.18); padding-bottom:5px; margin-bottom:8px;">
+            <span id="ftir-mol-formula" style="font-size:16px; font-weight:900; color:#00FF9D; letter-spacing:1px;">H₂O</span>
+            <span id="ftir-mol-status" style="padding:2px 7px; border-radius:6px; font-size:7.5px; font-weight:700; background:#1b2432; border:1px solid #00F0FF; color:#00F0FF;">3D ACTIVO</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:8.5px; margin-bottom:8px;">
+            <div><span style="color:rgba(255,255,255,0.6);">ÁTOMOS:</span> <strong id="ftir-atom-count" style="color:#FFF;">3</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">ENLACES:</span> <strong id="ftir-bond-count" style="color:#FFF;">2</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">MODOS VIB:</span> <strong id="ftir-mode-count" style="color:#FFF;">3N - 6 = 3</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">TEMP (T):</span> <strong id="ftir-temp-k" style="color:#00F0FF;">298 K</strong></div>
+          </div>
+          <!-- Peak details -->
+          <div style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; margin-top:4px;">
+            <div style="font-size:7.5px; color:#FFD700; font-weight:700; margin-bottom:4px;">BANDAS DIAGNÓSTICAS DETECTADAS:</div>
+            <div id="ftir-bands-list" style="display:flex; flex-direction:column; gap:4px; max-height:120px; overflow-y:auto; font-family:'Fira Code',monospace; font-size:8px;">
+              <!-- Dynamic items -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantum Formula Card -->
+        <div style="padding:10px 12px; border-radius:14px; border:1px solid rgba(191,0,255,0.35); background:linear-gradient(180deg, #130a24 0%, #080310 100%);">
+          <div style="font-size:8px; font-weight:700; color:#BF00FF; margin-bottom:4px;">MECÁNICA CUÁNTICA DEL OSCILADOR</div>
+          <div style="font-family:'Fira Code',monospace; font-size:8.5px; color:#FFF; line-height:1.4;">
+            ν̃ = (1 / 2πc) · √(k / μ)<br>
+            <span style="font-size:7.5px; color:rgba(255,255,255,0.7);">μ = (m₁·m₂) / (m₁+m₂) [Masa Reducida]</span>
+          </div>
+          <div style="font-size:7.5px; color:#00FFCF; margin-top:4px; line-height:1.3;">
+            💡 <b>Efecto Isotópico:</b> A mayor masa nuclear μ (p.ej. Deuterio ²H vs ¹H), menor frecuencia ν̃ de absorción.
           </div>
         </div>
       </div>

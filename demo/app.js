@@ -4157,6 +4157,350 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // FT-IR VIBRATIONAL SPECTROSCOPY & QUANTUM NORMAL MODES CONTROLLER
+  // ═══════════════════════════════════════════════════════════════
+  const btnFtir = document.getElementById('btn-ftir');
+  const ftirModal = document.getElementById('ftir-modal');
+  const btnCloseFtir = document.getElementById('btn-close-ftir');
+  const ftirCanvas = document.getElementById('ftir-spectrum-canvas');
+  const ftirTooltip = document.getElementById('ftir-canvas-tooltip');
+  const btnFtirToggleVib = document.getElementById('btn-ftir-toggle-vib');
+  const ftirAmpSlider = document.getElementById('ftir-amplitude-slider');
+
+  let activeFtirData = null;
+  let activeFtirModeId = 'all'; // 'all', 'sym', 'bend', 'asym'
+  let isFtirVibrating = false;
+  let ftirAmplitude = 1.0;
+  let hoveredFtirWavenumber = null;
+
+  function refreshFtirSpectroscopy() {
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (!realAtoms.length) return;
+
+    if (window.NULLA_COMPATIBILITY?.computeFTIRVibrationalSpectrum) {
+      activeFtirData = window.NULLA_COMPATIBILITY.computeFTIRVibrationalSpectrum(realAtoms, activeBonds, temperatureK);
+    }
+
+    if (!activeFtirData) return;
+
+    const elFormula = document.getElementById('ftir-mol-formula');
+    const elAtomCount = document.getElementById('ftir-atom-count');
+    const elBondCount = document.getElementById('ftir-bond-count');
+    const elModeCount = document.getElementById('ftir-mode-count');
+    const elTemp = document.getElementById('ftir-temp-k');
+    const elBandsList = document.getElementById('ftir-bands-list');
+
+    const formulaStr = currentReaction?.formula || activeFtirData.formula || 'H₂O';
+    if (elFormula) elFormula.textContent = formulaStr;
+    if (elAtomCount) elAtomCount.textContent = activeFtirData.atomCount;
+    if (elBondCount) elBondCount.textContent = activeFtirData.bondCount;
+    const nAtoms = activeFtirData.atomCount;
+    const modeCountTheoretical = nAtoms >= 3 ? Math.max(1, (3 * nAtoms) - 6) : 1;
+    if (elModeCount) elModeCount.textContent = `${activeFtirData.modes.length} (${modeCountTheoretical} calc)`;
+    if (elTemp) elTemp.textContent = `${temperatureK} K (${Math.round(temperatureK - 273.15)}°C)`;
+
+    if (elBandsList) {
+      elBandsList.innerHTML = '';
+      if (!activeFtirData.modes.length) {
+        elBandsList.innerHTML = '<div style="color:rgba(255,255,255,0.5);">Sin enlaces covalentes vibracionales activos.</div>';
+      } else {
+        activeFtirData.modes.forEach(m => {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; background:rgba(255,255,255,0.06); cursor:pointer;';
+          row.title = `Fuerza k=${m.forceConstantNm} N/m · Masa reducida μ=${m.reducedMassU} u`;
+          row.innerHTML = `<span style="color:#00F0FF; font-weight:700;">${m.wavenumberCm1} cm⁻¹</span> <span style="color:#FFF; font-size:7.5px;">${m.name}</span> <span style="color:#FFD700; font-size:7px;">${m.transmittancePct}% T</span>`;
+          row.addEventListener('click', () => {
+            activeFtirModeId = m.type === 'bend' ? 'bend' : 'sym';
+            isFtirVibrating = true;
+            updateFtirVibrationButtonState();
+            playTone(m.wavenumberCm1 * 0.25, 'sine', 0.15);
+            drawFtirSpectrum();
+          });
+          elBandsList.appendChild(row);
+        });
+      }
+    }
+
+    drawFtirSpectrum();
+  }
+
+  function drawFtirSpectrum() {
+    if (!ftirCanvas || !activeFtirData) return;
+    const ctx = ftirCanvas.getContext('2d');
+    const w = ftirCanvas.width;
+    const h = ftirCanvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const m = { top: 32, right: 28, bottom: 36, left: 46 };
+    const plotW = w - m.left - m.right;
+    const plotH = h - m.top - m.bottom;
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, '#091220');
+    bgGrad.addColorStop(1, '#04070d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    function nuToX(nu) {
+      return m.left + ((4000 - nu) / (4000 - 400)) * plotW;
+    }
+    function tToY(tPct) {
+      return m.top + ((100 - tPct) / 100) * plotH;
+    }
+
+    const diagnosticZones = [
+      { start: 3650, end: 3200, label: 'O-H / N-H', color: 'rgba(0, 240, 255, 0.08)', border: 'rgba(0, 240, 255, 0.25)' },
+      { start: 3050, end: 2850, label: 'C-H', color: 'rgba(0, 255, 157, 0.08)', border: 'rgba(0, 255, 157, 0.25)' },
+      { start: 2260, end: 2100, label: 'C≡C / C≡N', color: 'rgba(255, 215, 0, 0.08)', border: 'rgba(255, 215, 0, 0.25)' },
+      { start: 1750, end: 1680, label: 'C=O', color: 'rgba(255, 0, 85, 0.08)', border: 'rgba(255, 0, 85, 0.25)' },
+      { start: 1400, end: 400, label: 'HUELLA DACTILAR', color: 'rgba(191, 0, 255, 0.06)', border: 'rgba(191, 0, 255, 0.2)' }
+    ];
+
+    diagnosticZones.forEach(z => {
+      const x1 = nuToX(z.start);
+      const x2 = nuToX(z.end);
+      const zw = x2 - x1;
+      ctx.fillStyle = z.color;
+      ctx.fillRect(x1, m.top, zw, plotH);
+      ctx.strokeStyle = z.border;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x1, m.top, zw, plotH);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7.5px "Orbitron", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(z.label, x1 + zw / 2, m.top + 12);
+    });
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    [100, 80, 60, 40, 20, 0].forEach(tVal => {
+      const y = tToY(tVal);
+      ctx.beginPath();
+      ctx.moveTo(m.left, y);
+      ctx.lineTo(m.left + plotW, y);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '8px "Fira Code", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${tVal}%`, m.left - 6, y + 3);
+    });
+
+    [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500].forEach(nuVal => {
+      const x = nuToX(nuVal);
+      ctx.beginPath();
+      ctx.moveTo(x, m.top);
+      ctx.lineTo(x, m.top + plotH);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '8px "Fira Code", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${nuVal}`, x, m.top + plotH + 14);
+    });
+
+    ctx.fillStyle = '#00F0FF';
+    ctx.font = '9px "Orbitron", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('NÚMERO DE ONDA ν̃ (cm⁻¹) ◄ ESCALA INVERTIDA IUPAC', m.left + plotW / 2, h - 8);
+
+    ctx.save();
+    ctx.translate(14, m.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = '#BF00FF';
+    ctx.fillText('TRANSMITANCIA (%T)', 0, 0);
+    ctx.restore();
+
+    const curve = activeFtirData.spectrumCurve;
+    if (curve && curve.length > 1) {
+      ctx.save();
+      ctx.shadowColor = '#00F0FF';
+      ctx.shadowBlur = 6;
+      ctx.strokeStyle = '#00FFCF';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+
+      curve.forEach((pt, idx) => {
+        const x = nuToX(pt.wavenumber);
+        const y = tToY(pt.transmittancePct);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    activeFtirData.modes.forEach(mode => {
+      const px = nuToX(mode.wavenumberCm1);
+      const py = tToY(mode.transmittancePct);
+
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px, py - 5);
+      ctx.lineTo(px + 4, py);
+      ctx.lineTo(px, py + 5);
+      ctx.lineTo(px - 4, py);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '7.5px "Fira Code", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${mode.wavenumberCm1}`, px, py + 14);
+    });
+
+    if (hoveredFtirWavenumber !== null) {
+      const hx = nuToX(hoveredFtirWavenumber);
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#BF00FF';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, m.top);
+      ctx.lineTo(hx, m.top + plotH);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function handleFtirCanvasMouseMove(e) {
+    if (!ftirCanvas || !activeFtirData) return;
+    const rect = ftirCanvas.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
+
+    const scaleX = ftirCanvas.width / rect.width;
+    const scaleY = ftirCanvas.height / rect.height;
+    const canvasX = clientX * scaleX;
+    const canvasY = clientY * scaleY;
+
+    const m = { top: 32, right: 28, bottom: 36, left: 46 };
+    const plotW = ftirCanvas.width - m.left - m.right;
+    const plotH = ftirCanvas.height - m.top - m.bottom;
+
+    if (canvasX < m.left || canvasX > m.left + plotW || canvasY < m.top || canvasY > m.top + plotH) {
+      if (ftirTooltip) ftirTooltip.style.display = 'none';
+      hoveredFtirWavenumber = null;
+      drawFtirSpectrum();
+      return;
+    }
+
+    const frac = (canvasX - m.left) / plotW;
+    const nu = Math.round(4000 - frac * (4000 - 400));
+    hoveredFtirWavenumber = nu;
+
+    const pt = activeFtirData.spectrumCurve.find(p => Math.abs(p.wavenumber - nu) <= 4) || { transmittancePct: 95 };
+    const closestPeak = activeFtirData.modes.find(mode => Math.abs(mode.wavenumberCm1 - nu) < 65);
+
+    if (ftirTooltip) {
+      ftirTooltip.style.display = 'block';
+      ftirTooltip.style.left = `${clientX + 14}px`;
+      ftirTooltip.style.top = `${clientY - 12}px`;
+      if (closestPeak) {
+        ftirTooltip.innerHTML = `<strong>ν̃ = ${closestPeak.wavenumberCm1} cm⁻¹</strong> (${closestPeak.transmittancePct}% T)<br><span style="color:#00FF9D;">${closestPeak.name}</span><br><span style="color:#FFD700;">k=${closestPeak.forceConstantNm} N/m · μ=${closestPeak.reducedMassU} u</span>`;
+      } else {
+        ftirTooltip.innerHTML = `ν̃ = <strong>${nu} cm⁻¹</strong><br>Transmitancia: <strong>${pt.transmittancePct}%</strong>`;
+      }
+    }
+
+    drawFtirSpectrum();
+  }
+
+  function handleFtirCanvasClick(e) {
+    if (!ftirCanvas || !activeFtirData) return;
+    const rect = ftirCanvas.getBoundingClientRect();
+    const scaleX = ftirCanvas.width / rect.width;
+    const canvasX = (e.clientX - rect.left) * scaleX;
+
+    const m = { top: 32, right: 28, bottom: 36, left: 46 };
+    const plotW = ftirCanvas.width - m.left - m.right;
+    const frac = (canvasX - m.left) / plotW;
+    const nu = Math.round(4000 - frac * (4000 - 400));
+
+    const closestPeak = activeFtirData.modes.find(mode => Math.abs(mode.wavenumberCm1 - nu) < 90);
+    if (closestPeak) {
+      activeFtirModeId = closestPeak.type === 'bend' ? 'bend' : 'sym';
+      isFtirVibrating = true;
+      updateFtirVibrationButtonState();
+      playTone(closestPeak.wavenumberCm1 * 0.25, 'sine', 0.2);
+      drawFtirSpectrum();
+    }
+  }
+
+  function updateFtirVibrationButtonState() {
+    if (!btnFtirToggleVib) return;
+    if (isFtirVibrating) {
+      btnFtirToggleVib.textContent = '▶ VIBRACIÓN 3D: ACTIVA';
+      btnFtirToggleVib.style.color = '#00FFCF';
+      btnFtirToggleVib.style.borderColor = 'rgba(0, 255, 157, 0.72)';
+    } else {
+      btnFtirToggleVib.textContent = '⏸ VIBRACIÓN 3D: PAUSADA';
+      btnFtirToggleVib.style.color = '#FFAA00';
+      btnFtirToggleVib.style.borderColor = 'rgba(255, 170, 0, 0.72)';
+    }
+  }
+
+  if (btnFtir) {
+    btnFtir.addEventListener('click', () => {
+      playTone(480, 'sine', 0.15);
+      isFtirVibrating = true;
+      updateFtirVibrationButtonState();
+      openDialog(ftirModal, btnFtir);
+      setTimeout(refreshFtirSpectroscopy, 60);
+    });
+  }
+  if (btnCloseFtir) {
+    btnCloseFtir.addEventListener('click', () => {
+      closeDialog(ftirModal);
+    });
+  }
+  if (btnFtirToggleVib) {
+    btnFtirToggleVib.addEventListener('click', () => {
+      isFtirVibrating = !isFtirVibrating;
+      updateFtirVibrationButtonState();
+      playTone(isFtirVibrating ? 600 : 320, 'sine', 0.12);
+    });
+  }
+  if (ftirAmpSlider) {
+    ftirAmpSlider.addEventListener('input', () => {
+      ftirAmplitude = parseFloat(ftirAmpSlider.value) || 1.0;
+    });
+  }
+  if (ftirCanvas) {
+    ftirCanvas.addEventListener('click', handleFtirCanvasClick);
+    ftirCanvas.addEventListener('mousemove', handleFtirCanvasMouseMove);
+    ftirCanvas.addEventListener('mouseleave', () => {
+      if (ftirTooltip) ftirTooltip.style.display = 'none';
+      hoveredFtirWavenumber = null;
+      drawFtirSpectrum();
+    });
+  }
+
+  const ftirModeBtns = {
+    all: document.getElementById('btn-ftir-mode-all'),
+    sym: document.getElementById('btn-ftir-mode-sym'),
+    bend: document.getElementById('btn-ftir-mode-bend'),
+    asym: document.getElementById('btn-ftir-mode-asym')
+  };
+  Object.entries(ftirModeBtns).forEach(([key, btn]) => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      activeFtirModeId = key;
+      isFtirVibrating = true;
+      updateFtirVibrationButtonState();
+      Object.values(ftirModeBtns).forEach(b => b?.classList.remove('active'));
+      btn.classList.add('active');
+      playTone(550, 'sine', 0.1);
+      drawFtirSpectrum();
+    });
+  });
+
   // SUGGEST Button
   if (btnSuggest) {
     btnSuggest.addEventListener('click', showVerifiedSuggestions);
@@ -5864,13 +6208,48 @@ window.addEventListener('DOMContentLoaded', function() {
           if (a.basePos) a.targetPos.copy(a.basePos);
           if (hudEpi && i === 0) hudEpi.textContent = tr('phaseUnavailable');
         } else if (phase.key === 'solid') {
-          const referenceTm = Number(activeThermalProfile?.melt) || Number(activeThermalProfile?.boil) || 1000;
-          const solidVibScale = Math.min(1.5, temperatureK / Math.max(1, referenceTm));
-          const vibX = Math.sin(t * 12.0 + a.instIdx) * (0.35 * solidVibScale);
-          const vibY = Math.cos(t * 14.0 + a.instIdx) * (0.35 * solidVibScale);
-          const vibZ = Math.sin(t * 10.0 + a.instIdx) * (0.35 * solidVibScale);
-          if (a.basePos) a.targetPos.copy(a.basePos).add(new THREE.Vector3(vibX, vibY, vibZ));
-          if (hudEpi && i === 0) hudEpi.textContent = `${phase.label} (${temperatureK} K // ${Math.round(temperatureK - 273.15)}°C) · ${tr('solidMotionModel')}`;
+          if (isFtirVibrating && activeFtirData && activeFtirData.modes.length > 0) {
+            let vibDx = 0, vibDy = 0, vibDz = 0;
+            const amp = ftirAmplitude * 0.65;
+            if (activeFtirModeId === 'all') {
+              activeFtirData.modes.forEach((mode, mIdx) => {
+                const disp = mode.displacements?.[i];
+                if (disp) {
+                  const freq = 10.0 + (mIdx * 3.2);
+                  const phaseVal = (mIdx * 1.57) + i * 0.4;
+                  const sinFactor = Math.sin(t * freq + phaseVal) * amp;
+                  vibDx += disp.dx * sinFactor;
+                  vibDy += disp.dy * sinFactor;
+                  vibDz += disp.dz * sinFactor;
+                }
+              });
+            } else {
+              const targetMode = activeFtirData.modes.find(m => {
+                if (activeFtirModeId === 'sym') return m.type === 'stretch';
+                if (activeFtirModeId === 'bend') return m.type === 'bend';
+                if (activeFtirModeId === 'asym') return m.type === 'stretch';
+                return false;
+              }) || activeFtirData.modes[0];
+              const disp = targetMode?.displacements?.[i];
+              if (disp) {
+                const freq = 14.0;
+                const sinFactor = Math.sin(t * freq + (activeFtirModeId === 'asym' ? (i % 2 === 0 ? 0 : Math.PI) : 0)) * amp;
+                vibDx = disp.dx * sinFactor;
+                vibDy = disp.dy * sinFactor;
+                vibDz = disp.dz * sinFactor;
+              }
+            }
+            if (a.basePos) a.targetPos.copy(a.basePos).add(new THREE.Vector3(vibDx, vibDy, vibDz));
+            if (hudEpi && i === 0) hudEpi.textContent = `FT-IR 3D // ${activeFtirModeId.toUpperCase()} (${temperatureK} K) · Oscilador Armónico Cuántico k/μ`;
+          } else {
+            const referenceTm = Number(activeThermalProfile?.melt) || Number(activeThermalProfile?.boil) || 1000;
+            const solidVibScale = Math.min(1.5, temperatureK / Math.max(1, referenceTm));
+            const vibX = Math.sin(t * 12.0 + a.instIdx) * (0.35 * solidVibScale);
+            const vibY = Math.cos(t * 14.0 + a.instIdx) * (0.35 * solidVibScale);
+            const vibZ = Math.sin(t * 10.0 + a.instIdx) * (0.35 * solidVibScale);
+            if (a.basePos) a.targetPos.copy(a.basePos).add(new THREE.Vector3(vibX, vibY, vibZ));
+            if (hudEpi && i === 0) hudEpi.textContent = `${phase.label} (${temperatureK} K // ${Math.round(temperatureK - 273.15)}°C) · ${tr('solidMotionModel')}`;
+          }
         } else if (phase.key === 'liquid') {
           const range = Math.max(1, activeThermalProfile.boil - activeThermalProfile.melt);
           const liqScale = ((temperatureK - activeThermalProfile.melt) / range) * 0.8 + 0.4;
