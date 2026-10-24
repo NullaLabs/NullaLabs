@@ -353,6 +353,71 @@
     }
   };
 
+  // Calibrated NIST / CRC / IUCr thermophysical, crystallographic & mechanical profiles
+  const calibrationByFormula = {
+    'H₂O':      { melt:273.15, boil:373.15, bondLengthA:0.96, equation:'2 H₂ + O₂ → 2 H₂O', entropyJmolK:-163.3, bulkModulusGPa:2.2, vickersGPa:0, bandgapEv:6.9, spaceGroup:'P6₃/mmc (Ice Ih)', latticeA:4.52 },
+    'CO₂':      { melt:216.6, boil:194.7, transition:'sublimation', bondLengthA:1.16, equation:'C + O₂ → CO₂', entropyJmolK:2.9, bulkModulusGPa:3.0, vickersGPa:0, bandgapEv:8.5, spaceGroup:'Pa-3 (No. 205)', latticeA:5.62 },
+    'NH₃':      { melt:195.4, boil:239.8, bondLengthA:1.01, equation:'N₂ + 3 H₂ ⇌ 2 NH₃', entropyJmolK:-99.4, bulkModulusGPa:5.5, vickersGPa:0, bandgapEv:6.2, spaceGroup:'P2₁3 (No. 198)', latticeA:5.13 },
+    'CH₄':      { melt:90.7, boil:111.7, bondLengthA:1.09, equation:'C + 2 H₂ → CH₄', entropyJmolK:-80.7, bulkModulusGPa:1.8, vickersGPa:0, bandgapEv:9.0, spaceGroup:'Fm-3m (No. 225)', latticeA:5.89 },
+    'HCl':      { melt:158.9, boil:188.1, bondLengthA:1.27, equation:'H₂ + Cl₂ → 2 HCl', entropyJmolK:10.0, bulkModulusGPa:2.5, vickersGPa:0, bandgapEv:7.2, spaceGroup:'Cmc2₁ (No. 36)', latticeA:5.08 },
+    'HF':       { melt:189.8, boil:292.7, bondLengthA:0.92, equation:'H₂ + F₂ → 2 HF', entropyJmolK:7.0, bulkModulusGPa:3.1, vickersGPa:0, bandgapEv:8.8, spaceGroup:'Bmmb (No. 63)', latticeA:3.42 },
+    'SO₂':      { melt:200.0, boil:263.1, bondLengthA:1.43, equation:'S + O₂ → SO₂', entropyJmolK:11.3, bulkModulusGPa:3.4, vickersGPa:0, bandgapEv:4.3, spaceGroup:'Aba2 (No. 41)', latticeA:6.07 },
+    'H₂S':      { melt:187.7, boil:212.8, bondLengthA:1.34, equation:'H₂ + S → H₂S', entropyJmolK:43.1, bulkModulusGPa:2.8, vickersGPa:0, bandgapEv:4.8, spaceGroup:'Pa-3 (No. 205)', latticeA:5.78 },
+    'NaCl':     { melt:1074, boil:1738, bondLengthA:2.82, equation:'2 Na + Cl₂ → 2 NaCl', entropyJmolK:-90.6, bulkModulusGPa:24.4, vickersGPa:0.2, bandgapEv:8.5, spaceGroup:'Fm-3m (No. 225)', latticeA:5.64 },
+    'KCl':      { melt:1043, boil:1693, bondLengthA:3.15, equation:'2 K + Cl₂ → 2 KCl', entropyJmolK:-93.9, bulkModulusGPa:17.4, vickersGPa:0.15, bandgapEv:8.4, spaceGroup:'Fm-3m (No. 225)', latticeA:6.29 },
+    'NaF':      { melt:1266, boil:1968, bondLengthA:2.31, equation:'2 Na + F₂ → 2 NaF', entropyJmolK:-100.1, bulkModulusGPa:46.5, vickersGPa:0.6, bandgapEv:11.5, spaceGroup:'Fm-3m (No. 225)', latticeA:4.63 },
+    'KBr':      { melt:1007, boil:1708, bondLengthA:3.29, equation:'2 K + Br₂ → 2 KBr', entropyJmolK:-45.3, bulkModulusGPa:14.8, vickersGPa:0.12, bandgapEv:7.4, spaceGroup:'Fm-3m (No. 225)', latticeA:6.60 },
+    'LiF':      { melt:1121, boil:1949, bondLengthA:2.01, equation:'2 Li + F₂ → 2 LiF', entropyJmolK:-94.8, bulkModulusGPa:67.1, vickersGPa:1.1, bandgapEv:13.6, spaceGroup:'Fm-3m (No. 225)', latticeA:4.03 },
+    'MgO':      { melt:3125, boil:3873, bondLengthA:2.10, equation:'2 Mg + O₂ → 2 MgO', entropyJmolK:-108.3, bulkModulusGPa:162, vickersGPa:9.2, bandgapEv:7.8, spaceGroup:'Fm-3m (No. 225)', latticeA:4.21 },
+    'CaO':      { melt:2886, boil:3123, bondLengthA:2.40, equation:'2 Ca + O₂ → 2 CaO', entropyJmolK:-104.3, bulkModulusGPa:112, vickersGPa:6.5, bandgapEv:7.1, spaceGroup:'Fm-3m (No. 225)', latticeA:4.81 },
+    'Al₂O₃':    { melt:2345, boil:3250, bondLengthA:1.91, equation:'4 Al + 3 O₂ → 2 Al₂O₃', entropyJmolK:-313.2, bulkModulusGPa:254, vickersGPa:22.0, bandgapEv:8.8, spaceGroup:'R-3c (No. 167)', latticeA:4.76 },
+    'Fe₂O₃':    { melt:1838, boil:2260, bondLengthA:1.98, equation:'4 Fe + 3 O₂ → 2 Fe₂O₃', entropyJmolK:-274.7, bulkModulusGPa:206, vickersGPa:10.5, bandgapEv:2.1, spaceGroup:'R-3c (No. 167)', latticeA:5.03 },
+    'SiO₂':     { melt:1986, boil:3223, bondLengthA:1.61, equation:'Si + O₂ → SiO₂', entropyJmolK:-182.5, bulkModulusGPa:37.7, vickersGPa:11.5, bandgapEv:8.9, spaceGroup:'P3₁21 (No. 152)', latticeA:4.91 },
+    'TiO₂':     { melt:2116, boil:3245, bondLengthA:1.96, equation:'Ti + O₂ → TiO₂', entropyJmolK:-185.5, bulkModulusGPa:212, vickersGPa:11.0, bandgapEv:3.03, spaceGroup:'P4₂/mnm (No. 136)', latticeA:4.59 },
+    'ZrO₂':     { melt:2988, boil:4573, bondLengthA:2.15, equation:'Zr + O₂ → ZrO₂', entropyJmolK:-194.2, bulkModulusGPa:188, vickersGPa:13.5, bandgapEv:5.2, spaceGroup:'P2₁/c (No. 14)', latticeA:5.15 },
+    'SiC':      { melt:3003, boil:3100, transition:'sublimation', bondLengthA:1.89, equation:'Si + C → SiC', entropyJmolK:-8.0, bulkModulusGPa:225, vickersGPa:28.0, bandgapEv:3.26, spaceGroup:'F-43m (No. 216)', latticeA:4.36 },
+    'TiC':      { melt:3433, boil:5093, bondLengthA:2.16, equation:'Ti + C → TiC', entropyJmolK:-12.1, bulkModulusGPa:242, vickersGPa:30.0, bandgapEv:0, spaceGroup:'Fm-3m (No. 225)', latticeA:4.33 },
+    'WC':       { melt:3143, boil:6273, bondLengthA:2.19, equation:'W + C → WC', entropyJmolK:-6.2, bulkModulusGPa:385, vickersGPa:24.0, bandgapEv:0, spaceGroup:'P-6m2 (No. 187)', latticeA:2.91 },
+    'HfC':      { melt:4231, boil:5673, bondLengthA:2.32, equation:'Hf + C → HfC', entropyJmolK:-9.8, bulkModulusGPa:242, vickersGPa:26.1, bandgapEv:0, spaceGroup:'Fm-3m (No. 225)', latticeA:4.64 },
+    'TaC':      { melt:4153, boil:5053, bondLengthA:2.23, equation:'Ta + C → TaC', entropyJmolK:-4.9, bulkModulusGPa:345, vickersGPa:18.0, bandgapEv:0, spaceGroup:'Fm-3m (No. 225)', latticeA:4.45 },
+    'B₄C':      { melt:3036, boil:3773, bondLengthA:1.81, equation:'4 B + C → B₄C', entropyJmolK:-2.1, bulkModulusGPa:247, vickersGPa:38.0, bandgapEv:2.09, spaceGroup:'R-3m (No. 166)', latticeA:5.60 },
+    'TiB₂':     { melt:3498, boil:4200, bondLengthA:2.38, equation:'Ti + 2 B → TiB₂', entropyJmolK:-13.9, bulkModulusGPa:240, vickersGPa:33.0, bandgapEv:0, spaceGroup:'P6/mmm (No. 191)', latticeA:3.03 },
+    'TiN':      { melt:3203, boil:3700, bondLengthA:2.12, equation:'2 Ti + N₂ → 2 TiN', entropyJmolK:-96.0, bulkModulusGPa:288, vickersGPa:21.0, bandgapEv:0, spaceGroup:'Fm-3m (No. 225)', latticeA:4.24 },
+    'Si₃N₄':    { melt:2173, boil:2250, transition:'sublimation', bondLengthA:1.73, equation:'3 Si + 2 N₂ → Si₃N₄', entropyJmolK:-331.5, bulkModulusGPa:250, vickersGPa:16.5, bandgapEv:5.0, spaceGroup:'P6₃/m (No. 176)', latticeA:7.60 },
+    'BN':       { melt:3246, boil:3400, transition:'sublimation', bondLengthA:1.45, equation:'2 B + N₂ → 2 BN', entropyJmolK:-87.7, bulkModulusGPa:369, vickersGPa:48.0, bandgapEv:5.96, spaceGroup:'P6₃/mmc (No. 194)', latticeA:2.50 },
+    'AlN':      { melt:2473, boil:2790, bondLengthA:1.89, equation:'2 Al + N₂ → 2 AlN', entropyJmolK:-104.0, bulkModulusGPa:208, vickersGPa:12.0, bandgapEv:6.01, spaceGroup:'P6₃mc (No. 186)', latticeA:3.11 },
+    'GaN':      { melt:2773, boil:3100, bondLengthA:1.95, equation:'2 Ga + N₂ → 2 GaN', entropyJmolK:-106.0, bulkModulusGPa:210, vickersGPa:15.1, bandgapEv:3.40, spaceGroup:'P6₃mc (No. 186)', latticeA:3.19 },
+    'GaAs':     { melt:1511, boil:2070, bondLengthA:2.45, equation:'Ga + As → GaAs', entropyJmolK:-11.8, bulkModulusGPa:75.5, vickersGPa:7.5, bandgapEv:1.42, spaceGroup:'F-43m (No. 216)', latticeA:5.65 },
+    'MoS₂':     { melt:2023, boil:2648, bondLengthA:2.41, equation:'Mo + 2 S → MoS₂', entropyJmolK:-29.8, bulkModulusGPa:53.0, vickersGPa:1.8, bandgapEv:1.80, spaceGroup:'P6₃/mmc (No. 194)', latticeA:3.16 },
+    'WS₂':      { melt:1923, boil:2400, bondLengthA:2.41, equation:'W + 2 S → WS₂', entropyJmolK:-28.5, bulkModulusGPa:61.0, vickersGPa:2.0, bandgapEv:2.03, spaceGroup:'P6₃/mmc (No. 194)', latticeA:3.15 },
+    'Bi₂Te₃':   { melt:858, boil:1573, bondLengthA:3.07, equation:'2 Bi + 3 Te → Bi₂Te₃', entropyJmolK:-12.4, bulkModulusGPa:37.4, vickersGPa:0.9, bandgapEv:0.15, spaceGroup:'R-3m (No. 166)', latticeA:4.38 },
+    'LiCoO₂':   { melt:1400, boil:1850, bondLengthA:1.92, equation:'Li + Co + O₂ → LiCoO₂', entropyJmolK:-192.0, bulkModulusGPa:149, vickersGPa:8.5, bandgapEv:2.7, spaceGroup:'R-3m (No. 166)', latticeA:2.82 },
+    'BaTiO₃':   { melt:1898, boil:3200, bondLengthA:2.00, equation:'BaO + TiO₂ → BaTiO₃', entropyJmolK:-9.5, bulkModulusGPa:162, vickersGPa:7.0, bandgapEv:3.2, spaceGroup:'P4mm (No. 99)', latticeA:3.99 },
+    'SrTiO₃':   { melt:2353, boil:3450, bondLengthA:1.95, equation:'SrO + TiO₂ → SrTiO₃', entropyJmolK:-8.2, bulkModulusGPa:179, vickersGPa:8.5, bandgapEv:3.25, spaceGroup:'Pm-3m (No. 221)', latticeA:3.905 },
+    'BaZrO₃':   { melt:2963, boil:3800, bondLengthA:2.10, equation:'BaO + ZrO₂ → BaZrO₃', entropyJmolK:-7.5, bulkModulusGPa:154, vickersGPa:9.0, bandgapEv:5.3, spaceGroup:'Pm-3m (No. 221)', latticeA:4.19 },
+    'Ti₃AlC₂':  { melt:2623, boil:3400, bondLengthA:2.18, equation:'3 Ti + Al + 2 C → Ti₃AlC₂', entropyJmolK:-18.4, bulkModulusGPa:165, vickersGPa:4.5, bandgapEv:0, spaceGroup:'P6₃/mmc (No. 194)', latticeA:3.08 },
+    'NiTi':     { melt:1583, boil:3033, bondLengthA:2.60, equation:'Ni + Ti → NiTi', entropyJmolK:-7.2, bulkModulusGPa:140, vickersGPa:3.5, bandgapEv:0, spaceGroup:'Pm-3m (No. 221 · B2)', latticeA:3.015 },
+    'TiAl':     { melt:1733, boil:3200, bondLengthA:2.83, equation:'Ti + Al → TiAl', entropyJmolK:-8.1, bulkModulusGPa:112, vickersGPa:3.2, bandgapEv:0, spaceGroup:'P4/mmm (No. 123 · L1₀)', latticeA:4.00 },
+    'Ni₃Al':    { melt:1668, boil:3180, bondLengthA:2.52, equation:'3 Ni + Al → Ni₃Al', entropyJmolK:-14.5, bulkModulusGPa:174, vickersGPa:4.8, bandgapEv:0, spaceGroup:'Pm-3m (No. 221 · L1₂)', latticeA:3.57 },
+    'Nb₃Sn':    { melt:2403, boil:4100, bondLengthA:2.65, equation:'3 Nb + Sn → Nb₃Sn', entropyJmolK:-11.2, bulkModulusGPa:170, vickersGPa:6.5, bandgapEv:0, spaceGroup:'Pm-3n (No. 223 · A15)', latticeA:5.29 },
+    'Fe₃C':     { melt:1500, boil:3135, bondLengthA:2.01, equation:'3 Fe + C → Fe₃C', entropyJmolK:18.0, bulkModulusGPa:175, vickersGPa:10.0, bandgapEv:0, spaceGroup:'Pnma (No. 62)', latticeA:5.09 },
+    'Nd₂Fe₁₄B': { melt:1458, boil:3050, bondLengthA:2.54, equation:'2 Nd + 14 Fe + B → Nd₂Fe₁₄B', entropyJmolK:-24.0, bulkModulusGPa:135, vickersGPa:6.2, bandgapEv:0, spaceGroup:'P4₂/mnm (No. 136)', latticeA:8.80 },
+    'YBa₂Cu₃O₇':{ melt:1280, boil:1650, bondLengthA:1.94, equation:'Y + 2 Ba + 3 Cu + 3.5 O₂ → YBa₂Cu₃O₇', entropyJmolK:-610.0, bulkModulusGPa:115, vickersGPa:6.0, bandgapEv:0, spaceGroup:'Pmmm (No. 47)', latticeA:3.82 },
+    'CaCO₃':    { melt:1612, boil:1650, bondLengthA:1.28, equation:'CaO + CO₂ → CaCO₃', entropyJmolK:-160.5, bulkModulusGPa:73.0, vickersGPa:1.8, bandgapEv:6.0, spaceGroup:'R-3c (No. 167)', latticeA:4.99 },
+    'CaSiO₃':   { melt:1813, boil:2650, bondLengthA:1.62, equation:'CaO + SiO₂ → CaSiO₃', entropyJmolK:-2.5, bulkModulusGPa:86.0, vickersGPa:5.5, bandgapEv:6.4, spaceGroup:'P-1 (No. 2)', latticeA:7.94 },
+    'MgAl₂O₄':  { melt:2408, boil:3400, bondLengthA:1.92, equation:'MgO + Al₂O₃ → MgAl₂O₄', entropyJmolK:-4.2, bulkModulusGPa:197, vickersGPa:16.0, bandgapEv:7.8, spaceGroup:'Fd-3m (No. 227)', latticeA:8.08 },
+    'C₆₀@Cₙ(2D)':{ melt:1800, boil:4000, bondLengthA:1.42, equation:'C₆₀ + Grafeno(2D) → C₆₀@Cₙ(2D)', entropyJmolK:-18.0, bulkModulusGPa:420, vickersGPa:35.0, bandgapEv:0.25, spaceGroup:'P6/mmm-Hybrid', latticeA:2.46 },
+    'C₆₀@SWCNT':{ melt:1450, boil:4000, bondLengthA:1.42, equation:'n C₆₀ + SWCNT → (C₆₀)ₙ@SWCNT', entropyJmolK:-42.0, bulkModulusGPa:480, vickersGPa:40.0, bandgapEv:0.35, spaceGroup:'P6/mcc-1D', latticeA:13.60 },
+    'Cₙ/BN(2D)':{ melt:3200, boil:3800, bondLengthA:1.43, equation:'Grafeno(2D) + h-BN(2D) → Cₙ/BN(Moiré)', entropyJmolK:-12.0, bulkModulusGPa:400, vickersGPa:42.0, bandgapEv:0.05, spaceGroup:'P3m1-Moiré', latticeA:2.48 },
+    'C(sp³)–SiC':{ melt:3003, boil:3800, bondLengthA:1.72, equation:'C(sp³) + SiC → C(sp³)–SiC Composite', entropyJmolK:-6.5, bulkModulusGPa:340, vickersGPa:55.0, bandgapEv:3.26, spaceGroup:'Fd-3m / F-43m', latticeA:3.96 },
+    'G–SWCNT(3D)':{ melt:3600, boil:4200, bondLengthA:1.42, equation:'Grafeno(2D) + SWCNT(1D) → G–SWCNT(3D)', entropyJmolK:-8.0, bulkModulusGPa:310, vickersGPa:28.0, bandgapEv:0.0, spaceGroup:'P6/mmm-3D', latticeA:2.46 }
+  };
+
+  for (const entry of [...Object.values(reactions), ...Object.values(molecularReactions)]) {
+    const cal = calibrationByFormula[entry.formula];
+    if (cal) Object.assign(entry, cal);
+  }
+
   root.NULLA_VERIFIED_REACTIONS = Object.freeze(reactions);
   root.NULLA_MOLECULAR_SPECIES = Object.freeze(molecularSpecies);
   root.NULLA_MOLECULAR_REACTIONS = Object.freeze(molecularReactions);

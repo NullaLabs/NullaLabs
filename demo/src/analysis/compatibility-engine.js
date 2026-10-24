@@ -25,6 +25,59 @@
     55:2.44, 56:2.15, 57:2.07, 58:2.04, 60:2.01, 64:1.96, 72:1.75, 73:1.70, 74:1.62, 75:1.51, 76:1.44, 77:1.41, 78:1.36, 79:1.36, 80:1.32, 82:1.46, 83:1.48, 90:2.06, 92:1.96
   };
 
+  // Shannon effective ionic radii (Å) for Goldschmidt ABX₃ perovskite tolerance factor t
+  const SHANNON_A_SITE_RADII = {
+    11:1.39, 19:1.64, 20:1.34, 37:1.72, 38:1.44, 39:1.19, 55:1.88, 56:1.61, 57:1.36, 60:1.27, 82:1.49, 83:1.38
+  };
+  const SHANNON_B_SITE_RADII = {
+    12:0.72, 13:0.535, 14:0.40, 22:0.605, 23:0.58, 24:0.615, 25:0.53, 26:0.645, 27:0.545, 28:0.69, 30:0.74,
+    31:0.62, 40:0.72, 41:0.64, 42:0.59, 50:0.69, 72:0.71, 73:0.64, 74:0.60
+  };
+  const SHANNON_X_ANION_RADII = {
+    8:1.40, 9:1.33, 17:1.81, 35:1.96, 53:2.20
+  };
+
+  function computeGoldschmidtTolerance(zList) {
+    if (!Array.isArray(zList) || zList.length < 3) return null;
+    const xZ = zList.find(z => SHANNON_X_ANION_RADII[z] !== undefined);
+    if (!xZ) return null;
+    const cations = zList.filter(z => z !== xZ);
+    if (cations.length < 2) return null;
+    const aCandidates = cations.filter(z => SHANNON_A_SITE_RADII[z] !== undefined);
+    const bCandidates = cations.filter(z => SHANNON_B_SITE_RADII[z] !== undefined);
+    if (!aCandidates.length || !bCandidates.length) return null;
+    const aZ = aCandidates.sort((u, v) => SHANNON_A_SITE_RADII[v] - SHANNON_A_SITE_RADII[u])[0];
+    const bZ = bCandidates.find(z => z !== aZ) || bCandidates[0];
+    if (aZ === bZ) return null;
+    const rA = SHANNON_A_SITE_RADII[aZ];
+    const rB = SHANNON_B_SITE_RADII[bZ];
+    const rX = SHANNON_X_ANION_RADII[xZ];
+    const t = (rA + rX) / (Math.SQRT2 * (rB + rX));
+    const regime = (t >= 0.90 && t <= 1.05)
+      ? 'PEROVSKITA CÚBICA/TETRAGONAL ESTABLE (0.90 ≤ t ≤ 1.05)'
+      : (t >= 0.71 && t < 0.90)
+        ? 'PEROVSKITA ORTORRÓMBICA DISTORSIONADA (0.71 ≤ t < 0.90)'
+        : 'FUERA DE RANGO PEROVSKITA (FASE HEXAGONAL / ILMENITA)';
+    return { t: Number(t.toFixed(3)), rA, rB, rX, regime };
+  }
+
+  function evaluateFreeEnergyKJmol(enthalpyKJmol, entropyJmolK, temperatureK = 298) {
+    if (!Number.isFinite(enthalpyKJmol)) return null;
+    const dS = Number.isFinite(entropyJmolK) ? entropyJmolK : -45.0;
+    const dG = enthalpyKJmol - (Number(temperatureK) * dS) / 1000.0;
+    return Number(dG.toFixed(1));
+  }
+
+  function computeChronolithSeal(payloadStr) {
+    let hash = 0x811c9dc5;
+    const str = String(payloadStr || '');
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return `CHR-${hash.toString(16).toUpperCase().padStart(8, '0')}`;
+  }
+
   function paulingIonicityPct(deltaEN) {
     if (!Number.isFinite(deltaEN) || deltaEN < 0) return null;
     return Math.round((1 - Math.exp(-0.25 * deltaEN * deltaEN)) * 100);
@@ -59,16 +112,25 @@
     // 1. If we have a verified reaction (elemental or molecular)
     if (activeReaction) {
       const enthalpy = activeReaction.enthalpy;
+      const freeEnergyKJmol = evaluateFreeEnergyKJmol(enthalpy, activeReaction.entropyJmolK, temperatureK);
+      const atomZList = Array.isArray(activeReaction.atoms) ? activeReaction.atoms.map(a => a.z) : zList;
+      const goldschmidt = computeGoldschmidtTolerance(atomZList);
+      const isThermalDecomposed = Number.isFinite(activeReaction.boil) && temperatureK >= activeReaction.boil;
       const isEndothermic = typeof enthalpy === 'number' && enthalpy > 0;
-      const isMetastable = isEndothermic || /metastable|equilibrium|decompose|reversible/i.test(
+      const isMetastable = isThermalDecomposed || isEndothermic || (freeEnergyKJmol !== null && freeEnergyKJmol > 0) || /metastable|equilibrium|decompose|reversible/i.test(
         `${activeReaction.stabilityVerdict || ''} ${activeReaction.note || ''}`
       );
-      const stabilityClass = isMetastable ? 'METASTABLE' : 'STABLE';
-      const stabilityVerdict = activeReaction.stabilityVerdict || (
-        isMetastable
-          ? `METASTABLE · CONDITION-DEPENDENT (${activeReaction.formula})`
-          : `STABLE · VERIFIED THERMODYNAMIC PHASE (${activeReaction.formula})`
-      );
+      const stabilityClass = isThermalDecomposed ? 'METASTABLE' : (isMetastable ? 'METASTABLE' : 'STABLE');
+      const freeEnergyTag = freeEnergyKJmol !== null ? ` · ΔG°(${temperatureK}K)=${freeEnergyKJmol} kJ/mol` : '';
+      const goldschmidtTag = goldschmidt ? ` · Goldschmidt t=${goldschmidt.t}` : '';
+      const stabilityVerdict = isThermalDecomposed
+        ? `METAESTABLE / DISOCIACIÓN TÉRMICA (T=${temperatureK} K ≥ Tb=${activeReaction.boil} K${freeEnergyTag})`
+        : (activeReaction.stabilityVerdict || (
+            isMetastable
+              ? `METASTABLE · CONDITION-DEPENDENT (${activeReaction.formula})`
+              : `STABLE · VERIFIED THERMODYNAMIC PHASE (${activeReaction.formula})`
+          )) + freeEnergyTag + goldschmidtTag;
+      const seal = computeChronolithSeal(`${activeReaction.formula}|${temperatureK}|${enthalpy ?? 'ND'}`);
       return {
         canCombine: true,
         combinationMode: hasMolecules ? 'MOLECULAR_SYNTHESIS' : 'STOICHIOMETRIC_COMPOUND',
@@ -78,6 +140,11 @@
         ionicityPct,
         deltaEN,
         enthalpy: typeof enthalpy === 'number' ? enthalpy : null,
+        freeEnergyKJmol,
+        goldschmidt,
+        equation: activeReaction.equation || null,
+        scribaGate: activeReaction.evidenceLevel === 'CATALOGUED' ? 'GO' : 'GO_DEGRADED',
+        chronolithSeal: seal,
         legionCohorts: ['C03_MATH_CONTROL (Graph Topology)', 'C05_BIOMED_OMICS (Stoichiometry)', 'C10_CYBERNETIC_GOV (Catalogued Gate)'],
         engineeringSummary: activeReaction.note || `${activeReaction.type} · ${activeReaction.geom}`
       };
@@ -109,6 +176,7 @@
         ionicityPct: 0,
         deltaEN: null,
         enthalpy: null,
+        scribaGate: 'NO_GO',
         legionCohorts: ['C03_MATH_CONTROL', 'C10_CYBERNETIC_GOV'],
         engineeringSummary: 'Los gases nobles poseen octeto completo y alta energía de ionización; solo forman mezclas físicas o excímeros transitorios en plasma.'
       };
@@ -236,6 +304,30 @@
       };
     }
 
+    // 5b. Goldschmidt ABX₃ Perovskite Tolerance Rule (LEGION C03 + C04)
+    const goldschmidt = computeGoldschmidtTolerance(zList);
+    if (goldschmidt) {
+      const isStablePerovskite = goldschmidt.t >= 0.71 && goldschmidt.t <= 1.05;
+      const estimatedEnthalpy = isStablePerovskite ? -1580.0 : -820.0;
+      const freeEnergyKJmol = evaluateFreeEnergyKJmol(estimatedEnthalpy, -185.0, temperatureK);
+      return {
+        canCombine: true,
+        combinationMode: 'GOLDSCHMIDT_PEROVSKITE_OXIDE',
+        stabilityClass: isStablePerovskite ? 'STABLE' : 'METASTABLE',
+        stabilityVerdict: `${isStablePerovskite ? 'ESTABLE' : 'METAESTABLE'} · ${goldschmidt.regime} (t = ${goldschmidt.t})`,
+        bondingRegime: 'CORNER-SHARING BO₆ OCTAHEDRAL PEROVSKITE NETWORK',
+        ionicityPct,
+        deltaEN,
+        goldschmidt,
+        enthalpy: estimatedEnthalpy,
+        freeEnergyKJmol,
+        scribaGate: 'GO_DEGRADED',
+        chronolithSeal: computeChronolithSeal(`PEROVSKITE|${zList.join('-')}|${temperatureK}`),
+        legionCohorts: ['C03_MATH_CONTROL (Goldschmidt Tolerance)', 'C04_GRAPHICS_SHADERS (Octahedral Cage)'],
+        engineeringSummary: `Factor de tolerancia de Goldschmidt t = ${goldschmidt.t} (r_A=${goldschmidt.rA} Å, r_B=${goldschmidt.rB} Å, r_X=${goldschmidt.rX} Å).`
+      };
+    }
+
     // 6. General Ionic / Covalent Electronegativity Drive (Pauling Rule)
     if (zList.length >= 2 && deltaEN !== null) {
       const isStronglyFavorable = deltaEN >= 1.2;
@@ -259,6 +351,9 @@
         ionicityPct,
         deltaEN,
         enthalpy: estimatedEnthalpy,
+        freeEnergyKJmol: evaluateFreeEnergyKJmol(estimatedEnthalpy, -35.0, temperatureK),
+        scribaGate: 'GO_DEGRADED',
+        chronolithSeal: computeChronolithSeal(`PAULING|${zList.join('-')}|${temperatureK}`),
         legionCohorts: ['C03_MATH_CONTROL', 'C05_BIOMED_OMICS (Pauling Valence)', 'C10_CYBERNETIC_GOV'],
         engineeringSummary: hasRadioactive
           ? 'Contiene radionúclido pesado (Z ≥ 84); la red química sufre radiólisis y retroceso alfa.'
@@ -275,6 +370,7 @@
       ionicityPct: null,
       deltaEN: null,
       enthalpy: null,
+      scribaGate: 'NO_GO',
       legionCohorts: ['C10_CYBERNETIC_GOV'],
       engineeringSummary: 'Añade elementos de la tabla periódica o moléculas del laboratorio para evaluar su síntesis.'
     };
@@ -292,6 +388,7 @@
       if (deltaEN !== null) factors.push(`Δχ=${deltaEN.toFixed(2)} (${multi.ionicityPct}% ionic)`);
       if (multi.humeRotheryMismatchPct !== undefined) factors.push(`Hume-Rothery δr=${multi.humeRotheryMismatchPct}%`);
       if (multi.haggRatio !== undefined) factors.push(`Hägg r_i/r_M=${multi.haggRatio}`);
+      if (multi.goldschmidt) factors.push(`Goldschmidt t=${multi.goldschmidt.t}`);
       return {
         domain:'chemical',
         status:'NO_CATALOGUED_PATH',
@@ -308,6 +405,8 @@
     factors.push(`CATALOGUE: ${reaction.evidenceLevel || 'LEGACY_ENTRY'}`);
     if (reaction.enthalpy !== undefined) factors.push(`ΔH=${reaction.enthalpy} kJ/mol`);
     else requirements.push('ΔHf°: N/D');
+    if (multi.freeEnergyKJmol !== null && multi.freeEnergyKJmol !== undefined) factors.push(`ΔG°(${temperatureK}K)=${multi.freeEnergyKJmol} kJ/mol`);
+    if (multi.goldschmidt) factors.push(`Goldschmidt t=${multi.goldschmidt.t}`);
     if (!reaction.activationEnergy) requirements.push('Ea / k(T): N/D');
     if (!reaction.pressure) requirements.push('p° ≈ 1 atm · SOURCE: N/D');
     if (!reaction.temperatureRange) requirements.push(`T=${temperatureK} K · RANGE: N/D`);
@@ -350,5 +449,12 @@
     };
   }
 
-  root.NULLA_COMPATIBILITY = Object.freeze({ chemical, nuclear, multidisciplinary });
+  root.NULLA_COMPATIBILITY = Object.freeze({
+    chemical,
+    nuclear,
+    multidisciplinary,
+    computeGoldschmidtTolerance,
+    evaluateFreeEnergyKJmol,
+    computeChronolithSeal
+  });
 })(globalThis);

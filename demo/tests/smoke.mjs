@@ -330,6 +330,16 @@ const nobleCompatibility = compatibility.multidisciplinary({
 });
 assert.equal(nobleCompatibility.canCombine, false, 'Noble gas pair must be rejected as chemically unstable');
 assert.equal(nobleCompatibility.stabilityClass, 'UNSTABLE_BOND');
+assert.equal(nobleCompatibility.scribaGate, 'NO_GO', 'uncatalogued noble gas pair must trigger SCRIBA NO_GO gate');
+assert.match(html, /id="btn-export-cif"/, 'crystallographic CIF export button must be present');
+assert.match(app, /function exportCIFFile\(/, 'crystallographic CIF exporter must be implemented');
+assert.equal(chemistrySandbox.NULLA_VERIFIED_REACTIONS['C+Hf'].melt, 4231, 'HfC UHTC melting point must be calibrated');
+assert.equal(chemistrySandbox.NULLA_VERIFIED_REACTIONS['C+Hf'].bondLengthA, 2.32, 'HfC bond length must be calibrated in Angstroms');
+const btoGoldschmidt = compatibility.computeGoldschmidtTolerance([56, 22, 8]);
+assert.ok(btoGoldschmidt && btoGoldschmidt.t >= 1.0 && btoGoldschmidt.t <= 1.08, 'BaTiO3 Goldschmidt tolerance factor must be in the ferroelectric perovskite window');
+const freeEnergy298 = compatibility.evaluateFreeEnergyKJmol(-285.8, -163.3, 298);
+assert.ok(Math.abs(freeEnergy298 - (-237.1)) < 0.2, 'Gibbs free energy of H2O at 298 K must match thermodynamic reference');
+assert.match(compatibility.computeChronolithSeal('BaTiO₃|298|-1659'), /^CHR-[0-9A-F]{8}$/, 'Chronolith seal must produce deterministic 8-hex-digit hash');
 const dtCompatibility = compatibility.nuclear({reaction:nuclear.fusion['H+H'][0],isotopes:nuclear.isotopes});
 assert.equal(dtCompatibility.status, 'EXOENERGETIC_CHANNEL_KINETICS_UNEVALUATED');
 assert.equal(dtCompatibility.confidence, null, 'Q and contact barrier do not justify a probability score');

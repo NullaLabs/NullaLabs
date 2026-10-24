@@ -89,6 +89,7 @@ window.addEventListener('DOMContentLoaded', function() {
   const btnMeasure = document.getElementById('btn-measure');
   const btnExportGltf = document.getElementById('btn-export-gltf');
   const btnExportXyz = document.getElementById('btn-export-xyz');
+  const btnExportCif = document.getElementById('btn-export-cif');
   const btnAudio = document.getElementById('btn-audio');
   const btnExport = document.getElementById('btn-export');
   const btnSuggest = document.getElementById('btn-suggest');
@@ -492,6 +493,7 @@ window.addEventListener('DOMContentLoaded', function() {
   let activePhysicalNucleonCount = 0;
   let nuclearChargeField = null;
   let activeStructureId = 'dna';
+  let activeReactionRef = null;
   let angstromPerWorldUnit = 0.42;
   let measurementScaleVerified = true;
   let activeThermalProfile = {
@@ -1397,12 +1399,21 @@ window.addEventListener('DOMContentLoaded', function() {
   function formCompound(reaction) {
     clearMaterialSelection();
     isDnaMode = false;
+    activeReactionRef = reaction;
     const hasNaclReference = reaction.formula === 'NaCl';
-    activeThermalProfile = hasNaclReference
-      ? { label:'NaCl', melt:1074, boil:1738, pressure:'1 atm', model:'catalogued reference' }
+    const hasCalibratedThermal = hasNaclReference || window.NULLA_THERMODYNAMICS?.hasUsablePhaseProfile?.(reaction) || (Number.isFinite(reaction.melt) && Number.isFinite(reaction.boil) && reaction.boil > reaction.melt);
+    activeThermalProfile = hasCalibratedThermal
+      ? {
+          label: reaction.formula,
+          melt: hasNaclReference ? 1074 : reaction.melt,
+          boil: hasNaclReference ? 1738 : reaction.boil,
+          transition: reaction.transition || 'melting',
+          pressure: reaction.pressure || '1 atm',
+          model: 'catalogued reference'
+        }
       : { label:reaction.formula, melt:null, boil:null, pressure:reaction.pressure || '1 atm', model:'data unavailable' };
     measurementScaleVerified = false;
-    setThermalControlEnabled(hasNaclReference);
+    setThermalControlEnabled(Boolean(hasCalibratedThermal));
     const atoms = [];
     const name = reaction.name;
 
@@ -1920,6 +1931,9 @@ window.addEventListener('DOMContentLoaded', function() {
     if (hasNaclReference) {
       angstromPerWorldUnit = 2.82 / 4.0;
       measurementScaleVerified = true;
+    } else if (Number.isFinite(reaction.bondLengthA) && Number.isFinite(nearestDistance) && nearestDistance > 0.1) {
+      angstromPerWorldUnit = reaction.bondLengthA / nearestDistance;
+      measurementScaleVerified = true;
     }
     const explicitCompoundBonds = getExplicitCompoundBonds(name, atoms.length);
     spawnAtoms(atoms, explicitCompoundBonds);
@@ -1943,9 +1957,11 @@ window.addEventListener('DOMContentLoaded', function() {
       counts[order] = (counts[order] || 0) + 1;
       return counts;
     },{});
+    const d0Label = Number.isFinite(reaction.bondLengthA) ? ` · d₀=${reaction.bondLengthA} Å` : '';
+    const sgLabel = reaction.spaceGroup ? ` · SG: ${reaction.spaceGroup}` : '';
     const topologyLabel = explicitCompoundBonds
-      ? `GRAPH V=${atoms.length} · E=${explicitCompoundBonds.length} · ${Object.entries(bondOrderCounts).map(([order,count]) => `BO${order}×${count}`).join(' · ')}`
-      : `${reaction.bonds || 'BOND GRAPH'} · V=${atoms.length} · rcut=${activeBondCutoffWorld?.toFixed(2) || 'N/D'}`;
+      ? `GRAPH V=${atoms.length} · E=${explicitCompoundBonds.length} · ${Object.entries(bondOrderCounts).map(([order,count]) => `BO${order}×${count}`).join(' · ')}${d0Label}${sgLabel}`
+      : `${reaction.bonds || 'BOND GRAPH'} · V=${atoms.length} · rcut=${activeBondCutoffWorld?.toFixed(2) || 'N/D'}${d0Label}${sgLabel}`;
     const verdictTag = reaction.stabilityVerdict === 'METASTABLE'
       ? 'METAESTABLE'
       : reaction.stabilityVerdict === 'UNSTABLE' || reaction.stabilityVerdict === 'UNSTABLE_BOND'
@@ -1956,16 +1972,34 @@ window.addEventListener('DOMContentLoaded', function() {
     const stabilityDisplay = reaction.stabilityScore
       ? `${reaction.stabilityScore}% · ${verdictTag}`
       : (reaction.stabilityVerdict ? verdictTag : tr('dataUnavailable'));
+    const formulaWithEq = reaction.equation
+      ? `${reaction.equation} | ${reaction.atoms.map(g => (EL[g.z]?.s || g.z) + '×' + g.c).join(' + ')}`
+      : `${tr('formulaLabel')}: ${reaction.formula} | ${reaction.atoms.map(g => (EL[g.z]?.s || g.z) + '×' + g.c).join(' + ')}`;
+    const mechTag = Number.isFinite(reaction.bulkModulusGPa)
+      ? ` · B₀=${reaction.bulkModulusGPa} GPa${reaction.vickersGPa ? ` · HV=${reaction.vickersGPa} GPa` : ''}${Number.isFinite(reaction.bandgapEv) ? ` · Eg=${reaction.bandgapEv} eV` : ''}`
+      : '';
+    const thermalEpi = hasNaclReference
+      ? `Tm=1074 K · Tb=1738 K · p≈1 atm${mechTag}`
+      : hasCalibratedThermal
+        ? `Tm=${reaction.melt ?? '—'} K · ${reaction.transition === 'sublimation' ? 'Tsub' : 'Tb'}=${reaction.boil} K${mechTag}`
+        : `${reaction.state || 'T/P: 298 K · 1 atm'}${mechTag}`;
+    const freeEnergyKJmol = window.NULLA_COMPATIBILITY?.evaluateFreeEnergyKJmol?.(reaction.enthalpy, reaction.entropyJmolK, temperatureK);
+    const dGTag = freeEnergyKJmol !== null && freeEnergyKJmol !== undefined ? ` · ΔG°(${temperatureK}K)=${freeEnergyKJmol} kJ/mol` : '';
+    const enthalpyDisplay = reaction.enthalpy !== undefined && reaction.enthalpy !== null
+      ? (reaction.enthalpy < 0 ? `${reaction.enthalpy} kJ/mol (EXO)${dGTag}` : `${reaction.enthalpy} kJ/mol (ENDO)${dGTag}`)
+      : '—';
+    const seal = window.NULLA_COMPATIBILITY?.computeChronolithSeal?.(`${reaction.formula}|${temperatureK}|${reaction.enthalpy ?? 'ND'}`);
+    const sealTag = seal ? ` · [${seal}]` : '';
     updateTelemetry(
       `${reaction.formula} · ${reaction.name}`,
-      `${tr('formulaLabel')}: ${reaction.formula} | ${reaction.atoms.map(g => (EL[g.z]?.s || g.z) + '×' + g.c).join(' + ')}`,
+      formulaWithEq,
       `${reaction.type || 'COMPOUND'} · ${reaction.evidenceLevel}`,
       topologyLabel,
-      hasNaclReference ? 'Tm=1074 K · Tb=1738 K · p≈1 atm' : (reaction.state || 'T/P: 298 K · 1 atm'),
-      reaction.enthalpy !== undefined && reaction.enthalpy !== null ? (reaction.enthalpy < 0 ? `${reaction.enthalpy} kJ/mol (EXOTHERMIC)` : `${reaction.enthalpy} kJ/mol (ENDOTHERMIC)`) : '—',
+      thermalEpi,
+      enthalpyDisplay,
       reaction.dipole !== undefined && reaction.dipole !== null ? `${reaction.dipole} Debye (${reaction.dipole > 0 ? 'POLAR' : 'NON-POLAR'})` : tr('dataUnavailable'),
       stabilityDisplay,
-      reaction.note ? `${reaction.note} · ${evidenceLabel}` : evidenceLabel
+      reaction.note ? `${reaction.note} · ${evidenceLabel}${sealTag}` : `${evidenceLabel}${sealTag}`
     );
   }
 
@@ -2874,6 +2908,20 @@ window.addEventListener('DOMContentLoaded', function() {
       const c = temperatureK - 273;
       if (tempVal) tempVal.textContent = `${temperatureK} K (${c > 0 ? '+' + c : c}°C)`;
       updateThermalStatus();
+      if (activeReactionRef && activeStructureId.startsWith('compound-')) {
+        const freeEnergyKJmol = window.NULLA_COMPATIBILITY?.evaluateFreeEnergyKJmol?.(
+          activeReactionRef.enthalpy,
+          activeReactionRef.entropyJmolK,
+          temperatureK
+        );
+        if (hudEnthalpy && activeReactionRef.enthalpy !== undefined && activeReactionRef.enthalpy !== null) {
+          const dGTag = freeEnergyKJmol !== null && freeEnergyKJmol !== undefined ? ` · ΔG°(${temperatureK}K)=${freeEnergyKJmol} kJ/mol` : '';
+          hudEnthalpy.textContent = activeReactionRef.enthalpy < 0
+            ? `${activeReactionRef.enthalpy} kJ/mol (EXO)${dGTag}`
+            : `${activeReactionRef.enthalpy} kJ/mol (ENDO)${dGTag}`;
+        }
+        evaluateChemicalCompatibility(activeReactionRef);
+      }
       window.dispatchEvent(new CustomEvent('nulla:temperature',{detail:{temperatureK,phase:phaseAtTemperature(activeThermalProfile,temperatureK).key}}));
     });
   }
@@ -3046,6 +3094,66 @@ window.addEventListener('DOMContentLoaded', function() {
 
     const blob = new Blob([xyzText], { type: 'text/plain;charset=utf-8' });
     downloadBlob(blob, 'molecule_structure_3d.xyz');
+  }
+
+  function exportCIFFile() {
+    playTone(920, 'sine', 0.2);
+    if (activeAtoms.length === 0) return;
+    if (!calibratedGeometryExportAllowed()) return;
+
+    const coordsA = activeAtoms.map(a => ({
+      sym: a.elData?.s || 'X',
+      x: a.currentPos.x * angstromPerWorldUnit,
+      y: a.currentPos.y * angstromPerWorldUnit,
+      z: a.currentPos.z * angstromPerWorldUnit
+    }));
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    coordsA.forEach(p => {
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+      if (p.z < minZ) minZ = p.z; if (p.z > maxZ) maxZ = p.z;
+    });
+    const padA = Number.isFinite(activeReactionRef?.latticeA) ? activeReactionRef.latticeA : 4.0;
+    const cellA = Math.max(padA, (maxX - minX) + 3.5);
+    const cellB = Math.max(padA, (maxY - minY) + 3.5);
+    const cellC = Math.max(padA, (maxZ - minZ) + 3.5);
+    const formulaStr = activeReactionRef?.formula || activeStructureId;
+    const spaceGroup = activeReactionRef?.spaceGroup || 'P 1';
+    const seal = window.NULLA_COMPATIBILITY?.computeChronolithSeal?.(`${formulaStr}|${temperatureK}|${activeAtoms.length}`) || 'CHR-VERIFIED';
+
+    let cifText = `data_NULLA_LABS_${String(activeStructureId).replace(/[^A-Za-z0-9_]/g, '_')}\n`;
+    cifText += `_audit_creation_method            'NULLA-LABS Crystallographic & Molecular Synthesis Engine v101.2'\n`;
+    cifText += `_chemical_formula_sum             '${formulaStr}'\n`;
+    cifText += `_cell_measurement_temperature     ${temperatureK}\n`;
+    cifText += `_symmetry_space_group_name_H-M    '${spaceGroup}'\n`;
+    cifText += `_nulla_chronolith_integrity_seal  '${seal}'\n`;
+    cifText += `_cell_length_a                    ${cellA.toFixed(4)}\n`;
+    cifText += `_cell_length_b                    ${cellB.toFixed(4)}\n`;
+    cifText += `_cell_length_c                    ${cellC.toFixed(4)}\n`;
+    cifText += `_cell_angle_alpha                 90.0000\n`;
+    cifText += `_cell_angle_beta                  90.0000\n`;
+    cifText += `_cell_angle_gamma                 90.0000\n\n`;
+    cifText += `loop_\n`;
+    cifText += `  _atom_site_label\n`;
+    cifText += `  _atom_site_type_symbol\n`;
+    cifText += `  _atom_site_fract_x\n`;
+    cifText += `  _atom_site_fract_y\n`;
+    cifText += `  _atom_site_fract_z\n`;
+    cifText += `  _atom_site_Cartn_x\n`;
+    cifText += `  _atom_site_Cartn_y\n`;
+    cifText += `  _atom_site_Cartn_z\n`;
+
+    coordsA.forEach((p, idx) => {
+      const fx = ((p.x - minX + 1.75) / cellA).toFixed(5);
+      const fy = ((p.y - minY + 1.75) / cellB).toFixed(5);
+      const fz = ((p.z - minZ + 1.75) / cellC).toFixed(5);
+      cifText += `  ${(p.sym + (idx + 1)).padEnd(6)} ${p.sym.padEnd(4)} ${fx} ${fy} ${fz} ${p.x.toFixed(4)} ${p.y.toFixed(4)} ${p.z.toFixed(4)}\n`;
+    });
+
+    const blob = new Blob([cifText], { type: 'chemical/x-cif;charset=utf-8' });
+    downloadBlob(blob, `${String(activeStructureId).replace(/[^A-Za-z0-9_-]/g, '_')}.cif`);
   }
 
   function showVerifiedSuggestions() {
@@ -3573,9 +3681,12 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // EXPORT .XYZ Button
+  // EXPORT .XYZ & .CIF Buttons
   if (btnExportXyz) {
     btnExportXyz.addEventListener('click', exportXYZFile);
+  }
+  if (btnExportCif) {
+    btnExportCif.addEventListener('click', exportCIFFile);
   }
 
   // UNDO Button
