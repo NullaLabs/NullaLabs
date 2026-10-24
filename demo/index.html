@@ -31,7 +31,7 @@
     #webgl-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; display:block; z-index:0; touch-action:none; }
 
     /* ─── NEXT-GEN 3D iOS / VISION-OS SOLID CRYSTAL BUTTON SYSTEM (NO SE TRANSPARENTAN) ─── */
-    .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph, #btn-ftir, #btn-homo-lumo,
+    .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph, #btn-ftir, #btn-homo-lumo, #btn-mep,
     #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif, #btn-segre-inject-isotope, #btn-inspect-in-segre,
     #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr,
     #btn-quality-low, #btn-quality-med, #btn-quality-ultra,
@@ -56,7 +56,7 @@
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt, #btn-segre-chart, #btn-inspect-in-segre {
+    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt, #btn-segre-chart, #btn-inspect-in-segre, #btn-mep {
       border-color:rgba(0,240,255,0.72) !important;
       background:linear-gradient(180deg, #16465c 0%, #103345 24%, #081e2b 50%, #0d2a3a 76%, #041018 100%) !important;
       box-shadow:0 4px 14px rgba(0,240,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
@@ -96,7 +96,7 @@
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    .ios-crystal-btn:hover, #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover, #btn-ftir:hover, #btn-homo-lumo:hover,
+    .ios-crystal-btn:hover, #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover, #btn-ftir:hover, #btn-homo-lumo:hover, #btn-mep:hover,
     #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover, #btn-segre-inject-isotope:hover, #btn-inspect-in-segre:hover,
     #btn-tutorial:hover, #btn-docs:hover, #btn-quiz:hover, #btn-share-url:hover, #btn-webxr:hover,
     #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover,
@@ -107,7 +107,7 @@
       border-color:#FFFFFF !important;
       box-shadow:0 8px 24px rgba(0,240,255,0.38), inset 0 2px 0.5px #FFFFFF, inset 0 3.5px 2px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    .ios-crystal-btn:active, #btn-reassemble:active, #btn-open-pt:active, #btn-orbitals:active, #btn-visual-mode:active, #btn-xrd:active, #btn-synkronia:active, #btn-polymorph:active, #btn-ftir:active, #btn-homo-lumo:active,
+    .ios-crystal-btn:active, #btn-reassemble:active, #btn-open-pt:active, #btn-orbitals:active, #btn-visual-mode:active, #btn-xrd:active, #btn-synkronia:active, #btn-polymorph:active, #btn-ftir:active, #btn-homo-lumo:active, #btn-mep:active,
     #btn-segre-inject-isotope:active, #btn-inspect-in-segre:active,
     #btn-measure:active, #btn-export-gltf:active, #btn-export-usdz:active, #btn-export-xyz:active, #btn-export-cif:active,
     #btn-tutorial:active, #btn-docs:active, #btn-quiz:active, #btn-share-url:active, #btn-webxr:active,
@@ -575,7 +575,8 @@
       <button id="btn-inspect-in-segre" data-i18n="inspectInSegre" title="Localizar y examinar el isótopo nuclear de la estructura activa en la Carta de Segrè (N, Z)">⚛️ EN SEGRÈ (N, Z)</button>
       <button id="btn-homo-lumo" data-i18n="homoLumo" title="Orbitales Moleculares de Frontera HOMO / LUMO, Brecha de Banda Eg y Reactividad Cuántica (Pearson)">⚡ HOMO / LUMO (Eg)</button>
     </div>
-    <div class="experience-science" style="display:grid; grid-template-columns: 1fr; gap:4px; margin-top:4px;">
+    <div class="experience-science" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-mep" data-i18n="mepSurface" title="Superficie de Potencial Electrostático Molecular (MEP / ESP) en Envoltura de Van der Waals, Momento Dipolar μ y Sitios de Enlace de H">🌐 SUPERFICIE MEP (ESP)</button>
       <button id="btn-export-xyz" data-i18n="exportXyz">💾 EXPORTAR .XYZ</button>
     </div>
 
@@ -1069,6 +1070,92 @@
           </div>
           <div style="font-size:7.5px; color:#00FFCF; margin-top:4px; line-height:1.3;">
             💡 Moléculas con gran Eg son <b>químicamente duras</b> (alta estabilidad cinética, baja reactividad térmica); un Eg estrecho confiere <b>blandura y polarizabilidad</b>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOLECULAR ELECTROSTATIC POTENTIAL (MEP / ESP) & DIPOLE MODAL -->
+  <div id="mep-modal" role="dialog" aria-modal="true" aria-labelledby="mep-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:180; width:min(960px, calc(100vw - 20px)); max-height:88vh; overflow-y:auto; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.18) 100%); border:1px solid rgba(0,240,255,0.65); border-radius:20px; padding:18px; box-shadow:0 24px 64px rgba(0,0,0,0.68), inset 0 1.5px 1px rgba(255,255,255,0.8); backdrop-filter:blur(22px) saturate(1.9); -webkit-backdrop-filter:blur(22px) saturate(1.9); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.22); padding-bottom:8px; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="mep-modal-title" style="font-size:11.5px; font-weight:900; color:#00F0FF; letter-spacing:1.5px;">🌐 POTENCIAL ELECTROSTÁTICO MOLECULAR (MEP / ESP) // SUPERFICIE VDW</span>
+        <span class="hud-badge experience-science">COULOMB · GRADIENTE CROMÁTICO ROJO/AZUL · MOMENTO DIPOLAR (DEBYE)</span>
+      </div>
+      <button id="btn-close-mep" data-i18n-aria-label="closeMepLabel" aria-label="Cerrar analizador de potencial electrostático" style="background:none; border:none; color:#FFFFFF; font-size:16px; cursor:pointer; padding:2px 8px;">✕</button>
+    </div>
+
+    <!-- Quick action bar: 3D MEP Surface toggles, Dipole Arrow, and Probe Sliders -->
+    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <div style="display:flex; gap:5px; flex-wrap:wrap;" id="mep-mode-selectors">
+        <button id="btn-toggle-mep-surface" class="segre-filter-btn active" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">▶ SUPERFICIE MEP 3D: ACTIVA</button>
+        <button id="btn-toggle-mep-dipole" class="segre-filter-btn active" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">⚡ VECTOR DIPOLAR μ: ACTIVO</button>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <label style="font-size:8px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:4px;">
+          OPACIDAD:
+          <input type="range" id="mep-opacity-slider" min="0.2" max="1.0" step="0.05" value="0.75" style="width:65px; accent-color:#00F0FF; cursor:pointer; height:4px;">
+        </label>
+        <label style="font-size:8px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:4px;">
+          SONDA VDW:
+          <input type="range" id="mep-probe-slider" min="0.8" max="2.0" step="0.1" value="1.2" style="width:65px; accent-color:#00F0FF; cursor:pointer; height:4px;">
+        </label>
+      </div>
+    </div>
+
+    <!-- Main grid: MEP Distribution Canvas on left, Inspector Card & Polar Descriptors on right -->
+    <div style="display:grid; grid-template-columns: 1fr 310px; gap:14px; align-items:start;">
+      <!-- Canvas Container -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="position:relative; width:100%; border:1px solid rgba(255,255,255,0.22); border-radius:12px; background:linear-gradient(180deg, #070e18 0%, #03060a 100%); overflow:hidden; box-shadow:inset 0 0 20px rgba(0,0,0,0.8);">
+          <canvas id="mep-canvas" width="580" height="340" style="display:block; width:100%; height:auto; cursor:crosshair;"></canvas>
+          <div id="mep-canvas-tooltip" style="display:none; position:absolute; pointer-events:none; padding:4px 8px; border-radius:6px; background:rgba(8,18,32,0.95); border:1px solid #00F0FF; color:#FFF; font-size:8.5px; font-family:'Fira Code',monospace; box-shadow:0 4px 12px rgba(0,0,0,0.8); z-index:10;"></div>
+        </div>
+        <!-- Chromatic Scale Legend -->
+        <div style="display:flex; flex-wrap:wrap; gap:8px; font-size:8px; justify-content:center; color:rgba(255,255,255,0.85);">
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#FF1744; display:inline-block;"></span> <span>V &lt; -1.5 eV (Rico en e⁻ / Nucleófilo)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#FF9100; display:inline-block;"></span> <span>V ≈ -0.5 eV (Débilmente Negativo)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#00E676; display:inline-block;"></span> <span>V ≈ 0 eV (Potencial Neutro)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#00E5FF; display:inline-block;"></span> <span>V ≈ +0.8 eV (Electrófilo)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#2979FF; display:inline-block;"></span> <span>V &gt; +1.5 eV (Deficiente en e⁻ / Ácido)</span></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Inspector Card & Electrostatic Telemetry -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Molecule MEP Card -->
+        <div style="padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.25); background:linear-gradient(180deg, #162438 0%, #0a101a 100%); box-shadow:inset 0 1px 1px rgba(255,255,255,0.3);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.18); padding-bottom:5px; margin-bottom:8px;">
+            <span id="mep-mol-formula" style="font-size:16px; font-weight:900; color:#00FFCF; letter-spacing:1px;">H₂O</span>
+            <span id="mep-polarity-badge" style="padding:2px 7px; border-radius:6px; font-size:7.5px; font-weight:700; background:#1b2432; border:1px solid #00F0FF; color:#00F0FF;">POLAR PRÓTICO</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:8.5px; margin-bottom:8px;">
+            <div><span style="color:rgba(255,255,255,0.6);">DIPOLO |μ|:</span> <strong id="mep-dipole-val" style="color:#FFD700;">1.85 D</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">VECTOR μ:</span> <strong id="mep-dipole-vector" style="color:#FFF;">(0.0, 1.85, 0.0)</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">V(min):</span> <strong id="mep-vmin-val" style="color:#FF1744;">-2.45 eV</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">V(max):</span> <strong id="mep-vmax-val" style="color:#2979FF;">+2.90 eV</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">V(medio):</span> <strong id="mep-vmean-val" style="color:#00FFCF;">0.12 eV</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">VARIANZA σ²:</span> <strong id="mep-variance-val" style="color:#FFF;">2.64 eV²</strong></div>
+          </div>
+          <!-- Hydrogen bonding sites -->
+          <div style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; margin-top:4px;">
+            <div style="font-size:7.5px; color:#FFD700; font-weight:700; margin-bottom:4px;">SITIOS DE ENLACE DE HIDRÓGENO (H-BOND):</div>
+            <div id="mep-hbond-sites" style="display:flex; flex-direction:column; gap:4px; max-height:115px; overflow-y:auto; font-family:'Fira Code',monospace; font-size:8px;">
+              <!-- Dynamic items -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Electrostatic Potential Physical Theory Card -->
+        <div style="padding:10px 12px; border-radius:14px; border:1px solid rgba(0,240,255,0.35); background:linear-gradient(180deg, #091a26 0%, #03080e 100%);">
+          <div style="font-size:8px; font-weight:700; color:#00F0FF; margin-bottom:4px;">ELECTROSTÁTICA COULOMBIANA &amp; POLARIDAD</div>
+          <div style="font-family:'Fira Code',monospace; font-size:8px; color:#FFF; line-height:1.4;">
+            V(r) = Σ (qi / 4πε₀|r - Ri|)<br>
+            μ = Σ qi · ri [Momento Dipolar · 1 e·Å = 4.803 D]
+          </div>
+          <div style="font-size:7.5px; color:#00FFCF; margin-top:4px; line-height:1.3;">
+            💡 Las zonas <b>rojas</b> poseen alta densidad electrónica (receptores de enlace de H); las zonas <b>azules</b> presentan potencial positivo atrayente para aniones y bases de Lewis.
           </div>
         </div>
       </div>

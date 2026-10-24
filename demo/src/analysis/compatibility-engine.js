@@ -1195,6 +1195,233 @@
     };
   }
 
+  // ─── MOLECULAR ELECTROSTATIC POTENTIAL (MEP / ESP) & DIPOLE ENGINE ───
+  const PAULING_ELECTRONEGATIVITIES = {
+    1: 2.20, 2: 0.0, 3: 0.98, 4: 1.57, 5: 2.04, 6: 2.55, 7: 3.04, 8: 3.44, 9: 3.98, 10: 0.0,
+    11: 0.93, 12: 1.31, 13: 1.61, 14: 1.90, 15: 2.19, 16: 2.58, 17: 3.16, 18: 0.0,
+    19: 0.82, 20: 1.00, 21: 1.36, 22: 1.54, 23: 1.63, 24: 1.66, 25: 1.55, 26: 1.83, 27: 1.88, 28: 1.91, 29: 1.90, 30: 1.65,
+    31: 1.81, 32: 2.01, 33: 2.18, 34: 2.55, 35: 2.96, 36: 3.00, 37: 0.82, 38: 0.95, 39: 1.22, 40: 1.33,
+    41: 1.60, 42: 2.16, 43: 1.90, 44: 2.20, 45: 2.28, 46: 2.20, 47: 1.93, 48: 1.69, 49: 1.78, 50: 1.96,
+    51: 2.05, 52: 2.10, 53: 2.66, 54: 2.60, 55: 0.79, 56: 0.89, 72: 1.30, 73: 1.50, 74: 2.36, 78: 2.28,
+    79: 2.54, 80: 2.00, 82: 2.33, 83: 2.02, 92: 1.38
+  };
+
+  const VDW_RADII_ANGSTROM = {
+    1: 1.20, 2: 1.40, 3: 1.82, 4: 1.53, 5: 1.92, 6: 1.70, 7: 1.55, 8: 1.52, 9: 1.47, 10: 1.54,
+    11: 2.27, 12: 1.73, 13: 1.84, 14: 2.10, 15: 1.80, 16: 1.80, 17: 1.75, 18: 1.88,
+    19: 2.75, 20: 2.31, 22: 2.15, 26: 2.05, 28: 1.63, 29: 1.40, 30: 1.39, 35: 1.85, 53: 1.98
+  };
+
+  function computeMolecularElectrostaticPotential(atomsList = [], bondsList = [], temperatureK = 298) {
+    if (!Array.isArray(atomsList) || atomsList.length === 0) {
+      return {
+        formula: 'VACÍO',
+        atomCount: 0,
+        dipoleDebye: 0.0,
+        dipoleVector: { x: 0, y: 0, z: 0 },
+        vMinEv: 0.0,
+        vMaxEv: 0.0,
+        vMeanEv: 0.0,
+        varianceEv2: 0.0,
+        polarityRegime: 'NO_POLAR',
+        polarityLabel: 'No Polar (μ ≈ 0 D)',
+        hydrogenBondAcceptors: [],
+        hydrogenBondDonors: [],
+        mepDistributionCurve: [],
+        surfacePoints: [],
+        chronolithSeal: computeChronolithSeal('MEP|EMPTY')
+      };
+    }
+
+    const cleanFormula = atomsList.map(a => a.symbol || a.s || 'X').join('').replace(/[^A-Za-z0-9]/g, '');
+
+    // Step 1: Assign partial charges q_i
+    const charges = new Array(atomsList.length).fill(0.0);
+    const atomEN = atomsList.map(a => {
+      const z = Number(a.z) || 1;
+      if (Number.isFinite(a.electronegativity)) return a.electronegativity;
+      if (Number.isFinite(a.en)) return a.en;
+      const el = root.NULLA_PERIODIC_TABLE?.[z];
+      if (el && Number.isFinite(el.electronegativity)) return el.electronegativity;
+      return PAULING_ELECTRONEGATIVITIES[z] || 2.20;
+    });
+
+    if (Array.isArray(bondsList) && bondsList.length > 0) {
+      bondsList.forEach(bond => {
+        const i = Number(bond.a);
+        const j = Number(bond.b);
+        if (i >= 0 && i < atomsList.length && j >= 0 && j < atomsList.length) {
+          const deltaEN = atomEN[j] - atomEN[i];
+          const absDelta = Math.abs(deltaEN);
+          const transferred = (0.22 * absDelta + 0.045 * absDelta * absDelta) * (bond.order || 1);
+          if (deltaEN > 0) {
+            charges[j] -= transferred;
+            charges[i] += transferred;
+          } else if (deltaEN < 0) {
+            charges[i] -= transferred;
+            charges[j] += transferred;
+          }
+        }
+      });
+    } else {
+      const meanEN = atomEN.reduce((s, v) => s + v, 0) / Math.max(1, atomEN.length);
+      atomsList.forEach((_, idx) => {
+        charges[idx] = (meanEN - atomEN[idx]) * 0.32;
+      });
+    }
+
+    // Force neutrality
+    const totalCharge = charges.reduce((s, v) => s + v, 0);
+    const netCorrection = totalCharge / atomsList.length;
+    atomsList.forEach((_, idx) => {
+      charges[idx] -= netCorrection;
+    });
+
+    // Step 2: Center of mass and Dipole Vector μ = Σ q_i * r_i
+    let comX = 0, comY = 0, comZ = 0;
+    let totalMass = 0;
+    atomsList.forEach((a, idx) => {
+      const mass = Number(a.mass) || Number(a.m) || 12.0;
+      const x = Number(a.x) || 0;
+      const y = Number(a.y) || 0;
+      const z = Number(a.zCoord !== undefined ? a.zCoord : (a.z_pos !== undefined ? a.z_pos : 0));
+      comX += x * mass;
+      comY += y * mass;
+      comZ += z * mass;
+      totalMass += mass;
+    });
+    comX /= Math.max(1e-5, totalMass);
+    comY /= Math.max(1e-5, totalMass);
+    comZ /= Math.max(1e-5, totalMass);
+
+    let muX = 0, muY = 0, muZ = 0;
+    atomsList.forEach((a, idx) => {
+      const x = (Number(a.x) || 0) - comX;
+      const y = (Number(a.y) || 0) - comY;
+      const z = (Number(a.zCoord !== undefined ? a.zCoord : (a.z_pos !== undefined ? a.z_pos : 0))) - comZ;
+      const q = charges[idx];
+      muX += q * x;
+      muY += q * y;
+      muZ += q * z;
+    });
+
+    // 1 e * Å = 4.8032 Debye
+    const debyeConv = 4.8032;
+    const dipoleX = Number((muX * debyeConv).toFixed(2));
+    const dipoleY = Number((muY * debyeConv).toFixed(2));
+    const dipoleZ = Number((muZ * debyeConv).toFixed(2));
+    const dipoleDebye = Number(Math.sqrt(dipoleX * dipoleX + dipoleY * dipoleY + dipoleZ * dipoleZ).toFixed(2));
+
+    let polarityRegime = 'NO_POLAR';
+    let polarityLabel = 'Apolar / No Polar (μ < 0.15 D)';
+    if (dipoleDebye >= 2.0) {
+      polarityRegime = 'FUERTEMENTE_POLAR';
+      polarityLabel = `Fuertemente Polar (μ = ${dipoleDebye} D)`;
+    } else if (dipoleDebye >= 0.8) {
+      polarityRegime = 'MODERADAMENTE_POLAR';
+      polarityLabel = `Polar Prótico/Dipolar (μ = ${dipoleDebye} D)`;
+    } else if (dipoleDebye >= 0.15) {
+      polarityRegime = 'DEBILMENTE_POLAR';
+      polarityLabel = `Débilmente Polar (μ = ${dipoleDebye} D)`;
+    }
+
+    // Step 3: Sample Electrostatic Potential V(r) on the Van der Waals envelope
+    // V(r) = Σ (14.3996 * q_i / |r - R_i|) in eV
+    const COULOMB_K_EV_ANGSTROM = 14.3996;
+    const samplesPerAtom = 26;
+    const surfacePoints = [];
+    const phiGolden = Math.PI * (3.0 - Math.sqrt(5.0)); // Golden angle
+
+    atomsList.forEach((atom, aIdx) => {
+      const z = Number(atom.z) || 1;
+      const vdwR = VDW_RADII_ANGSTROM[z] || 1.65;
+      const ax = Number(atom.x) || 0;
+      const ay = Number(atom.y) || 0;
+      const az = Number(atom.zCoord !== undefined ? atom.zCoord : 0);
+
+      for (let s = 0; s < samplesPerAtom; s++) {
+        const yFrac = 1.0 - (s / (samplesPerAtom - 1.0)) * 2.0;
+        const radiusAtY = Math.sqrt(Math.max(0.0, 1.0 - yFrac * yFrac));
+        const theta = phiGolden * s;
+        const px = ax + Math.cos(theta) * radiusAtY * vdwR;
+        const py = ay + yFrac * vdwR;
+        const pz = az + Math.sin(theta) * radiusAtY * vdwR;
+
+        // Electrostatic potential at (px, py, pz)
+        let vEv = 0.0;
+        for (let j = 0; j < atomsList.length; j++) {
+          const jx = Number(atomsList[j].x) || 0;
+          const jy = Number(atomsList[j].y) || 0;
+          const jz = Number(atomsList[j].zCoord !== undefined ? atomsList[j].zCoord : 0);
+          const dist = Math.sqrt((px - jx) ** 2 + (py - jy) ** 2 + (pz - jz) ** 2);
+          vEv += (COULOMB_K_EV_ANGSTROM * charges[j]) / Math.max(0.4, dist);
+        }
+
+        surfacePoints.push({
+          x: Number(px.toFixed(3)),
+          y: Number(py.toFixed(3)),
+          z: Number(pz.toFixed(3)),
+          vEv: Number(vEv.toFixed(2)),
+          parentAtomIndex: aIdx
+        });
+      }
+    });
+
+    const vValues = surfacePoints.map(p => p.vEv);
+    const vMinEv = Number(Math.min(...vValues).toFixed(2));
+    const vMaxEv = Number(Math.max(...vValues).toFixed(2));
+    const vMeanEv = Number((vValues.reduce((s, v) => s + v, 0) / Math.max(1, vValues.length)).toFixed(2));
+    const varianceEv2 = Number((vValues.reduce((s, v) => s + (v - vMeanEv) ** 2, 0) / Math.max(1, vValues.length)).toFixed(2));
+
+    // Hydrogen bonding sites (Acceptors have V < -0.8 eV, Donors have V > +0.9 eV)
+    const hydrogenBondAcceptors = [];
+    const hydrogenBondDonors = [];
+    atomsList.forEach((a, idx) => {
+      const z = Number(a.z) || 1;
+      const sym = a.symbol || a.s || 'X';
+      const q = Number(charges[idx].toFixed(3));
+      if (q <= -0.15 || (z === 8 || z === 7 || z === 9 || z === 17)) {
+        hydrogenBondAcceptors.push({ index: idx, z, symbol: sym, charge: q, role: 'Aceptor de Enlace de H (Región Rica en e⁻)' });
+      } else if (q >= +0.12 && (z === 1 || atomEN[idx] <= 2.2)) {
+        hydrogenBondDonors.push({ index: idx, z, symbol: sym, charge: q, role: 'Dador de Enlace de H (Protón Ácido / Sitio Electrofílico)' });
+      }
+    });
+
+    // Step 4: Distribution curve for 2D Canvas (histogram of V across -6 eV to +6 eV)
+    const bins = 60;
+    const vRangeMin = -6.0;
+    const vRangeMax = 6.0;
+    const binStep = (vRangeMax - vRangeMin) / bins;
+    const mepDistributionCurve = [];
+    for (let b = 0; b < bins; b++) {
+      const bCenter = vRangeMin + (b + 0.5) * binStep;
+      const countInBin = vValues.filter(v => v >= bCenter - binStep / 2 && v < bCenter + binStep / 2).length;
+      mepDistributionCurve.push({
+        vEv: Number(bCenter.toFixed(2)),
+        densityPct: Number(((countInBin / Math.max(1, vValues.length)) * 100).toFixed(1))
+      });
+    }
+
+    return {
+      formula: cleanFormula,
+      atomCount: atomsList.length,
+      charges: charges.map(q => Number(q.toFixed(3))),
+      dipoleDebye,
+      dipoleVector: { x: dipoleX, y: dipoleY, z: dipoleZ },
+      vMinEv,
+      vMaxEv,
+      vMeanEv,
+      varianceEv2,
+      polarityRegime,
+      polarityLabel,
+      hydrogenBondAcceptors,
+      hydrogenBondDonors,
+      mepDistributionCurve,
+      surfacePoints,
+      chronolithSeal: computeChronolithSeal(`MEP|${cleanFormula}|${dipoleDebye}|${vMinEv}|${vMaxEv}|${temperatureK}`)
+    };
+  }
+
   root.NULLA_COMPATIBILITY = Object.freeze({
     chemical,
     nuclear,
@@ -1210,6 +1437,7 @@
     computePaulingPartialCharge,
     relaxAtomicStructure,
     computeFTIRVibrationalSpectrum,
-    computeHOMOLUMOProperties
+    computeHOMOLUMOProperties,
+    computeMolecularElectrostaticPotential
   });
 })(globalThis);

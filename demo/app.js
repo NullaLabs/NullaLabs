@@ -581,6 +581,8 @@ window.addEventListener('DOMContentLoaded', function() {
   let orbitalParticleSystem = null;
   let orbitalCycleIndex = 0;
   let molecularHOMOLUMOSystem = null;
+  let molecularMEPSystem = null;
+  let molecularDipoleArrow = null;
 
   function generateAtomicOrbitalCloud(z) {
     if (orbitalParticleSystem) {
@@ -812,6 +814,16 @@ window.addEventListener('DOMContentLoaded', function() {
       molecularHOMOLUMOSystem.geometry.dispose();
       molecularHOMOLUMOSystem.material.dispose();
       molecularHOMOLUMOSystem = null;
+    }
+    if (molecularMEPSystem) {
+      moleculeGroup.remove(molecularMEPSystem);
+      molecularMEPSystem.geometry.dispose();
+      molecularMEPSystem.material.dispose();
+      molecularMEPSystem = null;
+    }
+    if (molecularDipoleArrow) {
+      moleculeGroup.remove(molecularDipoleArrow);
+      molecularDipoleArrow = null;
     }
 
     // Fade out existing atoms that aren't needed
@@ -5093,6 +5105,430 @@ window.addEventListener('DOMContentLoaded', function() {
       if (orbitalTooltip) orbitalTooltip.style.display = 'none';
       hoveredOrbitalLevel = null;
       drawOrbitalEnergyLadder();
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // MOLECULAR ELECTROSTATIC POTENTIAL (MEP / ESP) & DIPOLE ENGINE
+  // ═══════════════════════════════════════════════════════════════
+  const btnMep = document.getElementById('btn-mep');
+  const mepModal = document.getElementById('mep-modal');
+  const btnCloseMep = document.getElementById('btn-close-mep');
+  const mepCanvas = document.getElementById('mep-canvas');
+  const mepTooltip = document.getElementById('mep-canvas-tooltip');
+  const mepOpacitySlider = document.getElementById('mep-opacity-slider');
+  const mepProbeSlider = document.getElementById('mep-probe-slider');
+  const btnToggleMepSurface = document.getElementById('btn-toggle-mep-surface');
+  const btnToggleMepDipole = document.getElementById('btn-toggle-mep-dipole');
+
+  let activeMEPData = null;
+  let isMEPSurfaceActive = true;
+  let isMEPDipoleActive = true;
+  let mepOpacity = 0.75;
+  let mepProbeRadius = 1.2;
+  let hoveredMEPPotential = null;
+
+  function clearMEPSurface() {
+    if (molecularMEPSystem) {
+      moleculeGroup.remove(molecularMEPSystem);
+      molecularMEPSystem.geometry.dispose();
+      molecularMEPSystem.material.dispose();
+      molecularMEPSystem = null;
+    }
+  }
+
+  function clearDipoleArrow() {
+    if (molecularDipoleArrow) {
+      moleculeGroup.remove(molecularDipoleArrow);
+      molecularDipoleArrow = null;
+    }
+  }
+
+  // Smooth RGB diverging colormap for electrostatic potential V (in eV)
+  // Red (V < -1.5) -> Yellow (V ~ -0.5) -> Green (V = 0) -> Cyan (V ~ +0.8) -> Blue (V > +1.5)
+  function getMEPColor(v) {
+    const clamped = Math.max(-2.5, Math.min(2.5, v));
+    let r = 0, g = 0, b = 0;
+    if (clamped < 0) {
+      // Negative potential: Red to Light Green
+      const t = (clamped + 2.5) / 2.5; // 0 (pure red) to 1 (green)
+      r = 1.0 - t * 0.9;
+      g = t * 0.9 + (1.0 - t) * 0.09;
+      b = (1.0 - t) * 0.26 + t * 0.46;
+    } else {
+      // Positive potential: Light Green to Royal Blue
+      const t = clamped / 2.5; // 0 (green) to 1 (royal blue)
+      r = (1.0 - t) * 0.1 + t * 0.16;
+      g = (1.0 - t) * 0.9 + t * 0.47;
+      b = (1.0 - t) * 0.46 + t * 1.0;
+    }
+    return { r, g, b };
+  }
+
+  function generateMEPSurface(opacity = mepOpacity, probeScale = mepProbeRadius) {
+    clearMEPSurface();
+    if (!isMEPSurfaceActive) return;
+
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (!realAtoms.length) return;
+
+    if (window.NULLA_COMPATIBILITY?.computeMolecularElectrostaticPotential) {
+      activeMEPData = window.NULLA_COMPATIBILITY.computeMolecularElectrostaticPotential(realAtoms, activeBonds, temperatureK);
+    }
+    if (!activeMEPData || !activeMEPData.surfacePoints.length) return;
+
+    const count = activeMEPData.surfacePoints.length;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    activeMEPData.surfacePoints.forEach((pt, idx) => {
+      // Surface position scaled by probe scale
+      const parentAtom = realAtoms[pt.parentAtomIndex] || realAtoms[0];
+      const basePos = parentAtom.mesh?.position || parentAtom.basePos || new THREE.Vector3(0, 0, 0);
+
+      // Relative displacement from parent atom
+      const dx = (pt.x - (Number(parentAtom.x) || 0)) * probeScale;
+      const dy = (pt.y - (Number(parentAtom.y) || 0)) * probeScale;
+      const dz = (pt.z - (Number(parentAtom.zCoord !== undefined ? parentAtom.zCoord : 0))) * probeScale;
+
+      positions[idx * 3] = basePos.x + dx;
+      positions[idx * 3 + 1] = basePos.y + dy;
+      positions[idx * 3 + 2] = basePos.z + dz;
+
+      const col = getMEPColor(pt.vEv);
+      colors[idx * 3] = col.r;
+      colors[idx * 3 + 1] = col.g;
+      colors[idx * 3 + 2] = col.b;
+    });
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 1.15,
+      vertexColors: true,
+      transparent: true,
+      opacity: Math.max(0.15, Math.min(1.0, opacity)),
+      blending: THREE.NormalBlending,
+      depthWrite: false
+    });
+
+    molecularMEPSystem = new THREE.Points(geometry, material);
+    moleculeGroup.add(molecularMEPSystem);
+  }
+
+  function generateDipoleArrow() {
+    clearDipoleArrow();
+    if (!isMEPDipoleActive || !activeMEPData) return;
+    if (activeMEPData.dipoleDebye < 0.12) return;
+
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (!realAtoms.length) return;
+
+    // Calculate center of mass in 3D scene space
+    const origin = new THREE.Vector3(0, 0, 0);
+    let totalWeight = 0;
+    realAtoms.forEach(a => {
+      const pos = a.mesh?.position || a.basePos || new THREE.Vector3(0, 0, 0);
+      const mass = Number(a.mass) || Number(a.m) || 12.0;
+      origin.addScaledVector(pos, mass);
+      totalWeight += mass;
+    });
+    origin.divideScalar(Math.max(1e-5, totalWeight));
+
+    const dir = new THREE.Vector3(
+      activeMEPData.dipoleVector.x,
+      activeMEPData.dipoleVector.y,
+      activeMEPData.dipoleVector.z
+    );
+    if (dir.lengthSq() < 1e-4) return;
+    dir.normalize();
+
+    const arrowLength = Math.max(4.5, Math.min(22.0, activeMEPData.dipoleDebye * 4.2));
+    molecularDipoleArrow = new THREE.ArrowHelper(dir, origin, arrowLength, 0xFFD700, 2.2, 1.4);
+    moleculeGroup.add(molecularDipoleArrow);
+  }
+
+  function refreshMEPSpectroscopy() {
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (!realAtoms.length) return;
+
+    if (window.NULLA_COMPATIBILITY?.computeMolecularElectrostaticPotential) {
+      activeMEPData = window.NULLA_COMPATIBILITY.computeMolecularElectrostaticPotential(realAtoms, activeBonds, temperatureK);
+    }
+    if (!activeMEPData) return;
+
+    const elFormula = document.getElementById('mep-mol-formula');
+    const elPolarity = document.getElementById('mep-polarity-badge');
+    const elDipole = document.getElementById('mep-dipole-val');
+    const elDipoleVector = document.getElementById('mep-dipole-vector');
+    const elVmin = document.getElementById('mep-vmin-val');
+    const elVmax = document.getElementById('mep-vmax-val');
+    const elVmean = document.getElementById('mep-vmean-val');
+    const elVariance = document.getElementById('mep-variance-val');
+    const elHbond = document.getElementById('mep-hbond-sites');
+
+    const formulaStr = currentReaction?.formula || activeMEPData.formula || 'H₂O';
+    if (elFormula) elFormula.textContent = formulaStr;
+    if (elPolarity) {
+      elPolarity.textContent = activeMEPData.polarityRegime.replace(/_/g, ' ');
+      if (activeMEPData.dipoleDebye >= 2.0) {
+        elPolarity.style.color = '#FF1744';
+        elPolarity.style.borderColor = '#FF1744';
+      } else if (activeMEPData.dipoleDebye >= 0.8) {
+        elPolarity.style.color = '#00F0FF';
+        elPolarity.style.borderColor = '#00F0FF';
+      } else {
+        elPolarity.style.color = '#00FF9D';
+        elPolarity.style.borderColor = '#00FF9D';
+      }
+    }
+    if (elDipole) elDipole.textContent = `${activeMEPData.dipoleDebye.toFixed(2)} D`;
+    if (elDipoleVector) {
+      elDipoleVector.textContent = `(${activeMEPData.dipoleVector.x.toFixed(2)}, ${activeMEPData.dipoleVector.y.toFixed(2)}, ${activeMEPData.dipoleVector.z.toFixed(2)}) D`;
+    }
+    if (elVmin) elVmin.textContent = `${activeMEPData.vMinEv.toFixed(2)} eV`;
+    if (elVmax) elVmax.textContent = `${activeMEPData.vMaxEv.toFixed(2)} eV`;
+    if (elVmean) elVmean.textContent = `${activeMEPData.vMeanEv.toFixed(2)} eV`;
+    if (elVariance) elVariance.textContent = `${activeMEPData.varianceEv2.toFixed(2)} eV²`;
+
+    if (elHbond) {
+      elHbond.innerHTML = '';
+      const allSites = [
+        ...activeMEPData.hydrogenBondAcceptors.map(s => ({ ...s, tag: 'ACEPTOR (ROJO)', tagCol: '#FF1744' })),
+        ...activeMEPData.hydrogenBondDonors.map(s => ({ ...s, tag: 'DADOR (AZUL)', tagCol: '#2979FF' }))
+      ];
+      if (!allSites.length) {
+        elHbond.innerHTML = '<div style="color:rgba(255,255,255,0.5);">Sin sitios activos de puente de hidrógeno.</div>';
+      } else {
+        allSites.forEach(s => {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; background:rgba(255,255,255,0.06); cursor:pointer;';
+          row.title = `Átomo ${s.symbol} (Z=${s.z}) · Carga q=${s.charge} e`;
+          row.innerHTML = `<span style="color:${s.tagCol}; font-weight:700;">${s.symbol}</span> <span style="color:#FFF; font-size:7.5px;">${s.role}</span> <span style="color:#FFD700; font-size:7px;">q=${s.charge > 0 ? '+' : ''}${s.charge} e</span>`;
+          elHbond.appendChild(row);
+        });
+      }
+    }
+
+    drawMEPCanvas();
+    generateMEPSurface(mepOpacity, mepProbeRadius);
+    generateDipoleArrow();
+  }
+
+  function drawMEPCanvas() {
+    if (!mepCanvas || !activeMEPData) return;
+    const ctx = mepCanvas.getContext('2d');
+    const w = mepCanvas.width;
+    const h = mepCanvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const m = { top: 32, right: 30, bottom: 36, left: 48 };
+    const plotW = w - m.left - m.right;
+    const plotH = h - m.top - m.bottom;
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, '#091220');
+    bgGrad.addColorStop(1, '#04070d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    const vMinAxis = -6.0;
+    const vMaxAxis = 6.0;
+    function vToX(v) {
+      return m.left + ((v - vMinAxis) / (vMaxAxis - vMinAxis)) * plotW;
+    }
+
+    const curve = activeMEPData.mepDistributionCurve || [];
+    const maxDensity = Math.max(1, ...curve.map(c => c.densityPct));
+    function dToY(pct) {
+      return m.top + ((maxDensity - pct) / maxDensity) * plotH;
+    }
+
+    // Grid ticks (V from -6 to +6 eV)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    for (let v = -6; v <= 6; v += 2) {
+      const x = vToX(v);
+      ctx.beginPath();
+      ctx.moveTo(x, m.top);
+      ctx.lineTo(x, m.top + plotH);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '8px "Fira Code", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${v > 0 ? '+' : ''}${v} eV`, x, m.top + plotH + 14);
+    }
+
+    // Zero-potential line (V = 0 eV, Neutral boundary)
+    const zeroX = vToX(0.0);
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#00E676';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(zeroX, m.top);
+    ctx.lineTo(zeroX, m.top + plotH);
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#00E676';
+    ctx.font = '7.5px "Orbitron", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('POTENCIAL NEUTRO (V = 0 eV)', zeroX, m.top + 12);
+
+    // Color gradient fill under the distribution curve
+    if (curve.length > 1) {
+      const grad = ctx.createLinearGradient(m.left, 0, m.left + plotW, 0);
+      grad.addColorStop(0.0, '#FF1744');  // -6 eV
+      grad.addColorStop(0.35, '#FF9100'); // -2 eV
+      grad.addColorStop(0.5, '#00E676');  // 0 eV
+      grad.addColorStop(0.65, '#00E5FF'); // +2 eV
+      grad.addColorStop(1.0, '#2979FF');  // +6 eV
+
+      ctx.beginPath();
+      ctx.moveTo(vToX(curve[0].vEv), m.top + plotH);
+      curve.forEach(pt => {
+        ctx.lineTo(vToX(pt.vEv), dToY(pt.densityPct));
+      });
+      ctx.lineTo(vToX(curve[curve.length - 1].vEv), m.top + plotH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.globalAlpha = 0.45;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+
+      // Curve stroke
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      curve.forEach((pt, i) => {
+        const x = vToX(pt.vEv);
+        const y = dToY(pt.densityPct);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    // Min and Max potential indicators
+    const minX = vToX(activeMEPData.vMinEv);
+    ctx.fillStyle = '#FF1744';
+    ctx.font = '8px "Fira Code", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`V(min)=${activeMEPData.vMinEv} eV`, minX, m.top + plotH - 8);
+
+    const maxX = vToX(activeMEPData.vMaxEv);
+    ctx.fillStyle = '#2979FF';
+    ctx.font = '8px "Fira Code", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`V(max)=+${activeMEPData.vMaxEv} eV`, maxX, m.top + 24);
+
+    // Hovered potential line
+    if (hoveredMEPPotential !== null) {
+      const hx = vToX(hoveredMEPPotential);
+      ctx.save();
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = '#00F0FF';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx, m.top);
+      ctx.lineTo(hx, m.top + plotH);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function handleMEPCanvasMouseMove(e) {
+    if (!mepCanvas || !activeMEPData) return;
+    const rect = mepCanvas.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
+
+    const scaleX = mepCanvas.width / rect.width;
+    const canvasX = clientX * scaleX;
+
+    const m = { top: 32, right: 30, bottom: 36, left: 48 };
+    const plotW = mepCanvas.width - m.left - m.right;
+
+    if (canvasX < m.left || canvasX > m.left + plotW) {
+      if (mepTooltip) mepTooltip.style.display = 'none';
+      hoveredMEPPotential = null;
+      drawMEPCanvas();
+      return;
+    }
+
+    const frac = (canvasX - m.left) / plotW;
+    const v = Number((-6.0 + frac * 12.0).toFixed(2));
+    hoveredMEPPotential = v;
+
+    const closestPoint = activeMEPData.mepDistributionCurve.find(c => Math.abs(c.vEv - v) <= 0.25) || { densityPct: 0 };
+
+    if (mepTooltip) {
+      mepTooltip.style.display = 'block';
+      mepTooltip.style.left = `${clientX + 14}px`;
+      mepTooltip.style.top = `${clientY - 12}px`;
+      const region = v < -0.8 ? '<span style="color:#FF1744;">Región Electronegativa (Aceptor H-Bond)</span>'
+        : (v > 0.8 ? '<span style="color:#2979FF;">Región Electropositiva (Dador H-Bond)</span>'
+        : '<span style="color:#00E676;">Región Neutra</span>');
+      mepTooltip.innerHTML = `<strong>V = ${v > 0 ? '+' : ''}${v} eV</strong> (${closestPoint.densityPct}% superficie)<br>${region}`;
+    }
+
+    drawMEPCanvas();
+  }
+
+  if (btnMep) {
+    btnMep.addEventListener('click', () => {
+      playTone(620, 'sine', 0.15);
+      openDialog(mepModal, btnMep);
+      setTimeout(refreshMEPSpectroscopy, 60);
+    });
+  }
+  if (btnCloseMep) {
+    btnCloseMep.addEventListener('click', () => {
+      closeDialog(mepModal);
+    });
+  }
+  if (btnToggleMepSurface) {
+    btnToggleMepSurface.addEventListener('click', () => {
+      isMEPSurfaceActive = !isMEPSurfaceActive;
+      btnToggleMepSurface.textContent = isMEPSurfaceActive ? '▶ SUPERFICIE MEP 3D: ACTIVA' : '⏸ SUPERFICIE MEP 3D: PAUSADA';
+      btnToggleMepSurface.style.color = isMEPSurfaceActive ? '#00FFCF' : '#FFAA00';
+      if (isMEPSurfaceActive) generateMEPSurface(mepOpacity, mepProbeRadius);
+      else clearMEPSurface();
+      playTone(isMEPSurfaceActive ? 580 : 340, 'sine', 0.1);
+    });
+  }
+  if (btnToggleMepDipole) {
+    btnToggleMepDipole.addEventListener('click', () => {
+      isMEPDipoleActive = !isMEPDipoleActive;
+      btnToggleMepDipole.textContent = isMEPDipoleActive ? '⚡ VECTOR DIPOLAR μ: ACTIVO' : '⏸ VECTOR DIPOLAR μ: PAUSADO';
+      btnToggleMepDipole.style.color = isMEPDipoleActive ? '#FFD700' : '#888888';
+      if (isMEPDipoleActive) generateDipoleArrow();
+      else clearDipoleArrow();
+      playTone(isMEPDipoleActive ? 640 : 360, 'sine', 0.1);
+    });
+  }
+  if (mepOpacitySlider) {
+    mepOpacitySlider.addEventListener('input', () => {
+      mepOpacity = parseFloat(mepOpacitySlider.value) || 0.75;
+      if (isMEPSurfaceActive) generateMEPSurface(mepOpacity, mepProbeRadius);
+    });
+  }
+  if (mepProbeSlider) {
+    mepProbeSlider.addEventListener('input', () => {
+      mepProbeRadius = parseFloat(mepProbeSlider.value) || 1.2;
+      if (isMEPSurfaceActive) generateMEPSurface(mepOpacity, mepProbeRadius);
+    });
+  }
+  if (mepCanvas) {
+    mepCanvas.addEventListener('mousemove', handleMEPCanvasMouseMove);
+    mepCanvas.addEventListener('mouseleave', () => {
+      if (mepTooltip) mepTooltip.style.display = 'none';
+      hoveredMEPPotential = null;
+      drawMEPCanvas();
     });
   }
 

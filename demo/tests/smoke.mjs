@@ -355,6 +355,9 @@ assert.match(html, /id="btn-ftir"/, 'FT-IR vibrational spectroscopy button must 
 assert.match(html, /id="btn-homo-lumo"/, 'HOMO/LUMO frontier orbital button must be present');
 assert.match(html, /id="homo-lumo-modal"/, 'HOMO/LUMO modal dialog must be present');
 assert.match(html, /id="orbital-levels-canvas"/, 'HOMO/LUMO energy ladder canvas must be present');
+assert.match(html, /id="btn-mep"/, 'MEP electrostatic potential surface button must be present');
+assert.match(html, /id="mep-modal"/, 'MEP modal dialog must be present');
+assert.match(html, /id="mep-canvas"/, 'MEP electrostatic potential canvas must be present');
 assert.match(html, /id="btn-xrd"/, 'Bragg XRD diffraction button must be present');
 assert.match(html, /id="btn-restore-left-hud"/, 'left telemetry panel drawer tab button must be present');
 assert.match(html, /id="btn-restore-pt-hud"/, 'bottom periodic table drawer tab button must be present');
@@ -365,6 +368,10 @@ assert.match(app, /function inspectCurrentInSegreChart\(/, 'inspectCurrentInSegr
 assert.match(app, /function generateMolecularHOMOLUMOCloud\(/, 'generateMolecularHOMOLUMOCloud must be defined in runtime');
 assert.match(app, /function refreshHOMOLUMOSpectroscopy\(/, 'refreshHOMOLUMOSpectroscopy must be defined in runtime');
 assert.match(app, /function drawOrbitalEnergyLadder\(/, 'drawOrbitalEnergyLadder must be defined in runtime');
+assert.match(app, /function generateMEPSurface\(/, 'generateMEPSurface must be defined in runtime');
+assert.match(app, /function generateDipoleArrow\(/, 'generateDipoleArrow must be defined in runtime');
+assert.match(app, /function refreshMEPSpectroscopy\(/, 'refreshMEPSpectroscopy must be defined in runtime');
+assert.match(app, /function drawMEPCanvas\(/, 'drawMEPCanvas must be defined in runtime');
 
 const ftirWater = compatibility.computeFTIRVibrationalSpectrum([
   { z: 8, symbol: 'O', x: 0, y: 0, zCoord: 0, mass: 15.999 },
@@ -400,6 +407,20 @@ assert.equal(homolumoWater.regime, 'AISLANTE_ELECTRICO');
 assert.ok(homolumoWater.energyLevels.length >= 5, 'Must calculate energy ladder levels');
 assert.ok(homolumoWater.nucleophilicSites.some(s => s.symbol === 'O'), 'Oxygen must be recognized as nucleophilic site');
 assert.ok(homolumoWater.electrophilicSites.some(s => s.symbol === 'H'), 'Hydrogen must be recognized as electrophilic site');
+
+const mepWater = compatibility.computeMolecularElectrostaticPotential([
+  { z: 8, symbol: 'O', x: 0, y: 0, zCoord: 0, mass: 15.999 },
+  { z: 1, symbol: 'H', x: 0.757, y: 0.586, zCoord: 0, mass: 1.008 },
+  { z: 1, symbol: 'H', x: -0.757, y: 0.586, zCoord: 0, mass: 1.008 }
+], [{ a: 0, b: 1 }, { a: 0, b: 2 }], 298);
+assert.equal(mepWater.formula, 'OHH');
+assert.ok(mepWater.dipoleDebye >= 1.5 && mepWater.dipoleDebye <= 2.2, 'Water dipole moment must be in 1.5-2.2 Debye range');
+assert.ok(mepWater.vMinEv < -1.0, 'Water Oxygen must exhibit negative electrostatic potential');
+assert.ok(mepWater.vMaxEv > 1.0, 'Water Hydrogens must exhibit positive electrostatic potential');
+assert.equal(mepWater.polarityRegime, 'MODERADAMENTE_POLAR');
+assert.ok(mepWater.hydrogenBondAcceptors.some(s => s.symbol === 'O'), 'Oxygen must be recognized as H-bond acceptor');
+assert.ok(mepWater.hydrogenBondDonors.some(s => s.symbol === 'H'), 'Hydrogens must be recognized as H-bond donors');
+assert.equal(mepWater.mepDistributionCurve.length, 60, 'MEP distribution curve must have 60 bins');
 const xrdSample = compatibility.computeBraggXRDPattern([
   { z: 11, x: 0, y: 0, zCoord: 0 },
   { z: 17, x: 2.82, y: 0, zCoord: 0 },
