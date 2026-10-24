@@ -32,7 +32,7 @@
 
     /* ─── NEXT-GEN 3D iOS / VISION-OS SOLID CRYSTAL BUTTON SYSTEM (NO SE TRANSPARENTAN) ─── */
     .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph, #btn-ftir,
-    #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif,
+    #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif, #btn-segre-inject-isotope, #btn-inspect-in-segre,
     #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr,
     #btn-quality-low, #btn-quality-med, #btn-quality-ultra,
     .shader-btn, .fusion-btn, .fusion-btn-undo, .fusion-btn-clear, .mol-chip, .stat-chip, .experience-mode-btn,
@@ -49,14 +49,14 @@
       text-shadow:0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,240,255,0.45) !important;
       transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
-    #btn-tutorial, #btn-share-url, #btn-export-cif, #btn-synkronia {
+    #btn-tutorial, #btn-share-url, #btn-export-cif, #btn-synkronia, #btn-segre-inject-isotope {
       border-color:rgba(0,255,157,0.72) !important;
       background:linear-gradient(180deg, #1b4938 0%, #123629 24%, #0a2018 50%, #0f2c22 76%, #05120d 100%) !important;
       box-shadow:0 4px 14px rgba(0,255,157,0.25), 0 1px 3px rgba(0,0,0,0.85),
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt, #btn-segre-chart {
+    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt, #btn-segre-chart, #btn-inspect-in-segre {
       border-color:rgba(0,240,255,0.72) !important;
       background:linear-gradient(180deg, #16465c 0%, #103345 24%, #081e2b 50%, #0d2a3a 76%, #041018 100%) !important;
       box-shadow:0 4px 14px rgba(0,240,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
@@ -97,7 +97,7 @@
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
     .ios-crystal-btn:hover, #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover, #btn-ftir:hover,
-    #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover,
+    #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover, #btn-segre-inject-isotope:hover, #btn-inspect-in-segre:hover,
     #btn-tutorial:hover, #btn-docs:hover, #btn-quiz:hover, #btn-share-url:hover, #btn-webxr:hover,
     #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover,
     .shader-btn:hover, .fusion-btn:hover, .fusion-btn-undo:hover, .fusion-btn-clear:hover, .mol-chip:hover, button.stat-chip:hover, .experience-mode-btn:hover,
@@ -108,6 +108,7 @@
       box-shadow:0 8px 24px rgba(0,240,255,0.38), inset 0 2px 0.5px #FFFFFF, inset 0 3.5px 2px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
     .ios-crystal-btn:active, #btn-reassemble:active, #btn-open-pt:active, #btn-orbitals:active, #btn-visual-mode:active, #btn-xrd:active, #btn-synkronia:active, #btn-polymorph:active, #btn-ftir:active,
+    #btn-segre-inject-isotope:active, #btn-inspect-in-segre:active,
     #btn-measure:active, #btn-export-gltf:active, #btn-export-usdz:active, #btn-export-xyz:active, #btn-export-cif:active,
     #btn-tutorial:active, #btn-docs:active, #btn-quiz:active, #btn-share-url:active, #btn-webxr:active,
     .shader-btn:active, .fusion-btn:active, .fusion-btn-undo:active, .fusion-btn-clear:active, .mol-chip:active, button.stat-chip:active, .experience-mode-btn:active,
@@ -570,7 +571,8 @@
       <button id="btn-export-gltf" data-i18n="exportGltf">📱 GLTF COORDS</button>
       <button id="btn-export-usdz" data-i18n="exportUsda"> USDA SOURCE</button>
     </div>
-    <div class="experience-science" style="display:grid; grid-template-columns: 1fr; gap:4px; margin-top:4px;">
+    <div class="experience-science" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-inspect-in-segre" data-i18n="inspectInSegre" title="Localizar y examinar el isótopo nuclear de la estructura activa en la Carta de Segrè (N, Z)">⚛️ EN SEGRÈ (N, Z)</button>
       <button id="btn-export-xyz" data-i18n="exportXyz">💾 EXPORTAR .XYZ</button>
     </div>
 
@@ -885,6 +887,7 @@
             <div style="grid-column:span 2;"><span style="color:rgba(255,255,255,0.6);">B/A (SEMF):</span> <strong id="segre-nuc-be" style="color:#00F0FF;">8.85 MeV / nucleón</strong></div>
           </div>
           <p id="segre-nuc-desc" style="font-size:8.5px; line-height:1.45; color:rgba(255,255,255,0.85); font-style:italic; margin:0; border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px;">Cúspide de la curva de Aston; punto de máxima estabilidad nuclear por nucleón.</p>
+          <button id="btn-segre-inject-isotope" class="ios-crystal-btn" data-i18n="injectIsotope" title="Cargar este isótopo específico en la bandeja o sustituirlo en la molécula activa para observar el corrimiento espectral FT-IR" style="width:100%; margin-top:8px; padding:6px 10px; border-color:rgba(0,255,157,0.72) !important; color:#00FF9D !important; font-size:8.5px; font-weight:700; cursor:pointer;">🧪 CARGAR ISÓTOPO EN SÍNTESIS</button>
         </div>
 
         <!-- Curva de Aston (Binding energy per nucleon curve) -->

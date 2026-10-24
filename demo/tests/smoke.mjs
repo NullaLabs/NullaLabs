@@ -355,6 +355,10 @@ assert.match(html, /id="btn-ftir"/, 'FT-IR vibrational spectroscopy button must 
 assert.match(html, /id="btn-xrd"/, 'Bragg XRD diffraction button must be present');
 assert.match(html, /id="btn-restore-left-hud"/, 'left telemetry panel drawer tab button must be present');
 assert.match(html, /id="btn-restore-pt-hud"/, 'bottom periodic table drawer tab button must be present');
+assert.match(html, /id="btn-segre-inject-isotope"/, 'Segrè nuclide synthesis injector button must be present');
+assert.match(html, /id="btn-inspect-in-segre"/, 'Molecular HUD Segrè inspector link button must be present');
+assert.match(app, /function injectNuclideIntoSynthesis\(/, 'injectNuclideIntoSynthesis must be defined in runtime');
+assert.match(app, /function inspectCurrentInSegreChart\(/, 'inspectCurrentInSegreChart must be defined in runtime');
 
 const ftirWater = compatibility.computeFTIRVibrationalSpectrum([
   { z: 8, symbol: 'O', x: 0, y: 0, zCoord: 0, mass: 15.999 },

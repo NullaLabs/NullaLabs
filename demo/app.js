@@ -916,6 +916,9 @@ window.addEventListener('DOMContentLoaded', function() {
             targetScale: scale,
             baseScale: scale,
             z: item.z,
+            mass: item.mass || item.physicalMass || null,
+            physicalMass: item.mass || item.physicalMass || null,
+            isotopeName: item.isotopeName || null,
             col: grp.col,
             baseCol: grp.col,
             elData,
@@ -2000,8 +2003,25 @@ window.addEventListener('DOMContentLoaded', function() {
       angstromPerWorldUnit = reaction.bondLengthA / nearestDistance;
       measurementScaleVerified = true;
     }
+    const isotopeMap = new Map();
+    selectedReactants.forEach(r => {
+      if (r.z && (r.mass || r.physicalMass)) {
+        isotopeMap.set(r.z, { mass: r.mass || r.physicalMass, isotopeName: r.isotopeName });
+      }
+    });
+    if (isotopeMap.size > 0) {
+      atoms.forEach(a => {
+        const iso = isotopeMap.get(a.z);
+        if (iso) {
+          a.mass = iso.mass;
+          a.physicalMass = iso.mass;
+          a.isotopeName = iso.isotopeName;
+        }
+      });
+    }
     const explicitCompoundBonds = getExplicitCompoundBonds(name, atoms.length);
     spawnAtoms(atoms, explicitCompoundBonds);
+    setTimeout(refreshFtirSpectroscopy, 50);
     activeStructureId = `compound-${reaction.formula}`;
     const matchedSpeciesKey = Object.keys(MOLECULAR_SPECIES).find(k =>
       MOLECULAR_SPECIES[k].formula === reaction.formula || k === reaction.formula
@@ -3363,7 +3383,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if (slots[i]) {
         if (i < selectedReactants.length) {
           const item = selectedReactants[i];
-          slots[i].textContent = item.formula || item.sym;
+          slots[i].textContent = item.isotopeName || item.formula || item.sym;
           const el = EL[item.z || item.atoms?.[0]?.z];
           const colorStr = item.isMolecule
             ? '#00FF9D'
@@ -4156,6 +4176,113 @@ window.addEventListener('DOMContentLoaded', function() {
       drawSegreChart();
     });
   });
+
+  const btnSegreInjectIsotope = document.getElementById('btn-segre-inject-isotope');
+  if (btnSegreInjectIsotope) {
+    btnSegreInjectIsotope.addEventListener('click', () => {
+      if (!selectedSegreNuclide) return;
+      injectNuclideIntoSynthesis(selectedSegreNuclide);
+    });
+  }
+
+  const btnInspectInSegre = document.getElementById('btn-inspect-in-segre');
+  if (btnInspectInSegre) {
+    btnInspectInSegre.addEventListener('click', () => {
+      inspectCurrentInSegreChart();
+    });
+  }
+
+  function injectNuclideIntoSynthesis(nuc) {
+    if (!nuc || nuc.Z <= 0 || nuc.Z > 118) return;
+    playTone(540, 'triangle', 0.2);
+
+    const matchingAtoms = activeAtoms.filter(a => a.z === nuc.Z && !a.isElectron && !a.removing);
+    if (matchingAtoms.length > 0) {
+      matchingAtoms.forEach(a => {
+        a.mass = nuc.A;
+        a.physicalMass = nuc.A;
+        a.isotopeName = nuc.symbol;
+      });
+
+      closeDialog(segreModal);
+      refreshFtirSpectroscopy();
+
+      updateTelemetry(
+        `ISÓTOPO SUSTITUIDO // ${nuc.symbol} (A=${nuc.A})`,
+        `Efecto isotópico activo: masa nuclear actualizada a ${nuc.A} u`,
+        `Frecuencia FT-IR recalculada: ν̃ ∝ √(k/μ)`,
+        `Periodo de semidesintegración: ${nuc.halfLife}`,
+        `Energía de enlace SEMF: ${nuc.expBE || '—'} MeV/nucleón`
+      );
+    } else {
+      if (selectedReactants.length >= MAX_REACTANTS) {
+        selectedReactants.shift();
+      }
+      const sym = nuc.element || EL[nuc.Z]?.s || 'X';
+      selectedReactants.push({
+        z: nuc.Z,
+        sym,
+        mass: nuc.A,
+        physicalMass: nuc.A,
+        isotopeName: nuc.symbol,
+        name: nuc.name || nuc.symbol
+      });
+
+      updateReactantsTrayHUD();
+      closeDialog(segreModal);
+
+      if (selectedReactants.length === 1) {
+        formElement(nuc.Z);
+        if (activeAtoms[0]) {
+          activeAtoms[0].mass = nuc.A;
+          activeAtoms[0].physicalMass = nuc.A;
+          activeAtoms[0].isotopeName = nuc.symbol;
+        }
+      } else {
+        renderSideBySidePreviewAtoms();
+      }
+
+      updateTelemetry(
+        `ISÓTOPO EN BANDEJA // ${nuc.symbol}`,
+        `Z=${nuc.Z} (${sym}) · N=${nuc.N} · A=${nuc.A} (${nuc.mode || 'ESTABLE'})`,
+        `Preparado para síntesis química o canal nuclear`,
+        `Masa nuclear: ${nuc.A} u · ${nuc.halfLife}`,
+        `Pulsa 🧪 COMBINAR para sintetizar con este isótopo`
+      );
+    }
+  }
+
+  function inspectCurrentInSegreChart() {
+    playTone(490, 'sine', 0.15);
+    const nuclides = window.NULLA_NUCLEAR?.SEGRE_NUCLIDES || [];
+    let targetZ = 26;
+    let targetA = null;
+
+    const realAtom = activeAtoms.find(a => !a.isElectron && !a.removing);
+    if (realAtom) {
+      targetZ = realAtom.z;
+      targetA = realAtom.mass || realAtom.physicalMass || null;
+    } else if (selectedReactants.length > 0) {
+      targetZ = selectedReactants[0].z || 26;
+      targetA = selectedReactants[0].mass || null;
+    }
+
+    let found = null;
+    if (targetA) {
+      found = nuclides.find(n => n.Z === targetZ && n.A === targetA);
+    }
+    if (!found) {
+      found = nuclides.find(n => n.Z === targetZ && n.mode === 'stable') ||
+              nuclides.find(n => n.Z === targetZ) ||
+              nuclides.find(n => n.id === 'Fe56');
+    }
+
+    if (found) {
+      selectedSegreNuclide = found;
+      openDialog(segreModal, btnInspectInSegre);
+      setTimeout(initSegreChart, 60);
+    }
+  }
 
   // ═══════════════════════════════════════════════════════════════
   // FT-IR VIBRATIONAL SPECTROSCOPY & QUANTUM NORMAL MODES CONTROLLER
