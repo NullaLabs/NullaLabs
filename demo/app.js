@@ -3713,6 +3713,450 @@ window.addEventListener('DOMContentLoaded', function() {
   if (btnNuclearFusion) btnNuclearFusion.addEventListener('click', attemptNuclearFusion);
   if (btnNuclearFission) btnNuclearFission.addEventListener('click', attemptNuclearFission);
 
+  // ═══════════════════════════════════════════════════════════════
+  // SEGRÈ NUCLIDE CHART & VALLEY OF STABILITY CONTROLLER
+  // ═══════════════════════════════════════════════════════════════
+  const btnSegreChart = document.getElementById('btn-segre-chart');
+  const segreModal = document.getElementById('segre-modal');
+  const btnCloseSegre = document.getElementById('btn-close-segre');
+  const segreCanvas = document.getElementById('segre-chart-canvas');
+  const astonCanvas = document.getElementById('aston-curve-canvas');
+  const segreTooltip = document.getElementById('segre-canvas-tooltip');
+
+  let activeSegreFilter = 'all';
+  let selectedSegreNuclide = null;
+  let activeCascadeInterval = null;
+  let activeCascadeStep = 0;
+
+  function initSegreChart() {
+    const nuclides = window.NULLA_NUCLEAR?.SEGRE_NUCLIDES || [];
+    if (!selectedSegreNuclide && nuclides.length) {
+      selectedSegreNuclide = nuclides.find(n => n.id === 'Fe56') || nuclides[0];
+    }
+    updateSegreInspector(selectedSegreNuclide);
+    drawSegreChart();
+    drawAstonCurve(selectedSegreNuclide);
+  }
+
+  function updateSegreInspector(nuc) {
+    if (!nuc) return;
+    const elSym = document.getElementById('segre-nuc-sym');
+    const elMode = document.getElementById('segre-nuc-mode');
+    const elZ = document.getElementById('segre-nuc-z');
+    const elN = document.getElementById('segre-nuc-n');
+    const elA = document.getElementById('segre-nuc-a');
+    const elHL = document.getElementById('segre-nuc-hl');
+    const elBE = document.getElementById('segre-nuc-be');
+    const elDesc = document.getElementById('segre-nuc-desc');
+
+    if (elSym) elSym.textContent = nuc.symbol;
+    if (elZ) elZ.textContent = nuc.Z;
+    if (elN) elN.textContent = nuc.N;
+    if (elA) elA.textContent = nuc.A;
+    if (elHL) elHL.textContent = nuc.halfLife;
+    if (elDesc) elDesc.textContent = nuc.desc;
+
+    const semf = window.NULLA_NUCLEAR?.calculateSEMF ? window.NULLA_NUCLEAR.calculateSEMF(nuc.A, nuc.Z) : { perNucleonMeV: nuc.expBE };
+    if (elBE) elBE.textContent = `${semf.perNucleonMeV || nuc.expBE} MeV / nucleón`;
+
+    const modeLabels = {
+      stable: { text: 'ESTABLE', bg: '#1b2432', col: '#FFD700', border: '#FFD700' },
+      beta_minus: { text: 'BETA⁻ (n→p)', bg: '#082536', col: '#00D4FF', border: '#00D4FF' },
+      beta_plus: { text: 'BETA⁺ / EC (p→n)', bg: '#360d16', col: '#FF3366', border: '#FF3366' },
+      alpha: { text: 'ALFA (⁴He)', bg: '#382806', col: '#FFB700', border: '#FFB700' },
+      fission: { text: 'FISIÓN ESP.', bg: '#2b0938', col: '#BF00FF', border: '#BF00FF' }
+    };
+    const modeMeta = modeLabels[nuc.decayMode] || modeLabels.stable;
+    if (elMode) {
+      elMode.textContent = modeMeta.text;
+      elMode.style.background = modeMeta.bg;
+      elMode.style.color = modeMeta.col;
+      elMode.style.borderColor = modeMeta.border;
+    }
+  }
+
+  function getNuclideCanvasCoords(nuc, width, height) {
+    const padX = 40, padY = 30;
+    const plotW = width - padX - 20;
+    const plotH = height - padY - 20;
+    const maxN = 160;
+    const maxZ = 100;
+    const x = padX + (nuc.N / maxN) * plotW;
+    const y = (height - padY) - (nuc.Z / maxZ) * plotH;
+    return { x, y };
+  }
+
+  function drawSegreChart() {
+    if (!segreCanvas) return;
+    const ctx = segreCanvas.getContext('2d');
+    const width = segreCanvas.width;
+    const height = segreCanvas.height;
+    const nuclides = window.NULLA_NUCLEAR?.SEGRE_NUCLIDES || [];
+    const magic = window.NULLA_NUCLEAR?.MAGIC_NUMBERS || { Z: [2,8,20,28,50,82], N: [2,8,20,28,50,82,126] };
+
+    ctx.fillStyle = '#070e18';
+    ctx.fillRect(0, 0, width, height);
+
+    const padX = 40, padY = 30;
+    const plotW = width - padX - 20;
+    const plotH = height - padY - 20;
+    const maxN = 160;
+    const maxZ = 100;
+
+    // Grid lines for Magic Numbers
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.18)';
+    ctx.lineWidth = 1;
+    magic.Z.forEach(z => {
+      const y = (height - padY) - (z / maxZ) * plotH;
+      ctx.beginPath();
+      ctx.moveTo(padX, y);
+      ctx.lineTo(width - 20, y);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.55)';
+      ctx.font = '7px Orbitron, sans-serif';
+      ctx.fillText(`Z=${z}`, padX + 3, y - 2);
+    });
+    magic.N.forEach(n => {
+      const x = padX + (n / maxN) * plotW;
+      ctx.beginPath();
+      ctx.moveTo(x, height - padY);
+      ctx.lineTo(x, 20);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.55)';
+      ctx.font = '7px Orbitron, sans-serif';
+      ctx.fillText(`N=${n}`, x + 2, height - padY - 3);
+    });
+
+    // Reference line N = Z (dashed green)
+    ctx.strokeStyle = 'rgba(0, 255, 157, 0.45)';
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    const originX = padX;
+    const originY = height - padY;
+    const endZ = 95;
+    const endN = 95;
+    const endX = padX + (endN / maxN) * plotW;
+    const endY = (height - padY) - (endZ / maxZ) * plotH;
+    ctx.moveTo(originX, originY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(0, 255, 157, 0.7)';
+    ctx.font = '8px Orbitron, sans-serif';
+    ctx.fillText('N = Z', endX - 25, endY - 6);
+
+    // Axes
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(padX, 15);
+    ctx.lineTo(padX, height - padY);
+    ctx.lineTo(width - 15, height - padY);
+    ctx.stroke();
+
+    // Axis labels
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '9px Orbitron, sans-serif';
+    ctx.fillText('N (NEUTRONES) ➔', width / 2 - 25, height - 10);
+    ctx.save();
+    ctx.translate(14, height / 2 + 30);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Z (PROTONES) ➔', 0, 0);
+    ctx.restore();
+
+    // Decay Chain trajectory arrows if cascade is playing
+    const cascadeChain = window.NULLA_NUCLEAR?.URANIUM_DECAY_CHAIN || [];
+    if (activeCascadeStep > 0) {
+      for (let s = 0; s < Math.min(activeCascadeStep, cascadeChain.length); s++) {
+        const step = cascadeChain[s];
+        const fromNuc = nuclides.find(n => n.id === step.from);
+        const toNuc = nuclides.find(n => n.id === step.to);
+        if (fromNuc && toNuc) {
+          const p1 = getNuclideCanvasCoords(fromNuc, width, height);
+          const p2 = getNuclideCanvasCoords(toNuc, width, height);
+          ctx.strokeStyle = step.mode === 'alpha' ? '#FFB700' : '#00D4FF';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw Nuclides
+    nuclides.forEach(nuc => {
+      let isVisible = true;
+      if (activeSegreFilter === 'stable' && nuc.decayMode !== 'stable') isVisible = false;
+      if (activeSegreFilter === 'fusion' && nuc.A > 20) isVisible = false;
+      if (activeSegreFilter === 'fission' && (nuc.A < 85 && nuc.A > 1)) isVisible = false;
+
+      const { x, y } = getNuclideCanvasCoords(nuc, width, height);
+      const isSelected = selectedSegreNuclide && selectedSegreNuclide.id === nuc.id;
+      const size = isSelected ? 9 : 6.5;
+
+      let fillColor = '#1b2432';
+      let strokeColor = '#FFD700';
+      if (nuc.decayMode === 'beta_minus') { fillColor = '#00D4FF'; strokeColor = '#FFFFFF'; }
+      else if (nuc.decayMode === 'beta_plus') { fillColor = '#FF3366'; strokeColor = '#FFFFFF'; }
+      else if (nuc.decayMode === 'alpha') { fillColor = '#FFB700'; strokeColor = '#FFFFFF'; }
+      else if (nuc.decayMode === 'fission') { fillColor = '#BF00FF'; strokeColor = '#FFFFFF'; }
+
+      ctx.globalAlpha = isVisible ? 1.0 : 0.15;
+      ctx.fillStyle = fillColor;
+      ctx.fillRect(x - size / 2, y - size / 2, size, size);
+
+      ctx.strokeStyle = isSelected ? '#00FF9D' : strokeColor;
+      ctx.lineWidth = isSelected ? 2 : 0.75;
+      ctx.strokeRect(x - size / 2, y - size / 2, size, size);
+
+      if (isSelected) {
+        ctx.strokeStyle = 'rgba(0, 255, 157, 0.6)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    });
+    ctx.globalAlpha = 1.0;
+  }
+
+  function drawAstonCurve(nuc) {
+    if (!astonCanvas) return;
+    const ctx = astonCanvas.getContext('2d');
+    const width = astonCanvas.width;
+    const height = astonCanvas.height;
+    const semfFn = window.NULLA_NUCLEAR?.calculateSEMF;
+
+    ctx.fillStyle = '#101a28';
+    ctx.fillRect(0, 0, width, height);
+
+    const padL = 30, padB = 22, padT = 12, padR = 15;
+    const plotW = width - padL - padR;
+    const plotH = height - padB - padT;
+
+    const toX = A => padL + (A / 240) * plotW;
+    const toY = be => (height - padB) - (be / 10) * plotH;
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1;
+    [2, 4, 6, 8, 10].forEach(val => {
+      const y = toY(val);
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(width - padR, y);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '7px Orbitron, sans-serif';
+      ctx.fillText(val, padL - 14, y + 2);
+    });
+
+    // Aston Curve Path
+    ctx.strokeStyle = '#00F0FF';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let A = 2; A <= 240; A += 2) {
+      const Z = Math.round(A / (2 + 0.015 * Math.pow(A, 2 / 3)));
+      const semf = semfFn ? semfFn(A, Z) : { perNucleonMeV: 8 };
+      const px = toX(A);
+      const py = toY(semf.perNucleonMeV);
+      if (A === 2) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    // Mark Iron-56 Peak (8.79 MeV)
+    const feX = toX(56);
+    const feY = toY(8.79);
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.arc(feX, feY, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#FFD700';
+    ctx.font = '7.5px Orbitron, sans-serif';
+    ctx.fillText('⁵⁶Fe', feX - 8, feY - 7);
+
+    // Mark currently selected nuclide
+    if (nuc && nuc.A > 0) {
+      const semf = semfFn ? semfFn(nuc.A, nuc.Z) : { perNucleonMeV: nuc.expBE };
+      const nx = toX(nuc.A);
+      const ny = toY(semf.perNucleonMeV || nuc.expBE);
+
+      ctx.strokeStyle = 'rgba(0, 255, 157, 0.4)';
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(nx, height - padB);
+      ctx.lineTo(nx, ny);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#00FF9D';
+      ctx.beginPath();
+      ctx.arc(nx, ny, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 8px Orbitron, sans-serif';
+      ctx.fillText(nuc.symbol, nx + 6, ny + 3);
+    }
+
+    // Axes
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT);
+    ctx.lineTo(padL, height - padB);
+    ctx.lineTo(width - padR, height - padB);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '7.5px Orbitron, sans-serif';
+    ctx.fillText('A (Masa) ➔', width / 2 - 15, height - 5);
+  }
+
+  function handleSegreCanvasClick(event) {
+    if (!segreCanvas) return;
+    const rect = segreCanvas.getBoundingClientRect();
+    const scaleX = segreCanvas.width / rect.width;
+    const scaleY = segreCanvas.height / rect.height;
+    const clickX = (event.clientX - rect.left) * scaleX;
+    const clickY = (event.clientY - rect.top) * scaleY;
+
+    const nuclides = window.NULLA_NUCLEAR?.SEGRE_NUCLIDES || [];
+    let closest = null;
+    let minD2 = 144; // 12px radius threshold
+
+    nuclides.forEach(nuc => {
+      const p = getNuclideCanvasCoords(nuc, segreCanvas.width, segreCanvas.height);
+      const d2 = (p.x - clickX) * (p.x - clickX) + (p.y - clickY) * (p.y - clickY);
+      if (d2 < minD2) {
+        minD2 = d2;
+        closest = nuc;
+      }
+    });
+
+    if (closest) {
+      selectedSegreNuclide = closest;
+      playTone(550, 'sine', 0.1);
+      updateSegreInspector(closest);
+      drawSegreChart();
+      drawAstonCurve(closest);
+    }
+  }
+
+  function handleSegreCanvasMouseMove(event) {
+    if (!segreCanvas || !segreTooltip) return;
+    const rect = segreCanvas.getBoundingClientRect();
+    const scaleX = segreCanvas.width / rect.width;
+    const scaleY = segreCanvas.height / rect.height;
+    const mouseX = (event.clientX - rect.left) * scaleX;
+    const mouseY = (event.clientY - rect.top) * scaleY;
+
+    const nuclides = window.NULLA_NUCLEAR?.SEGRE_NUCLIDES || [];
+    let hovered = null;
+    let minD2 = 100;
+
+    nuclides.forEach(nuc => {
+      const p = getNuclideCanvasCoords(nuc, segreCanvas.width, segreCanvas.height);
+      const d2 = (p.x - mouseX) * (p.x - mouseX) + (p.y - mouseY) * (p.y - mouseY);
+      if (d2 < minD2) {
+        minD2 = d2;
+        hovered = nuc;
+      }
+    });
+
+    if (hovered) {
+      segreTooltip.style.display = 'block';
+      segreTooltip.style.left = `${(event.clientX - rect.left) + 12}px`;
+      segreTooltip.style.top = `${(event.clientY - rect.top) - 16}px`;
+      segreTooltip.textContent = `${hovered.symbol} (Z=${hovered.Z}, N=${hovered.N}) · ${hovered.halfLife}`;
+    } else {
+      segreTooltip.style.display = 'none';
+    }
+  }
+
+  function playUraniumCascade() {
+    const chain = window.NULLA_NUCLEAR?.URANIUM_DECAY_CHAIN || [];
+    const nuclides = window.NULLA_NUCLEAR?.SEGRE_NUCLIDES || [];
+    if (!chain.length) return;
+
+    if (activeCascadeInterval) {
+      clearInterval(activeCascadeInterval);
+      activeCascadeInterval = null;
+    }
+    activeCascadeStep = 1;
+    activeSegreFilter = 'all';
+
+    const stepFn = () => {
+      if (activeCascadeStep > chain.length) {
+        clearInterval(activeCascadeInterval);
+        activeCascadeInterval = null;
+        return;
+      }
+      const item = chain[activeCascadeStep - 1];
+      const targetNuclide = nuclides.find(n => n.id === item.to);
+      if (targetNuclide) {
+        selectedSegreNuclide = targetNuclide;
+        playTone(item.mode === 'alpha' ? 380 : 620, 'triangle', 0.12);
+        updateSegreInspector(targetNuclide);
+        drawSegreChart();
+        drawAstonCurve(targetNuclide);
+      }
+      activeCascadeStep++;
+    };
+
+    stepFn();
+    activeCascadeInterval = setInterval(stepFn, 700);
+  }
+
+  // Hook up Segrè Modal controls
+  if (btnSegreChart) {
+    btnSegreChart.addEventListener('click', () => {
+      playTone(520, 'sine', 0.15);
+      openDialog(segreModal, btnSegreChart);
+      setTimeout(initSegreChart, 60);
+    });
+  }
+  if (btnCloseSegre) {
+    btnCloseSegre.addEventListener('click', () => {
+      if (activeCascadeInterval) {
+        clearInterval(activeCascadeInterval);
+        activeCascadeInterval = null;
+      }
+      closeDialog(segreModal);
+    });
+  }
+  if (segreCanvas) {
+    segreCanvas.addEventListener('click', handleSegreCanvasClick);
+    segreCanvas.addEventListener('mousemove', handleSegreCanvasMouseMove);
+    segreCanvas.addEventListener('mouseleave', () => {
+      if (segreTooltip) segreTooltip.style.display = 'none';
+    });
+  }
+  const btnCascade = document.getElementById('btn-segre-play-chain');
+  if (btnCascade) {
+    btnCascade.addEventListener('click', playUraniumCascade);
+  }
+  const filterBtns = {
+    all: document.getElementById('btn-segre-filter-all'),
+    stable: document.getElementById('btn-segre-filter-stable'),
+    fusion: document.getElementById('btn-segre-filter-fusion'),
+    fission: document.getElementById('btn-segre-filter-fission')
+  };
+  Object.entries(filterBtns).forEach(([key, btn]) => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      activeSegreFilter = key;
+      Object.values(filterBtns).forEach(b => b?.classList.remove('active'));
+      btn.classList.add('active');
+      drawSegreChart();
+    });
+  });
+
   // SUGGEST Button
   if (btnSuggest) {
     btnSuggest.addEventListener('click', showVerifiedSuggestions);

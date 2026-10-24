@@ -56,12 +56,24 @@
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt {
+    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt, #btn-segre-chart {
       border-color:rgba(0,240,255,0.72) !important;
       background:linear-gradient(180deg, #16465c 0%, #103345 24%, #081e2b 50%, #0d2a3a 76%, #041018 100%) !important;
       box-shadow:0 4px 14px rgba(0,240,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
                  inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
                  inset 0 -3px 5px rgba(0,0,0,0.9) !important;
+    }
+    .segre-filter-btn {
+      border:1px solid rgba(255, 255, 255, 0.35);
+      background:linear-gradient(180deg, #1f2d40 0%, #0f1824 100%);
+      color:#FFFFFF; font-family:'Orbitron',sans-serif;
+      box-shadow:0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0.5px rgba(255,255,255,0.7);
+      transition:all 0.2s ease;
+    }
+    .segre-filter-btn:hover, .segre-filter-btn.active {
+      border-color:#00F0FF !important; color:#00FFCF !important;
+      background:linear-gradient(180deg, #18465c 0%, #081e2b 100%) !important;
+      box-shadow:0 4px 12px rgba(0,240,255,0.3), inset 0 1px 0.5px #FFFFFF !important;
     }
     #btn-quiz, #btn-xrd, #btn-polymorph {
       border-color:rgba(255,215,0,0.72) !important;
@@ -810,6 +822,81 @@
       </select>
       <button class="fusion-btn nuclear-btn" id="btn-nuclear-fusion">☀ FUSIÓN NUCLEAR</button>
       <button class="fusion-btn nuclear-btn" id="btn-nuclear-fission">☢ FISIÓN NUCLEAR</button>
+      <button class="fusion-btn nuclear-btn" id="btn-segre-chart" data-i18n="segreChart">⚛️ CARTA DE NUCLEIDOS</button>
+    </div>
+  </div>
+
+  <!-- SEGRÈ NUCLIDE CHART & VALLEY OF STABILITY MODAL -->
+  <div id="segre-modal" role="dialog" aria-modal="true" aria-labelledby="segre-modal-title" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:180; width:min(940px, calc(100vw - 20px)); max-height:88vh; overflow-y:auto; background:linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(8,18,36,0.18) 100%); border:1px solid rgba(0,240,255,0.65); border-radius:20px; padding:18px; box-shadow:0 24px 64px rgba(0,0,0,0.68), inset 0 1.5px 1px rgba(255,255,255,0.8); backdrop-filter:blur(22px) saturate(1.9); -webkit-backdrop-filter:blur(22px) saturate(1.9); font-family:'Orbitron',sans-serif;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.22); padding-bottom:8px; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="segre-modal-title" style="font-size:11.5px; font-weight:900; color:#00F0FF; letter-spacing:1.5px;">⚛️ CARTA DE NUCLEIDOS &amp; VALLE DE ESTABILIDAD (SEGRÈ)</span>
+        <span class="hud-badge experience-science">AME2020 · SEMF WEIZSÄCKER</span>
+      </div>
+      <button id="btn-close-segre" data-i18n-aria-label="closeSegreLabel" aria-label="Cerrar carta de nucleidos" style="background:none; border:none; color:#FFFFFF; font-size:16px; cursor:pointer; padding:2px 8px;">✕</button>
+    </div>
+
+    <!-- Quick action bar: Filters & Cascade simulation -->
+    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <div style="display:flex; gap:5px; flex-wrap:wrap;" id="segre-filters">
+        <button id="btn-segre-filter-all" class="segre-filter-btn active" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">TODOS</button>
+        <button id="btn-segre-filter-stable" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;" data-i18n="valleyOfStability">VALLE DE ESTABILIDAD</button>
+        <button id="btn-segre-filter-fusion" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">FUSIÓN (LIGEROS)</button>
+        <button id="btn-segre-filter-fission" class="segre-filter-btn" style="padding:4px 9px; border-radius:8px; font-size:8px; font-weight:700; cursor:pointer;">FISIÓN (PESADOS)</button>
+      </div>
+      <button id="btn-segre-play-chain" class="ios-crystal-btn" data-i18n="playDecayChain" style="padding:5px 12px; border-color:rgba(255,215,0,0.72) !important; color:#FFD700 !important; font-size:8.5px; font-weight:700; cursor:pointer;">▶ CASCADA RADIACTIVA</button>
+    </div>
+
+    <!-- Main grid: Chart on left, Inspector + Aston Curve on right -->
+    <div style="display:grid; grid-template-columns: 1fr 310px; gap:14px; align-items:start;">
+      <!-- Chart Canvas Container -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="position:relative; width:100%; border:1px solid rgba(255,255,255,0.22); border-radius:12px; background:linear-gradient(180deg, #070e18 0%, #03060a 100%); overflow:hidden; box-shadow:inset 0 0 20px rgba(0,0,0,0.8);">
+          <canvas id="segre-chart-canvas" width="560" height="380" style="display:block; width:100%; height:auto; cursor:crosshair;"></canvas>
+          <div id="segre-canvas-tooltip" style="display:none; position:absolute; pointer-events:none; padding:4px 8px; border-radius:6px; background:rgba(8,18,32,0.95); border:1px solid #00F0FF; color:#FFF; font-size:8.5px; font-family:'Fira Code',monospace; box-shadow:0 4px 12px rgba(0,0,0,0.8); z-index:10;"></div>
+        </div>
+        <!-- Legend of Decay Modes -->
+        <div style="display:flex; flex-wrap:wrap; gap:8px; font-size:8px; justify-content:center; color:rgba(255,255,255,0.85);">
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#1b2432; border:1px solid #FFD700; display:inline-block;"></span> <span>Estable</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#00D4FF; display:inline-block;"></span> <span>Beta⁻ (n→p)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#FF3366; display:inline-block;"></span> <span>Beta⁺ / EC (p→n)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#FFB700; display:inline-block;"></span> <span>Alfa (⁴He)</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:2px; background:#BF00FF; display:inline-block;"></span> <span>Fisión Esp.</span></div>
+          <div style="display:flex; align-items:center; gap:4px;"><span style="width:14px; height:1px; background:rgba(0,255,157,0.8); display:inline-block;"></span> <span>N = Z</span></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Inspector & Aston Curve -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Nuclide Inspector Card -->
+        <div style="padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,0.25); background:linear-gradient(180deg, #162438 0%, #0a101a 100%); box-shadow:inset 0 1px 1px rgba(255,255,255,0.3);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.18); padding-bottom:5px; margin-bottom:8px;">
+            <span id="segre-nuc-sym" style="font-size:16px; font-weight:900; color:#00FF9D; letter-spacing:1px;">⁵⁶₂₆Fe</span>
+            <span id="segre-nuc-mode" style="padding:2px 7px; border-radius:6px; font-size:7.5px; font-weight:700; background:#1b2432; border:1px solid #FFD700; color:#FFD700;">ESTABLE</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:8.5px; margin-bottom:8px;">
+            <div><span style="color:rgba(255,255,255,0.6);">PROTONES (Z):</span> <strong id="segre-nuc-z" style="color:#FFF;">26</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">NEUTRONES (N):</span> <strong id="segre-nuc-n" style="color:#FFF;">30</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">MASA TOTAL (A):</span> <strong id="segre-nuc-a" style="color:#FFF;">56</strong></div>
+            <div><span style="color:rgba(255,255,255,0.6);">VIDA MEDIA:</span> <strong id="segre-nuc-hl" style="color:#FFF;">Estable</strong></div>
+            <div style="grid-column:span 2;"><span style="color:rgba(255,255,255,0.6);">B/A (SEMF):</span> <strong id="segre-nuc-be" style="color:#00F0FF;">8.85 MeV / nucleón</strong></div>
+          </div>
+          <p id="segre-nuc-desc" style="font-size:8.5px; line-height:1.45; color:rgba(255,255,255,0.85); font-style:italic; margin:0; border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px;">Cúspide de la curva de Aston; punto de máxima estabilidad nuclear por nucleón.</p>
+        </div>
+
+        <!-- Curva de Aston (Binding energy per nucleon curve) -->
+        <div style="padding:10px; border-radius:14px; border:1px solid rgba(255,255,255,0.2); background:linear-gradient(180deg, #101a28 0%, #060a10 100%);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:8.5px; font-weight:700; color:#FFD700; letter-spacing:0.8px;">CURVA DE ASTON: B/A (MeV)</span>
+            <span style="font-size:7.5px; color:#00FF9D; font-weight:bold;">MÁXIMO: ⁵⁶Fe / ⁶²Ni</span>
+          </div>
+          <canvas id="aston-curve-canvas" width="280" height="130" style="display:block; width:100%; height:auto;"></canvas>
+          <div style="display:flex; justify-content:space-between; font-size:7px; color:rgba(255,255,255,0.7); margin-top:4px;">
+            <span style="color:#00FF9D;">◄ FUSIÓN (Q &gt; 0)</span>
+            <span style="color:#FF3366;">FISIÓN (Q &gt; 0) ►</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
