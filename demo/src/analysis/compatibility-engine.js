@@ -1062,6 +1062,139 @@
     };
   }
 
+  // ─── FRONTIER MOLECULAR ORBITALS (HOMO / LUMO) & BAND GAP ENGINE ───
+  const MOLECULAR_ORBITAL_BENCHMARKS = {
+    'H2O': { homo: -12.6, lumo: -5.2, name: 'Agua' },
+    'CO2': { homo: -13.8, lumo: -5.4, name: 'Dióxido de Carbono' },
+    'NH3': { homo: -10.2, lumo: -4.3, name: 'Amoníaco' },
+    'CH4': { homo: -13.0, lumo: -3.8, name: 'Metano' },
+    'HCl': { homo: -12.7, lumo: -6.8, name: 'Cloruro de Hidrógeno' },
+    'NaCl': { homo: -9.5, lumo: -1.0, name: 'Cloruro de Sodio (Sal de Roca)' },
+    'TiO2': { homo: -7.5, lumo: -4.3, name: 'Dióxido de Titanio (Rutilo/Anatasa)' },
+    'SiO2': { homo: -11.5, lumo: -2.6, name: 'Sílice (Cuarzo)' },
+    'C60': { homo: -7.6, lumo: -5.8, name: 'Fullereno C60' },
+    'Graphene': { homo: -4.6, lumo: -4.6, name: 'Grafeno Monocapa (Dirac)' },
+    'Diamond': { homo: -9.8, lumo: -4.3, name: 'Diamante sp³' },
+    'SWCNT': { homo: -5.1, lumo: -4.3, name: 'Nanotubo de Carbono (10,0)' },
+    'CaO': { homo: -8.8, lumo: -1.7, name: 'Óxido de Calcio' },
+    'Al2O3': { homo: -10.2, lumo: -1.4, name: 'Alúmina (Corindón)' },
+    'SiC': { homo: -7.9, lumo: -4.7, name: 'Carburo de Silicio' },
+    'TiC': { homo: -6.2, lumo: -5.8, name: 'Carburo de Titanio' },
+    'BN': { homo: -9.2, lumo: -3.3, name: 'Nitruro de Boro Hexagonal' },
+    'Fe': { homo: -7.9, lumo: -7.6, name: 'Hierro α-BCC' },
+    'Cu': { homo: -7.7, lumo: -7.5, name: 'Cobre FCC' }
+  };
+
+  function computeHOMOLUMOProperties(atomsList = [], bondsList = [], formulaStr = '', temperatureK = 298) {
+    if (!Array.isArray(atomsList) || atomsList.length === 0) {
+      return {
+        formula: 'VACÍO',
+        homoEv: -10.0,
+        lumoEv: -5.0,
+        bandgapEv: 5.0,
+        hardnessEtaEv: 2.5,
+        chemicalPotentialEv: -7.5,
+        electrophilicityOmegaEv: 11.25,
+        regime: 'AISLANTE_ELECTRICO',
+        regimeLabel: 'Aislante Eléctrico (Eg > 4.0 eV)',
+        energyLevels: [],
+        nucleophilicSites: [],
+        electrophilicSites: [],
+        chronolithSeal: computeChronolithSeal('ORBITAL|EMPTY')
+      };
+    }
+
+    const cleanFormula = (formulaStr || atomsList.map(a => a.symbol || a.s || 'X').join('')).replace(/[^A-Za-z0-9]/g, '');
+    let benchmark = MOLECULAR_ORBITAL_BENCHMARKS[cleanFormula];
+
+    let homoEv = -11.5;
+    let lumoEv = -4.5;
+
+    if (benchmark) {
+      homoEv = benchmark.homo;
+      lumoEv = benchmark.lumo;
+    } else {
+      const enValues = atomsList.map(a => {
+        const z = Number(a.z) || 1;
+        const el = root.NULLA_PERIODIC_TABLE?.[z];
+        return el?.electronegativity || 2.2;
+      });
+      const meanEN = enValues.reduce((s, v) => s + v, 0) / Math.max(1, enValues.length);
+      const minEN = Math.min(...enValues);
+      const maxEN = Math.max(...enValues);
+      const deltaEN = maxEN - minEN;
+
+      homoEv = -(7.5 + meanEN * 1.5 + deltaEN * 0.4);
+      const estimatedGap = Math.max(0.2, 1.2 + deltaEN * 2.2 + (atomsList.length <= 4 ? 2.5 : 0.8));
+      lumoEv = homoEv + estimatedGap;
+    }
+
+    const dEg = (temperatureK - 298) * 0.00045;
+    const bandgapEv = Number(Math.max(0.0, (lumoEv - homoEv) - dEg).toFixed(2));
+    homoEv = Number(homoEv.toFixed(2));
+    lumoEv = Number((homoEv + bandgapEv).toFixed(2));
+
+    const hardnessEtaEv = Number((bandgapEv / 2).toFixed(2));
+    const chemicalPotentialEv = Number(((homoEv + lumoEv) / 2).toFixed(2));
+    const electrophilicityOmegaEv = hardnessEtaEv > 0.05
+      ? Number(((chemicalPotentialEv * chemicalPotentialEv) / (2 * hardnessEtaEv)).toFixed(2))
+      : 0.0;
+
+    let regime = 'AISLANTE_ELECTRICO';
+    let regimeLabel = 'Aislante Eléctrico (Eg > 4.0 eV)';
+    if (bandgapEv < 0.3) {
+      regime = 'CONDUCTOR_METÁLICO';
+      regimeLabel = 'Conductor Metálico / Semimetal (Eg ≈ 0 eV)';
+    } else if (bandgapEv < 2.5) {
+      regime = 'SEMICONDUCTOR_BANDA_ESTRECHA';
+      regimeLabel = 'Semiconductor Banda Estrecha (0.3 ≤ Eg < 2.5 eV)';
+    } else if (bandgapEv <= 4.0) {
+      regime = 'SEMICONDUCTOR_BANDA_ANCHA';
+      regimeLabel = 'Semiconductor Banda Ancha (2.5 ≤ Eg ≤ 4.0 eV)';
+    }
+
+    const energyLevels = [
+      { id: 'homo_3', label: 'HOMO-3', energy: Number((homoEv - 4.5).toFixed(2)), occupied: true, type: 'core' },
+      { id: 'homo_2', label: 'HOMO-2', energy: Number((homoEv - 2.8).toFixed(2)), occupied: true, type: 'bonding' },
+      { id: 'homo_1', label: 'HOMO-1', energy: Number((homoEv - 1.3).toFixed(2)), occupied: true, type: 'bonding' },
+      { id: 'homo', label: 'HOMO (Dador)', energy: homoEv, occupied: true, type: 'frontier_homo' },
+      { id: 'lumo', label: 'LUMO (Aceptor)', energy: lumoEv, occupied: false, type: 'frontier_lumo' },
+      { id: 'lumo_1', label: 'LUMO+1', energy: Number((lumoEv + 1.5).toFixed(2)), occupied: false, type: 'antibonding' },
+      { id: 'lumo_2', label: 'LUMO+2', energy: Number((lumoEv + 3.2).toFixed(2)), occupied: false, type: 'antibonding' }
+    ];
+
+    const nucleophilicSites = [];
+    const electrophilicSites = [];
+    atomsList.forEach((a, idx) => {
+      const z = Number(a.z) || 1;
+      const el = root.NULLA_PERIODIC_TABLE?.[z];
+      const en = el?.electronegativity || 2.2;
+      const sym = a.symbol || a.s || el?.s || 'X';
+      if (en >= 3.0 || (z === 8 || z === 7 || z === 9 || z === 17)) {
+        nucleophilicSites.push({ index: idx, z, symbol: sym, electronegativity: en, role: 'Par no enlazante / Dador nucleófilo' });
+      } else if (en <= 2.2 || (z === 1 || z === 6 || z === 11 || z === 22)) {
+        electrophilicSites.push({ index: idx, z, symbol: sym, electronegativity: en, role: 'Lóbulo antienlazante / Aceptor electrófilo' });
+      }
+    });
+
+    return {
+      formula: cleanFormula,
+      atomCount: atomsList.length,
+      homoEv,
+      lumoEv,
+      bandgapEv,
+      hardnessEtaEv,
+      chemicalPotentialEv,
+      electrophilicityOmegaEv,
+      regime,
+      regimeLabel,
+      energyLevels,
+      nucleophilicSites,
+      electrophilicSites,
+      chronolithSeal: computeChronolithSeal(`HOMO-LUMO|${cleanFormula}|${homoEv}|${lumoEv}|${temperatureK}`)
+    };
+  }
+
   root.NULLA_COMPATIBILITY = Object.freeze({
     chemical,
     nuclear,
@@ -1076,6 +1209,7 @@
     computeBraggXRDPattern,
     computePaulingPartialCharge,
     relaxAtomicStructure,
-    computeFTIRVibrationalSpectrum
+    computeFTIRVibrationalSpectrum,
+    computeHOMOLUMOProperties
   });
 })(globalThis);

@@ -352,6 +352,9 @@ assert.ok(synk5.synapticWeight > synk1.synapticWeight, 'STDP pulse sequence must
 assert.ok(synk5.conductanceMicroS > synk1.conductanceMicroS, 'STDP potentiation must increase synaptic conductance');
 assert.match(html, /id="btn-visual-mode"/, '3D visual representation switcher button must be present');
 assert.match(html, /id="btn-ftir"/, 'FT-IR vibrational spectroscopy button must be present');
+assert.match(html, /id="btn-homo-lumo"/, 'HOMO/LUMO frontier orbital button must be present');
+assert.match(html, /id="homo-lumo-modal"/, 'HOMO/LUMO modal dialog must be present');
+assert.match(html, /id="orbital-levels-canvas"/, 'HOMO/LUMO energy ladder canvas must be present');
 assert.match(html, /id="btn-xrd"/, 'Bragg XRD diffraction button must be present');
 assert.match(html, /id="btn-restore-left-hud"/, 'left telemetry panel drawer tab button must be present');
 assert.match(html, /id="btn-restore-pt-hud"/, 'bottom periodic table drawer tab button must be present');
@@ -359,6 +362,9 @@ assert.match(html, /id="btn-segre-inject-isotope"/, 'Segrè nuclide synthesis in
 assert.match(html, /id="btn-inspect-in-segre"/, 'Molecular HUD Segrè inspector link button must be present');
 assert.match(app, /function injectNuclideIntoSynthesis\(/, 'injectNuclideIntoSynthesis must be defined in runtime');
 assert.match(app, /function inspectCurrentInSegreChart\(/, 'inspectCurrentInSegreChart must be defined in runtime');
+assert.match(app, /function generateMolecularHOMOLUMOCloud\(/, 'generateMolecularHOMOLUMOCloud must be defined in runtime');
+assert.match(app, /function refreshHOMOLUMOSpectroscopy\(/, 'refreshHOMOLUMOSpectroscopy must be defined in runtime');
+assert.match(app, /function drawOrbitalEnergyLadder\(/, 'drawOrbitalEnergyLadder must be defined in runtime');
 
 const ftirWater = compatibility.computeFTIRVibrationalSpectrum([
   { z: 8, symbol: 'O', x: 0, y: 0, zCoord: 0, mass: 15.999 },
@@ -379,6 +385,21 @@ assert.ok(stretchD && stretchD.wavenumberCm1 < stretchH.wavenumberCm1, 'Isotopic
 const isotopicRatio = stretchH.wavenumberCm1 / stretchD.wavenumberCm1;
 assert.ok(isotopicRatio >= 1.34 && isotopicRatio <= 1.42, 'Isotopic wavenumber ratio must conform to square root of reduced masses');
 assert.equal(ftirWater.spectrumCurve.length, 901, 'FT-IR continuous spectrum must span 4000 to 400 cm^-1 in 4 cm^-1 increments');
+
+const homolumoWater = compatibility.computeHOMOLUMOProperties([
+  { z: 8, symbol: 'O' },
+  { z: 1, symbol: 'H' },
+  { z: 1, symbol: 'H' }
+], [{ a: 0, b: 1 }, { a: 0, b: 2 }], 'H2O', 298);
+assert.equal(homolumoWater.formula, 'H2O');
+assert.equal(homolumoWater.homoEv, -12.6);
+assert.equal(homolumoWater.lumoEv, -5.2);
+assert.equal(homolumoWater.bandgapEv, 7.4);
+assert.equal(homolumoWater.hardnessEtaEv, 3.7);
+assert.equal(homolumoWater.regime, 'AISLANTE_ELECTRICO');
+assert.ok(homolumoWater.energyLevels.length >= 5, 'Must calculate energy ladder levels');
+assert.ok(homolumoWater.nucleophilicSites.some(s => s.symbol === 'O'), 'Oxygen must be recognized as nucleophilic site');
+assert.ok(homolumoWater.electrophilicSites.some(s => s.symbol === 'H'), 'Hydrogen must be recognized as electrophilic site');
 const xrdSample = compatibility.computeBraggXRDPattern([
   { z: 11, x: 0, y: 0, zCoord: 0 },
   { z: 17, x: 2.82, y: 0, zCoord: 0 },

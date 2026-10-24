@@ -580,6 +580,7 @@ window.addEventListener('DOMContentLoaded', function() {
   // ═══════════════════════════════════════════════════════════════
   let orbitalParticleSystem = null;
   let orbitalCycleIndex = 0;
+  let molecularHOMOLUMOSystem = null;
 
   function generateAtomicOrbitalCloud(z) {
     if (orbitalParticleSystem) {
@@ -805,6 +806,12 @@ window.addEventListener('DOMContentLoaded', function() {
       orbitalParticleSystem.geometry.dispose();
       orbitalParticleSystem.material.dispose();
       orbitalParticleSystem = null;
+    }
+    if (molecularHOMOLUMOSystem) {
+      moleculeGroup.remove(molecularHOMOLUMOSystem);
+      molecularHOMOLUMOSystem.geometry.dispose();
+      molecularHOMOLUMOSystem.material.dispose();
+      molecularHOMOLUMOSystem = null;
     }
 
     // Fade out existing atoms that aren't needed
@@ -4627,6 +4634,467 @@ window.addEventListener('DOMContentLoaded', function() {
       drawFtirSpectrum();
     });
   });
+
+  // ═══════════════════════════════════════════════════════════════
+  // FRONTIER MOLECULAR ORBITALS (HOMO / LUMO) & QUANTUM REACTIVITY
+  // ═══════════════════════════════════════════════════════════════
+  const btnHomoLumo = document.getElementById('btn-homo-lumo');
+  const homoLumoModal = document.getElementById('homo-lumo-modal');
+  const btnCloseHomoLumo = document.getElementById('btn-close-homo-lumo');
+  const orbitalCanvas = document.getElementById('orbital-levels-canvas');
+  const orbitalTooltip = document.getElementById('orbital-canvas-tooltip');
+  const orbitalIsoSlider = document.getElementById('orbital-isovalue-slider');
+
+  let activeHomoLumoData = null;
+  let activeOrbitalMode = 'homo'; // 'none', 'homo', 'lumo', 'both'
+  let orbitalIsovalue = 1.0;
+  let hoveredOrbitalLevel = null;
+
+  function clearMolecularHOMOLUMOCloud() {
+    if (molecularHOMOLUMOSystem) {
+      moleculeGroup.remove(molecularHOMOLUMOSystem);
+      molecularHOMOLUMOSystem.geometry.dispose();
+      molecularHOMOLUMOSystem.material.dispose();
+      molecularHOMOLUMOSystem = null;
+    }
+  }
+
+  function generateMolecularHOMOLUMOCloud(mode = activeOrbitalMode, isovalue = orbitalIsovalue) {
+    clearMolecularHOMOLUMOCloud();
+    if (mode === 'none') return;
+
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (!realAtoms.length) return;
+
+    const formulaStr = currentReaction?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
+    if (!activeHomoLumoData || activeHomoLumoData.formula !== formulaStr.replace(/[^A-Za-z0-9]/g, '')) {
+      if (window.NULLA_COMPATIBILITY?.computeHOMOLUMOProperties) {
+        activeHomoLumoData = window.NULLA_COMPATIBILITY.computeHOMOLUMOProperties(realAtoms, activeBonds, formulaStr, temperatureK);
+      }
+    }
+    if (!activeHomoLumoData) return;
+
+    const count = 3800;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    const homoPosColor = new THREE.Color(0x00F0FF); // +ψ HOMO (Cyan)
+    const homoNegColor = new THREE.Color(0x3b59ff); // -ψ HOMO (Deep Blue/Violet)
+    const lumoPosColor = new THREE.Color(0xFFD700); // +ψ LUMO (Gold)
+    const lumoNegColor = new THREE.Color(0xFF4500); // -ψ LUMO (Orange/Crimson)
+    const nodeColor = new THREE.Color(0xFFFFFF);    // Nodal interface
+
+    let accepted = 0;
+    let attempts = 0;
+    const maxAttempts = count * 22;
+
+    while (accepted < count && attempts < maxAttempts) {
+      attempts++;
+      // Pick an atom center weighted by electronegativity and role
+      const atomIdx = Math.floor(Math.random() * realAtoms.length);
+      const atom = realAtoms[atomIdx];
+      const z = Number(atom.z) || 1;
+      const el = EL[z] || EL[1];
+      const en = el?.electronegativity || 2.2;
+
+      // Determine if this point represents HOMO or LUMO
+      let isHomo = true;
+      if (mode === 'homo') isHomo = true;
+      else if (mode === 'lumo') isHomo = false;
+      else if (mode === 'both') isHomo = Math.random() < 0.5;
+
+      // Weighting: HOMO concentrates on high EN (nucleophilic); LUMO on low EN / electropositive centers
+      const homoWeight = Math.max(0.2, (en - 1.2) / 2.6);
+      const lumoWeight = Math.max(0.2, (4.0 - en) / 2.6);
+      const affinity = isHomo ? homoWeight : lumoWeight;
+      if (Math.random() > affinity) continue;
+
+      // Spherical coordinates around chosen atom
+      const u = Math.random();
+      const v = Math.random();
+      const phi = u * 2.0 * Math.PI;
+      const cosTheta = 2.0 * v - 1.0;
+      const sinTheta = Math.sqrt(Math.max(0, 1.0 - cosTheta * cosTheta));
+      const radiusScale = (el.radius || 35) / 38.0;
+      const r = Math.pow(Math.random(), 0.75) * (7.5 * radiusScale);
+
+      // Orbital wavefunction lobe: p-like directional or s-like
+      let psi = 0;
+      if (isHomo) {
+        // Lone pair / pi lobe directed outwards or along z-axis
+        psi = Math.exp(-r / (2.6 * isovalue)) * (cosTheta + 0.3 * Math.sin(phi));
+      } else {
+        // LUMO anti-bonding lobe with clear nodal plane (cosTheta changes sign sharply)
+        psi = (r / 2.2) * Math.exp(-r / (2.8 * isovalue)) * (cosTheta * Math.cos(phi));
+      }
+
+      const prob = psi * psi;
+      if (Math.random() > Math.min(1.0, prob * 2.8 * isovalue)) continue;
+
+      const lx = r * sinTheta * Math.cos(phi);
+      const ly = r * cosTheta;
+      const lz = r * sinTheta * Math.sin(phi);
+
+      const basePos = atom.mesh?.position || atom.basePos || new THREE.Vector3(0, 0, 0);
+      positions[accepted * 3] = basePos.x + lx;
+      positions[accepted * 3 + 1] = basePos.y + ly;
+      positions[accepted * 3 + 2] = basePos.z + lz;
+
+      let ptColor = nodeColor;
+      if (Math.abs(psi) < 0.05) {
+        ptColor = nodeColor;
+      } else if (isHomo) {
+        ptColor = psi >= 0 ? homoPosColor : homoNegColor;
+      } else {
+        ptColor = psi >= 0 ? lumoPosColor : lumoNegColor;
+      }
+
+      colors[accepted * 3] = ptColor.r;
+      colors[accepted * 3 + 1] = ptColor.g;
+      colors[accepted * 3 + 2] = ptColor.b;
+      accepted++;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 0.95,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.82,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    molecularHOMOLUMOSystem = new THREE.Points(geometry, material);
+    moleculeGroup.add(molecularHOMOLUMOSystem);
+  }
+
+  function refreshHOMOLUMOSpectroscopy() {
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (!realAtoms.length) return;
+
+    const formulaStr = currentReaction?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
+    if (window.NULLA_COMPATIBILITY?.computeHOMOLUMOProperties) {
+      activeHomoLumoData = window.NULLA_COMPATIBILITY.computeHOMOLUMOProperties(realAtoms, activeBonds, formulaStr, temperatureK);
+    }
+    if (!activeHomoLumoData) return;
+
+    const elFormula = document.getElementById('homo-lumo-mol-formula');
+    const elRegime = document.getElementById('homo-lumo-regime-badge');
+    const elHomo = document.getElementById('homo-energy-val');
+    const elLumo = document.getElementById('lumo-energy-val');
+    const elEg = document.getElementById('bandgap-energy-val');
+    const elHardness = document.getElementById('pearson-hardness-val');
+    const elPot = document.getElementById('chemical-potential-val');
+    const elElectrophilicity = document.getElementById('parr-electrophilicity-val');
+    const elSites = document.getElementById('homo-lumo-reactive-sites');
+
+    if (elFormula) elFormula.textContent = formulaStr;
+    if (elRegime) {
+      elRegime.textContent = activeHomoLumoData.regime.replace(/_/g, ' ');
+      if (activeHomoLumoData.bandgapEv < 0.3) {
+        elRegime.style.color = '#00FF9D';
+        elRegime.style.borderColor = '#00FF9D';
+      } else if (activeHomoLumoData.bandgapEv <= 4.0) {
+        elRegime.style.color = '#00F0FF';
+        elRegime.style.borderColor = '#00F0FF';
+      } else {
+        elRegime.style.color = '#FFD700';
+        elRegime.style.borderColor = '#FFD700';
+      }
+    }
+    if (elHomo) elHomo.textContent = `${activeHomoLumoData.homoEv.toFixed(2)} eV`;
+    if (elLumo) elLumo.textContent = `${activeHomoLumoData.lumoEv.toFixed(2)} eV`;
+    if (elEg) elEg.textContent = `${activeHomoLumoData.bandgapEv.toFixed(2)} eV`;
+    if (elHardness) elHardness.textContent = `${activeHomoLumoData.hardnessEtaEv.toFixed(2)} eV`;
+    if (elPot) elPot.textContent = `${activeHomoLumoData.chemicalPotentialEv.toFixed(2)} eV`;
+    if (elElectrophilicity) elElectrophilicity.textContent = `${activeHomoLumoData.electrophilicityOmegaEv.toFixed(2)} eV`;
+
+    if (elSites) {
+      elSites.innerHTML = '';
+      const allSites = [
+        ...activeHomoLumoData.nucleophilicSites.map(s => ({ ...s, tag: 'NUCLEÓFILO (HOMO)', tagCol: '#00F0FF' })),
+        ...activeHomoLumoData.electrophilicSites.map(s => ({ ...s, tag: 'ELECTRÓFILO (LUMO)', tagCol: '#FF5500' }))
+      ];
+      if (!allSites.length) {
+        elSites.innerHTML = '<div style="color:rgba(255,255,255,0.5);">Sin sitios frontera diferenciados.</div>';
+      } else {
+        allSites.forEach(s => {
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; background:rgba(255,255,255,0.06); cursor:pointer;';
+          row.title = `Átomo ${s.symbol} (Z=${s.z}) · Electronegatividad χ=${s.electronegativity}`;
+          row.innerHTML = `<span style="color:${s.tagCol}; font-weight:700;">${s.symbol}</span> <span style="color:#FFF; font-size:7.5px;">${s.role}</span> <span style="color:#FFD700; font-size:7px;">χ=${s.electronegativity}</span>`;
+          row.addEventListener('click', () => {
+            activeOrbitalMode = s.tag.includes('HOMO') ? 'homo' : 'lumo';
+            updateHomoLumoButtons();
+            generateMolecularHOMOLUMOCloud(activeOrbitalMode, orbitalIsovalue);
+            playTone(450, 'sine', 0.1);
+          });
+          elSites.appendChild(row);
+        });
+      }
+    }
+
+    drawOrbitalEnergyLadder();
+    generateMolecularHOMOLUMOCloud(activeOrbitalMode, orbitalIsovalue);
+  }
+
+  function drawOrbitalEnergyLadder() {
+    if (!orbitalCanvas || !activeHomoLumoData) return;
+    const ctx = orbitalCanvas.getContext('2d');
+    const w = orbitalCanvas.width;
+    const h = orbitalCanvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const m = { top: 32, right: 36, bottom: 32, left: 54 };
+    const plotW = w - m.left - m.right;
+    const plotH = h - m.top - m.bottom;
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, '#091220');
+    bgGrad.addColorStop(1, '#04070d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    const eMin = -16.0;
+    const eMax = 0.0;
+    function eToY(ev) {
+      const clamped = Math.max(eMin, Math.min(eMax, ev));
+      return m.top + ((eMax - clamped) / (eMax - eMin)) * plotH;
+    }
+
+    // Grid ticks & energy scale (-16 to 0 eV)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    for (let ev = 0; ev >= eMin; ev -= 2) {
+      const y = eToY(ev);
+      ctx.beginPath();
+      ctx.moveTo(m.left, y);
+      ctx.lineTo(m.left + plotW, y);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '8px "Fira Code", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${ev} eV`, m.left - 8, y + 3);
+    }
+
+    // Vacuum Level (0 eV)
+    const vacY = eToY(0.0);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(m.left, vacY);
+    ctx.lineTo(m.left + plotW, vacY);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.font = '7.5px "Orbitron", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('NIVEL DE VACÍO (Evac = 0 eV)', m.left + 8, vacY - 4);
+
+    // Fermi Level line (dotted violet)
+    const ef = activeHomoLumoData.chemicalPotentialEv;
+    const efY = eToY(ef);
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#BF00FF';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(m.left, efY);
+    ctx.lineTo(m.left + plotW, efY);
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#BF00FF';
+    ctx.font = '8px "Fira Code", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Ef ≈ ${ef.toFixed(2)} eV (Fermi)`, m.left + 8, efY - 4);
+
+    // Bandgap bracket between HOMO and LUMO
+    const homoY = eToY(activeHomoLumoData.homoEv);
+    const lumoY = eToY(activeHomoLumoData.lumoEv);
+    const bracketX = m.left + plotW - 40;
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(bracketX - 10, lumoY);
+    ctx.lineTo(bracketX, lumoY);
+    ctx.lineTo(bracketX, homoY);
+    ctx.lineTo(bracketX - 10, homoY);
+    ctx.stroke();
+
+    const gapMidY = (lumoY + homoY) / 2;
+    ctx.fillStyle = '#FFD700';
+    ctx.font = '8.5px "Orbitron", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(`Eg = ${activeHomoLumoData.bandgapEv.toFixed(2)} eV`, bracketX - 14, gapMidY + 3);
+
+    // Render individual orbital levels
+    const barW = 200;
+    const barX1 = m.left + 90;
+    const barX2 = barX1 + barW;
+
+    activeHomoLumoData.energyLevels.forEach(lvl => {
+      const y = eToY(lvl.energy);
+      const isHomo = lvl.type === 'frontier_homo';
+      const isLumo = lvl.type === 'frontier_lumo';
+      const isHovered = hoveredOrbitalLevel && hoveredOrbitalLevel.id === lvl.id;
+
+      let strokeCol = lvl.occupied ? '#00F0FF' : '#FF5500';
+      if (isHomo) strokeCol = '#00FFCF';
+      if (isLumo) strokeCol = '#FFAA00';
+
+      ctx.save();
+      ctx.lineWidth = isHomo || isLumo ? 3.5 : (isHovered ? 3 : 2);
+      ctx.strokeStyle = strokeCol;
+      ctx.beginPath();
+      ctx.moveTo(barX1, y);
+      ctx.lineTo(barX2, y);
+      ctx.stroke();
+      ctx.restore();
+
+      // Electron spin arrows (⥮ paired for occupied)
+      if (lvl.occupied) {
+        ctx.fillStyle = '#00F0FF';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('⥮', (barX1 + barX2) / 2, y + 3);
+      } else {
+        ctx.fillStyle = 'rgba(255, 85, 0, 0.7)';
+        ctx.font = '9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('○', (barX1 + barX2) / 2, y + 3);
+      }
+
+      // Orbital label (left of bar)
+      ctx.fillStyle = isHomo ? '#00FFCF' : (isLumo ? '#FFAA00' : 'rgba(255, 255, 255, 0.85)');
+      ctx.font = isHomo || isLumo ? '8px "Orbitron", sans-serif' : '7.5px "Orbitron", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(lvl.label, barX1 - 10, y + 3);
+
+      // Energy value (right of bar)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.font = '8px "Fira Code", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${lvl.energy.toFixed(2)} eV`, barX2 + 10, y + 3);
+    });
+  }
+
+  function handleOrbitalCanvasMouseMove(e) {
+    if (!orbitalCanvas || !activeHomoLumoData) return;
+    const rect = orbitalCanvas.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
+
+    const scaleX = orbitalCanvas.width / rect.width;
+    const scaleY = orbitalCanvas.height / rect.height;
+    const canvasY = clientY * scaleY;
+
+    const m = { top: 32, right: 36, bottom: 32, left: 54 };
+    const plotH = orbitalCanvas.height - m.top - m.bottom;
+    const eMin = -16.0;
+    const eMax = 0.0;
+
+    let closest = null;
+    let minDy = 12;
+
+    activeHomoLumoData.energyLevels.forEach(lvl => {
+      const y = m.top + ((eMax - lvl.energy) / (eMax - eMin)) * plotH;
+      const dy = Math.abs(y - canvasY);
+      if (dy < minDy) {
+        minDy = dy;
+        closest = lvl;
+      }
+    });
+
+    hoveredOrbitalLevel = closest;
+
+    if (orbitalTooltip) {
+      if (closest) {
+        orbitalTooltip.style.display = 'block';
+        orbitalTooltip.style.left = `${clientX + 14}px`;
+        orbitalTooltip.style.top = `${clientY - 12}px`;
+        const role = closest.occupied
+          ? (closest.type === 'frontier_homo' ? 'HOMO (Dador Nucleófilo · Par Libre / π)' : 'Orbital Enlazante Ocupado (2 e⁻)')
+          : (closest.type === 'frontier_lumo' ? 'LUMO (Aceptor Electrófilo · Antienlazante σ*/π*)' : 'Orbital Antienlazante Vacío (0 e⁻)');
+        orbitalTooltip.innerHTML = `<strong>${closest.label}</strong>: <strong>${closest.energy.toFixed(2)} eV</strong><br><span style="color:#00FFCF;">${role}</span>`;
+      } else {
+        orbitalTooltip.style.display = 'none';
+      }
+    }
+
+    drawOrbitalEnergyLadder();
+  }
+
+  function handleOrbitalCanvasClick(e) {
+    if (!hoveredOrbitalLevel) return;
+    playTone(520, 'sine', 0.15);
+    if (hoveredOrbitalLevel.type === 'frontier_homo') {
+      activeOrbitalMode = 'homo';
+    } else if (hoveredOrbitalLevel.type === 'frontier_lumo') {
+      activeOrbitalMode = 'lumo';
+    } else {
+      activeOrbitalMode = hoveredOrbitalLevel.occupied ? 'homo' : 'lumo';
+    }
+    updateHomoLumoButtons();
+    generateMolecularHOMOLUMOCloud(activeOrbitalMode, orbitalIsovalue);
+  }
+
+  const homoModeBtns = {
+    none: document.getElementById('btn-homo-mode-none'),
+    homo: document.getElementById('btn-homo-mode-homo'),
+    lumo: document.getElementById('btn-homo-mode-lumo'),
+    both: document.getElementById('btn-homo-mode-both')
+  };
+
+  function updateHomoLumoButtons() {
+    Object.entries(homoModeBtns).forEach(([key, btn]) => {
+      if (!btn) return;
+      if (key === activeOrbitalMode) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+  }
+
+  Object.entries(homoModeBtns).forEach(([key, btn]) => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      activeOrbitalMode = key;
+      updateHomoLumoButtons();
+      playTone(560, 'sine', 0.1);
+      generateMolecularHOMOLUMOCloud(activeOrbitalMode, orbitalIsovalue);
+    });
+  });
+
+  if (btnHomoLumo) {
+    btnHomoLumo.addEventListener('click', () => {
+      playTone(580, 'sine', 0.15);
+      openDialog(homoLumoModal, btnHomoLumo);
+      setTimeout(refreshHOMOLUMOSpectroscopy, 60);
+    });
+  }
+  if (btnCloseHomoLumo) {
+    btnCloseHomoLumo.addEventListener('click', () => {
+      closeDialog(homoLumoModal);
+    });
+  }
+  if (orbitalIsoSlider) {
+    orbitalIsoSlider.addEventListener('input', () => {
+      orbitalIsovalue = parseFloat(orbitalIsoSlider.value) || 1.0;
+      generateMolecularHOMOLUMOCloud(activeOrbitalMode, orbitalIsovalue);
+    });
+  }
+  if (orbitalCanvas) {
+    orbitalCanvas.addEventListener('click', handleOrbitalCanvasClick);
+    orbitalCanvas.addEventListener('mousemove', handleOrbitalCanvasMouseMove);
+    orbitalCanvas.addEventListener('mouseleave', () => {
+      if (orbitalTooltip) orbitalTooltip.style.display = 'none';
+      hoveredOrbitalLevel = null;
+      drawOrbitalEnergyLadder();
+    });
+  }
 
   // SUGGEST Button
   if (btnSuggest) {
