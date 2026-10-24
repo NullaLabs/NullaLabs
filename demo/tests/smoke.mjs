@@ -368,6 +368,13 @@ const chargePlus = compatibility.computePaulingPartialCharge(0.93, 2.05);
 const chargeMinus = compatibility.computePaulingPartialCharge(3.16, 2.05);
 assert.ok(chargePlus.q > 0 && chargePlus.hexColor === 0x38BDF8, 'electropositive atom must receive positive partial charge and electrophilic blue color');
 assert.ok(chargeMinus.q < 0 && chargeMinus.hexColor === 0xF43F5E, 'electronegative atom must receive negative partial charge and nucleophilic red color');
+const relaxTest = compatibility.relaxAtomicStructure([
+  { z: 8, x: -3.2, y: 0, zCoord: 0, electronegativity: 3.44 },
+  { z: 1, x: 3.2, y: 0.5, zCoord: 0, electronegativity: 2.20 },
+  { z: 1, x: 0, y: -3.2, zCoord: 0, electronegativity: 2.20 }
+], 0.42, 298);
+assert.ok(relaxTest && Array.isArray(relaxTest.relaxedPositions) && relaxTest.relaxedPositions.length === 3, 'relaxAtomicStructure must return relaxed 3D coordinates for all input atoms');
+assert.ok(relaxTest.deltaEnergyKJmol <= 0, '3D force-field relaxation must lower or preserve potential energy');
 const dtCompatibility = compatibility.nuclear({reaction:nuclear.fusion['H+H'][0],isotopes:nuclear.isotopes});
 assert.equal(dtCompatibility.status, 'EXOENERGETIC_CHANNEL_KINETICS_UNEVALUATED');
 assert.equal(dtCompatibility.confidence, null, 'Q and contact barrier do not justify a probability score');

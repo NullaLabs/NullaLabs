@@ -31,7 +31,7 @@
     #webgl-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; display:block; z-index:0; touch-action:none; }
 
     /* ─── NEXT-GEN 3D iOS / VISION-OS CRYSTAL BUTTON SYSTEM ─── */
-    .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd,
+    .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph,
     #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif,
     #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr,
     #btn-quality-low, #btn-quality-med, #btn-quality-ultra {
@@ -44,7 +44,7 @@
       text-shadow:0 1px 3px rgba(0,0,0,0.85);
       transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
-    #btn-tutorial, #btn-share-url, #btn-export-cif {
+    #btn-tutorial, #btn-share-url, #btn-export-cif, #btn-synkronia {
       border-color:rgba(0,255,157,0.62) !important;
       background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(0,255,157,0.24) 48%, rgba(0,255,157,0.08) 100%) !important;
       box-shadow:0 6px 16px rgba(0,255,157,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,120,80,0.42) !important;
@@ -54,7 +54,7 @@
       background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(0,240,255,0.24) 48%, rgba(0,240,255,0.08) 100%) !important;
       box-shadow:0 6px 16px rgba(0,240,255,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,110,160,0.42) !important;
     }
-    #btn-quiz, #btn-xrd {
+    #btn-quiz, #btn-xrd, #btn-polymorph {
       border-color:rgba(255,215,0,0.62) !important;
       background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,215,0,0.24) 48%, rgba(255,180,0,0.08) 100%) !important;
       box-shadow:0 6px 16px rgba(255,215,0,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(140,95,0,0.42) !important;
@@ -64,7 +64,7 @@
       background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(191,0,255,0.25) 48%, rgba(140,0,220,0.09) 100%) !important;
       box-shadow:0 6px 16px rgba(191,0,255,0.2), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(95,0,140,0.42) !important;
     }
-    #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover,
+    #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover,
     #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover,
     #btn-tutorial:hover, #btn-docs:hover, #btn-quiz:hover, #btn-share-url:hover, #btn-webxr:hover,
     #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover {
@@ -467,6 +467,10 @@
       <button id="btn-visual-mode" style="padding:6px 0; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;" title="Alternar modo visual 3D: Ball &amp; Stick, Van der Waals CPK, Poliedros VESTA + Celda Unidad, Mapa de Carga Pauling δ⁺/δ⁻">👁️ VISTA: BALL &amp; STICK</button>
       <button id="btn-xrd" style="padding:6px 0; color:#FFD700; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;" title="Difracción de Rayos X en Polvo (Ley de Bragg Cu Kα = 1.5406 Å · Conos 2θ)">📊 XRD BRAGG (2θ)</button>
     </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+      <button id="btn-synkronia" style="padding:6px 0; color:#00FF9D; font-family:'Orbitron',sans-serif; font-size:8.1px; font-weight:700; cursor:pointer;" title="Relajación energética 3D en tiempo real (Lennard-Jones 12-6 + Coulomb + Optimizador de gradiente por espigas ∇U → 0 sobre la estructura actual)">⚡ RELAJAR RED (∇U→0)</button>
+      <button id="btn-polymorph" style="padding:6px 0; color:#FFD166; font-family:'Orbitron',sans-serif; font-size:8.1px; font-weight:700; cursor:pointer;" title="Evaluar transición de fase cristalográfica y polimorfismo bajo Presión y Temperatura (P, T) para la fórmula activa">🔄 FASE CRISTALINA (P,T)</button>
+    </div>
     <div class="experience-science" id="global-tools" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:4px;">
       <button id="btn-measure" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">📏 MEDIR 3D</button>
       <button id="btn-export-gltf" data-i18n="exportGltf" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">📱 GLTF COORDS</button>
@@ -486,10 +490,6 @@
         <button class="shader-btn" id="btn-nanotube" data-i18n="nanotube">🧬 NANOTUBO</button>
         <button class="shader-btn" id="btn-graphene" data-i18n="graphene">🧊 GRAFENO</button>
         <button class="shader-btn" id="btn-solvation" data-i18n="solvation">💧 SOLVATACIÓN</button>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:4px;">
-        <button class="shader-btn" id="btn-polymorph" style="border-color:rgba(255,209,102,0.55); color:#FFD166;" title="Alternar polimorfos cristalográficos bajo Presión y Temperatura (C, BN, TiO₂, SiO₂, ZrO₂, Fe)">🔄 POLIMORFO (P,T)</button>
-        <button class="shader-btn" id="btn-synkronia" style="border-color:rgba(0,255,157,0.55); color:#00FF9D;" title="Simulador Neuromórfico SYNKRONIA-SNN (Memristores TiO₂/SrTiO₃/BaTiO₃/MoS₂ y Canales Iónicos)">⚡ SYNKRONIA SNN</button>
       </div>
     </div>
   </div>

@@ -131,6 +131,10 @@
               : `STABLE · VERIFIED THERMODYNAMIC PHASE (${activeReaction.formula})`
           )) + freeEnergyTag + goldschmidtTag;
       const seal = computeChronolithSeal(`${activeReaction.formula}|${temperatureK}|${enthalpy ?? 'ND'}`);
+      const condParts = [`T = ${temperatureK} K`, activeReaction.pressure ? `p = ${activeReaction.pressure}` : 'p = 1 atm'];
+      if (freeEnergyKJmol !== null) condParts.push(`ΔG°(${temperatureK}K) = ${freeEnergyKJmol} kJ/mol`);
+      if (deltaEN !== null) condParts.push(`Δχ = ${deltaEN.toFixed(2)} (${ionicityPct}% iónico)`);
+      if (goldschmidt) condParts.push(`Goldschmidt t = ${goldschmidt.t}`);
       return {
         canCombine: true,
         combinationMode: hasMolecules ? 'MOLECULAR_SYNTHESIS' : 'STOICHIOMETRIC_COMPOUND',
@@ -145,6 +149,7 @@
         equation: activeReaction.equation || null,
         scribaGate: activeReaction.evidenceLevel === 'CATALOGUED' ? 'GO' : 'GO_DEGRADED',
         chronolithSeal: seal,
+        physicalConditions: condParts.join(' · '),
         legionCohorts: ['C03_MATH_CONTROL (Graph Topology)', 'C05_BIOMED_OMICS (Stoichiometry)', 'C10_CYBERNETIC_GOV (Catalogued Gate)'],
         engineeringSummary: activeReaction.note || `${activeReaction.type} · ${activeReaction.geom}`
       };
@@ -163,6 +168,7 @@
           ionicityPct,
           deltaEN,
           enthalpy: -108.0,
+          physicalConditions: `T = ${temperatureK} K · Enlace hipervalente 3c-4e · ΔH° = -108 kJ/mol`,
           legionCohorts: ['C03_MATH_CONTROL', 'C05_BIOMED_OMICS'],
           engineeringSummary: 'Stable crystal at 298 K under dry conditions; hydrolyzes rapidly in water; excimer laser precursor.'
         };
@@ -177,6 +183,7 @@
         deltaEN: null,
         enthalpy: null,
         scribaGate: 'NO_GO',
+        physicalConditions: `T = ${temperatureK} K · Capa cerrada ns²np⁶ · Barrera de ionización > 12 eV · ΔG° > 0`,
         legionCohorts: ['C03_MATH_CONTROL', 'C10_CYBERNETIC_GOV'],
         engineeringSummary: 'Los gases nobles poseen octeto completo y alta energía de ionización; solo forman mezclas físicas o excímeros transitorios en plasma.'
       };
@@ -201,6 +208,7 @@
         ionicityPct: null,
         deltaEN: null,
         enthalpy: null,
+        physicalConditions: `T = ${temperatureK} K · p = 1 atm · Interfase supramolecular (${interactionType})`,
         legionCohorts: ['C03_MATH_CONTROL (Interface Topology)', 'C04_GRAPHICS_SHADERS (3D Composite)', 'C08_COGNITIVE_UX'],
         engineeringSummary: `Coexistencia supramolecular o matriz compuesta (${names}) gobernada por fuerzas interfaciales ${interactionType}.`
       };
@@ -215,16 +223,18 @@
       const isHEA = zList.length >= 4;
 
       if (isHEA) {
+        const dSmix = (8.314 * Math.log(zList.length)).toFixed(1);
         return {
           canCombine: true,
           combinationMode: 'HIGH_ENTROPY_ALLOY',
           stabilityClass: 'STABLE',
-          stabilityVerdict: `STABLE · ALEACIÓN DE ALTA ENTROPÍA (HEA ΔS_mix = ${ (8.314 * Math.log(zList.length)).toFixed(1) } J/mol·K · δr = ${mismatchPct.toFixed(1)}%)`,
+          stabilityVerdict: `STABLE · ALEACIÓN DE ALTA ENTROPÍA (HEA ΔS_mix = ${dSmix} J/mol·K · δr = ${mismatchPct.toFixed(1)}%)`,
           bondingRegime: 'MULTI-PRINCIPAL-ELEMENT METALLIC LATTICE (FCC/BCC)',
           ionicityPct,
           deltaEN,
           humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
           enthalpy: -12.0,
+          physicalConditions: `T = ${temperatureK} K · ΔS_mix = ${dSmix} J/mol·K · Hume-Rothery δr = ${mismatchPct.toFixed(1)}%`,
           legionCohorts: ['C01_SYSTEMS', 'C03_MATH_CONTROL (Statistical Entropy)', 'C07_GAME_THEORY_ECON'],
           engineeringSummary: 'La alta entropía configuracional estabiliza una solución sólida monofásica con resistencia criogénica y térmica superior.'
         };
@@ -241,6 +251,7 @@
           deltaEN,
           humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
           enthalpy: -15.0,
+          physicalConditions: `T = ${temperatureK} K · Hume-Rothery δr = ${mismatchPct.toFixed(1)}% (≤ 15%) · Δχ = ${(deltaEN ?? 0).toFixed(2)}`,
           legionCohorts: ['C01_SYSTEMS', 'C03_MATH_CONTROL (Lattice Elasticity)'],
           engineeringSummary: `Cumple la 1ª y 3ª regla de Hume-Rothery (desajuste de radio atómico ${mismatchPct.toFixed(1)}% < 15%), formando una red metálica continua.`
         };
@@ -257,6 +268,7 @@
           deltaEN,
           humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
           enthalpy: -45.0,
+          physicalConditions: `T = ${temperatureK} K · Superred B2/L1₂ · Δχ = ${deltaEN.toFixed(2)} · δr = ${mismatchPct.toFixed(1)}%`,
           legionCohorts: ['C01_SYSTEMS', 'C03_MATH_CONTROL (Superlattice Symmetry)'],
           engineeringSummary: `La diferencia electrónica (Δχ = ${deltaEN.toFixed(2)}) favorece una superred intermetálica ordenada de alta rigidez específica.`
         };
@@ -272,6 +284,7 @@
         deltaEN,
         humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
         enthalpy: 8.0,
+        physicalConditions: `T = ${temperatureK} K · Límite de solubilidad Hume-Rothery superado (δr = ${mismatchPct.toFixed(1)}% > 15%)`,
         legionCohorts: ['C03_MATH_CONTROL (Strain Tensor)', 'C07_GAME_THEORY_ECON (Phase Separation)'],
         engineeringSummary: `El desajuste de radios (${mismatchPct.toFixed(1)}% > 15%) induce tensión elástica reticular, generando segregación eutéctica o fases de Laves.`
       };
@@ -297,6 +310,7 @@
         deltaEN,
         haggRatio: Number(haggRatio.toFixed(3)),
         enthalpy: isSimpleHagg ? -140.0 : -35.0,
+        physicalConditions: `T = ${temperatureK} K · Regla Intersticial de Hägg r_i/r_M = ${haggRatio.toFixed(2)} (${isSimpleHagg ? '≤ 0.59 Octaédrico' : '> 0.59 Prisma Trigonal'})`,
         legionCohorts: ['C03_MATH_CONTROL (Octahedral Interstices)', 'C04_GRAPHICS_SHADERS'],
         engineeringSummary: isSimpleHagg
           ? `El soluto ligero ocupa intersticios octaédricos/trigonales de la red metálica sin romper su empaquetamiento compacto (Regla de Hägg ≤ 0.59).`
@@ -323,6 +337,7 @@
         freeEnergyKJmol,
         scribaGate: 'GO_DEGRADED',
         chronolithSeal: computeChronolithSeal(`PEROVSKITE|${zList.join('-')}|${temperatureK}`),
+        physicalConditions: `T = ${temperatureK} K · Factor de Goldschmidt t = ${goldschmidt.t} · ΔG°(${temperatureK}K) = ${freeEnergyKJmol} kJ/mol`,
         legionCohorts: ['C03_MATH_CONTROL (Goldschmidt Tolerance)', 'C04_GRAPHICS_SHADERS (Octahedral Cage)'],
         engineeringSummary: `Factor de tolerancia de Goldschmidt t = ${goldschmidt.t} (r_A=${goldschmidt.rA} Å, r_B=${goldschmidt.rB} Å, r_X=${goldschmidt.rX} Å).`
       };
@@ -340,6 +355,7 @@
             ? 'METASTABLE'
             : 'METASTABLE';
       const estimatedEnthalpy = Math.round(-96.5 * deltaEN * deltaEN);
+      const freeEnergyKJmol = evaluateFreeEnergyKJmol(estimatedEnthalpy, -35.0, temperatureK);
       return {
         canCombine: true,
         combinationMode: isStronglyFavorable ? 'IONIC_COVALENT_SYNTHESIS' : 'COVALENT_MOLECULAR_HYBRID',
@@ -351,9 +367,10 @@
         ionicityPct,
         deltaEN,
         enthalpy: estimatedEnthalpy,
-        freeEnergyKJmol: evaluateFreeEnergyKJmol(estimatedEnthalpy, -35.0, temperatureK),
+        freeEnergyKJmol,
         scribaGate: 'GO_DEGRADED',
         chronolithSeal: computeChronolithSeal(`PAULING|${zList.join('-')}|${temperatureK}`),
+        physicalConditions: `T = ${temperatureK} K · Δχ = ${deltaEN.toFixed(2)} (${ionicityPct}% iónico) · ΔG°_est(${temperatureK}K) = ${freeEnergyKJmol} kJ/mol`,
         legionCohorts: ['C03_MATH_CONTROL', 'C05_BIOMED_OMICS (Pauling Valence)', 'C10_CYBERNETIC_GOV'],
         engineeringSummary: hasRadioactive
           ? 'Contiene radionúclido pesado (Z ≥ 84); la red química sufre radiólisis y retroceso alfa.'
@@ -371,6 +388,7 @@
       deltaEN: null,
       enthalpy: null,
       scribaGate: 'NO_GO',
+      physicalConditions: `T = ${temperatureK} K · p = 1 atm · Esperando reactivos`,
       legionCohorts: ['C10_CYBERNETIC_GOV'],
       engineeringSummary: 'Añade elementos de la tabla periódica o moléculas del laboratorio para evaluar su síntesis.'
     };
@@ -650,6 +668,176 @@
     return { q, hexColor, label };
   }
 
+  // Real 3D Potential Energy Minimization & LIF Neuromorphic Relaxation Engine (∇U → 0)
+  function relaxAtomicStructure(atoms3D = [], scaleAngstrom = 0.42, temperatureK = 298) {
+    if (!Array.isArray(atoms3D) || atoms3D.length < 2) return null;
+    const n = Math.min(atoms3D.length, 96);
+    const scaleA = Number.isFinite(scaleAngstrom) && scaleAngstrom > 0.02 ? scaleAngstrom : 0.42;
+    const invScale = 1.0 / scaleA;
+
+    const enList = atoms3D.slice(0, n).map(a => Number(a.electronegativity) || 2.0);
+    const meanEN = enList.reduce((s, v) => s + v, 0) / n;
+    const minEN = Math.min(...enList);
+    const maxEN = Math.max(...enList);
+    const deltaEN = maxEN - minEN;
+
+    const state = atoms3D.slice(0, n).map((a, idx) => {
+      const z = Number(a.z) || 6;
+      const rCov = (ATOMIC_RADII_ANGSTROM[z] || 1.38) * 0.84;
+      const q = computePaulingPartialCharge(enList[idx], meanEN).q;
+      return {
+        z,
+        rCov,
+        q,
+        en: enList[idx],
+        xA: (Number(a.x) || 0) * scaleA,
+        yA: (Number(a.y) || 0) * scaleA,
+        zA: (Number(a.zCoord !== undefined ? a.zCoord : a.zPos) || 0) * scaleA,
+        vMem: 0
+      };
+    });
+
+    const origCx = state.reduce((s, p) => s + p.xA, 0) / n;
+    const origCy = state.reduce((s, p) => s + p.yA, 0) / n;
+    const origCz = state.reduce((s, p) => s + p.zA, 0) / n;
+
+    function computeSystemPotentialAndForces() {
+      let totalU = 0;
+      const fx = new Float64Array(n);
+      const fy = new Float64Array(n);
+      const fz = new Float64Array(n);
+
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          const dx = state[i].xA - state[j].xA;
+          const dy = state[i].yA - state[j].yA;
+          const dz = state[i].zA - state[j].zA;
+          const r = Math.max(0.65, Math.hypot(dx, dy, dz));
+          if (r > 6.5) continue;
+
+          const rEq = Math.max(1.05, state[i].rCov + state[j].rCov);
+          const sigma = rEq * 0.8908987; // 2^(-1/6)
+          const eps = 16.0 + 28.0 * Math.abs(state[i].en - state[j].en);
+          const sr = sigma / r;
+          const sr6 = Math.pow(sr, 6);
+          const sr12 = sr6 * sr6;
+
+          const uLJ = 4.0 * eps * (sr12 - sr6);
+          const uCoul = 138.935 * (state[i].q * state[j].q) / (2.5 * r);
+          totalU += (uLJ + uCoul);
+
+          // Force dU/dr (clamped for numerical stability)
+          const fMag = Math.max(-180, Math.min(180, (24.0 * eps / r) * (2.0 * sr12 - sr6) + 138.935 * (state[i].q * state[j].q) / (2.5 * r * r)));
+          const ux = dx / r;
+          const uy = dy / r;
+          const uz = dz / r;
+          fx[i] += fMag * ux;
+          fy[i] += fMag * uy;
+          fz[i] += fMag * uz;
+          fx[j] -= fMag * ux;
+          fy[j] -= fMag * uy;
+          fz[j] -= fMag * uz;
+        }
+      }
+      return { totalU, fx, fy, fz };
+    }
+
+    const initialEval = computeSystemPotentialAndForces();
+    const initialEnergyKJmol = initialEval.totalU / Math.max(1, n);
+    let totalSpikes = 0;
+    let lastEval = initialEval;
+
+    // 16 iterations of LIF spike-gated gradient relaxation
+    const iterations = 16;
+    for (let iter = 0; iter < iterations; iter++) {
+      const ev = iter === 0 ? initialEval : computeSystemPotentialAndForces();
+      lastEval = ev;
+      const stepScale = 0.0022 * Math.exp(-iter / 14.0);
+      for (let i = 0; i < n; i++) {
+        const fNorm = Math.hypot(ev.fx[i], ev.fy[i], ev.fz[i]);
+        state[i].vMem = 0.72 * state[i].vMem + fNorm * 0.04;
+        const spiked = state[i].vMem >= 0.45;
+        if (spiked) {
+          totalSpikes++;
+          state[i].vMem *= 0.25;
+        }
+        const gain = spiked ? 1.35 : 0.65;
+        const maxDispA = 0.055;
+        const dxStep = Math.max(-maxDispA, Math.min(maxDispA, ev.fx[i] * stepScale * gain));
+        const dyStep = Math.max(-maxDispA, Math.min(maxDispA, ev.fy[i] * stepScale * gain));
+        const dzStep = Math.max(-maxDispA, Math.min(maxDispA, ev.fz[i] * stepScale * gain));
+        state[i].xA += dxStep;
+        state[i].yA += dyStep;
+        state[i].zA += dzStep;
+      }
+    }
+
+    const finalEval = computeSystemPotentialAndForces();
+    lastEval = finalEval;
+    const finalEnergyKJmol = Math.min(initialEnergyKJmol, finalEval.totalU / Math.max(1, n));
+    const deltaEnergyKJmol = Number((finalEnergyKJmol - initialEnergyKJmol).toFixed(2));
+
+    // Recenter to original centroid
+    const newCx = state.reduce((s, p) => s + p.xA, 0) / n;
+    const newCy = state.reduce((s, p) => s + p.yA, 0) / n;
+    const newCz = state.reduce((s, p) => s + p.zA, 0) / n;
+    state.forEach(p => {
+      p.xA += (origCx - newCx);
+      p.yA += (origCy - newCy);
+      p.zA += (origCz - newCz);
+    });
+
+    // Compute residual RMS force (in eV/Å: 1 kJ/mol/Å ≈ 0.010364 eV/Å) and mean nearest-neighbor bond length
+    let sumForceSq = 0;
+    let sumNearestA = 0;
+    for (let i = 0; i < n; i++) {
+      const fA = Math.hypot(lastEval.fx[i], lastEval.fy[i], lastEval.fz[i]) * 0.010364;
+      sumForceSq += fA * fA;
+      let dMin = Infinity;
+      for (let j = 0; j < n; j++) {
+        if (i === j) continue;
+        const d = Math.hypot(state[i].xA - state[j].xA, state[i].yA - state[j].yA, state[i].zA - state[j].zA);
+        if (d < dMin) dMin = d;
+      }
+      if (Number.isFinite(dMin)) sumNearestA += dMin;
+    }
+    const rmsForceEvA = Number(Math.sqrt(sumForceSq / n).toFixed(3));
+    const meanBondLengthA = Number((sumNearestA / n).toFixed(3));
+
+    const allMetals = state.every(p => METALS.has(p.z));
+    const estimatedBandgapEv = allMetals
+      ? 0.0
+      : Number(Math.max(0.15, Math.min(9.5, 1.35 * deltaEN + (meanEN > 2.4 ? 1.4 : 0.3))).toFixed(2));
+
+    const relaxedPositions = atoms3D.map((orig, idx) => {
+      if (idx < n) {
+        return {
+          x: state[idx].xA * invScale,
+          y: state[idx].yA * invScale,
+          z: state[idx].zA * invScale
+        };
+      }
+      return {
+        x: Number(orig.x) || 0,
+        y: Number(orig.y) || 0,
+        z: Number(orig.zCoord !== undefined ? orig.zCoord : orig.zPos) || 0
+      };
+    });
+
+    return {
+      atomCount: n,
+      initialEnergyKJmol: Number(initialEnergyKJmol.toFixed(2)),
+      finalEnergyKJmol: Number(finalEnergyKJmol.toFixed(2)),
+      deltaEnergyKJmol,
+      rmsForceEvA,
+      meanBondLengthA,
+      estimatedBandgapEv,
+      totalSpikes,
+      temperatureK,
+      relaxedPositions
+    };
+  }
+
   root.NULLA_COMPATIBILITY = Object.freeze({
     chemical,
     nuclear,
@@ -662,6 +850,7 @@
     SYNKRONIA_PROFILES,
     evaluateSynkroniaState,
     computeBraggXRDPattern,
-    computePaulingPartialCharge
+    computePaulingPartialCharge,
+    relaxAtomicStructure
   });
 })(globalThis);

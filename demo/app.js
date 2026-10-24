@@ -2053,8 +2053,6 @@ window.addEventListener('DOMContentLoaded', function() {
     const enthalpyDisplay = reaction.enthalpy !== undefined && reaction.enthalpy !== null
       ? (reaction.enthalpy < 0 ? `${reaction.enthalpy} kJ/mol (EXO)${dGTag}` : `${reaction.enthalpy} kJ/mol (ENDO)${dGTag}`)
       : '—';
-    const seal = window.NULLA_COMPATIBILITY?.computeChronolithSeal?.(`${reaction.formula}|${temperatureK}|${reaction.enthalpy ?? 'ND'}`);
-    const sealTag = seal ? ` · [${seal}]` : '';
     updateTelemetry(
       `${reaction.formula} · ${reaction.name}`,
       formulaWithEq,
@@ -2064,7 +2062,7 @@ window.addEventListener('DOMContentLoaded', function() {
       enthalpyDisplay,
       reaction.dipole !== undefined && reaction.dipole !== null ? `${reaction.dipole} Debye (${reaction.dipole > 0 ? 'POLAR' : 'NON-POLAR'})` : tr('dataUnavailable'),
       stabilityDisplay,
-      reaction.note ? `${reaction.note} · ${evidenceLabel}${sealTag}` : `${evidenceLabel}${sealTag}`
+      reaction.note ? `${reaction.note} · ${evidenceLabel}` : `${evidenceLabel}`
     );
   }
 
@@ -3329,8 +3327,8 @@ window.addEventListener('DOMContentLoaded', function() {
       }
     }
     if (hudConditions) {
-      if (result.legionCohorts?.length) {
-        hudConditions.textContent = `LEGION [${result.legionCohorts.join(' + ')}] · T=${temperatureK} K`;
+      if (result.physicalConditions) {
+        hudConditions.textContent = result.physicalConditions;
       } else {
         const requirements = result.requirements?.length ? result.requirements.map(translateCompatibilityItem).join(' · ') : tr('noAdditionalConditions');
         const risks = result.instability?.length ? ` | ${tr('instability')}: ${result.instability.map(translateCompatibilityItem).join(' · ')}` : '';
@@ -3437,7 +3435,7 @@ window.addEventListener('DOMContentLoaded', function() {
     updateTelemetry(
       `BANDEJA DE SÍNTESIS (${count}/${MAX_REACTANTS}) · ${symbolsStr}`,
       reaction ? `${symbolsStr} → ${reaction.formula} (${reaction.name})` : `${symbolsStr} → ${multi?.combinationMode || '?'}`,
-      reaction ? `${reaction.type} · ${reaction.evidenceLevel}` : `LEGION MULTIDISCIPLINARY · ${multi?.stabilityClass || 'PREVIEW'}`,
+      reaction ? `${reaction.type} · ${reaction.evidenceLevel}` : `${multi?.combinationMode || 'FASE MULTICOMPONENTE'} · ${multi?.stabilityClass || 'PREVIEW'}`,
       multi?.bondingRegime || reaction?.bonds || 'Pulsa 🧪 COMBINAR o ◌ MEZCLAR',
       `SEPARACIÓN CUÁNTICA 3D · T=${temperatureK} K`,
       reaction?.enthalpy !== undefined ? `${reaction.enthalpy} kJ/mol` : (multi?.enthalpy != null ? `≈${multi.enthalpy} kJ/mol` : '—'),
@@ -3922,16 +3920,60 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function triggerPolymorphTransition() {
     playTone(710, 'triangle', 0.18);
+    if (activeCollisionMode === 'fusion' || activeCollisionMode === 'fission') return;
+
+    const families = window.NULLA_COMPATIBILITY?.POLYMORPH_FAMILIES || {};
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    const uniqueZ = [...new Set(realAtoms.map(a => a.z))].sort((a, b) => a - b);
+
+    // Determine if the active structure belongs to a polymorphic crystal family
+    let matchedFamily = null;
+    if (activeReactionRef?.formula && families[activeReactionRef.formula]) {
+      matchedFamily = activeReactionRef.formula;
+    } else if (uniqueZ.length === 1 && uniqueZ[0] === 6) {
+      matchedFamily = 'C';
+    } else if (uniqueZ.length === 1 && uniqueZ[0] === 26) {
+      matchedFamily = 'Fe';
+    } else if (uniqueZ.length === 2 && uniqueZ[0] === 5 && uniqueZ[1] === 7) {
+      matchedFamily = 'BN';
+    } else if (uniqueZ.length === 2 && uniqueZ[0] === 8 && uniqueZ[1] === 22) {
+      matchedFamily = 'TiO₂';
+    } else if (uniqueZ.length === 2 && uniqueZ[0] === 8 && uniqueZ[1] === 14) {
+      matchedFamily = 'SiO₂';
+    } else if (uniqueZ.length === 2 && uniqueZ[0] === 8 && uniqueZ[1] === 40) {
+      matchedFamily = 'ZrO₂';
+    }
+
+    // If the current molecule/compound does not belong to a multi-polymorph solid family,
+    // evaluate its thermodynamic (P, T) phase stability in-place without replacing the molecule!
+    if (!matchedFamily) {
+      const phaseObj = phaseAtTemperature(activeThermalProfile, temperatureK);
+      const freeEnergyKJmol = activeReactionRef
+        ? window.NULLA_COMPATIBILITY?.evaluateFreeEnergyKJmol?.(activeReactionRef.enthalpy, activeReactionRef.entropyJmolK, temperatureK)
+        : null;
+      const dGStr = freeEnergyKJmol !== null && freeEnergyKJmol !== undefined
+        ? `ΔG°(${temperatureK}K) = ${freeEnergyKJmol} kJ/mol`
+        : `T = ${temperatureK} K`;
+      if (hudCompatibility) {
+        hudCompatibility.textContent = `FASE TERMODINÁMICA ACTIVA: ${ String(phaseObj?.key || 'solid').toUpperCase() } (${dGStr})`;
+        hudCompatibility.style.color = '#FFD166';
+      }
+      if (hudConditions) {
+        const meltStr = activeThermalProfile?.melt ? `Tm = ${activeThermalProfile.melt} K · ` : '';
+        const boilStr = activeThermalProfile?.boil ? `Tb = ${activeThermalProfile.boil} K · ` : '';
+        hudConditions.textContent = `Equilibrio de Fases P–T: ${meltStr}${boilStr}${dGStr} · (Polimorfos de alta presión disponibles en C, BN, TiO₂, SiO₂, ZrO₂, Fe)`;
+      }
+      return;
+    }
+
     isDnaMode = false;
     activeCollisionMode = 'chemical';
-    const candidateFormula = activeReactionRef?.formula && window.NULLA_COMPATIBILITY?.POLYMORPH_FAMILIES?.[activeReactionRef.formula]
-      ? activeReactionRef.formula
-      : activePolymorphFamily;
-    const nextInfo = window.NULLA_COMPATIBILITY?.getNextPolymorph?.(candidateFormula, activePolymorphId);
-    if (!nextInfo) return;
+    const list = families[matchedFamily];
+    const currentIdx = list.findIndex(item => item.id === activePolymorphId);
+    const nextIdx = (currentIdx + 1) % list.length;
+    const poly = list[nextIdx];
 
-    activePolymorphFamily = nextInfo.familyKey;
-    const poly = nextInfo.polymorph;
+    activePolymorphFamily = matchedFamily;
     activePolymorphId = poly.id;
     activeReactionRef = poly;
     activeStructureId = `polymorph-${poly.id}`;
@@ -3963,104 +4005,71 @@ window.addEventListener('DOMContentLoaded', function() {
 
     const freeEnergyKJmol = window.NULLA_COMPATIBILITY?.evaluateFreeEnergyKJmol?.(poly.enthalpy, poly.entropyJmolK, temperatureK);
     const dGTag = freeEnergyKJmol !== null ? ` · ΔG°(${temperatureK}K)=${freeEnergyKJmol} kJ/mol` : '';
-    const seal = window.NULLA_COMPATIBILITY?.computeChronolithSeal?.(`POLYMORPH|${poly.id}|${temperatureK}`) || 'CHR-POLY';
 
     updateTelemetry(
-      `🔄 POLIMORFO [${nextInfo.index + 1}/${nextInfo.total}] · ${poly.name}`,
-      `Fórmula: ${poly.formula} | Grupo Espacial IUCr: ${poly.spaceGroup}`,
-      `COMPETICIÓN DE FASES P–T · Ventana: P ∈ [${poly.pWindow}] · T ∈ [${poly.tWindow}]`,
+      `${poly.formula} · ${poly.name}`,
+      `${poly.formula} | Grupo Espacial IUCr: ${poly.spaceGroup} (Polimorfo ${nextIdx + 1}/${list.length})`,
+      `FASE CRISTALINA · P ∈ [${poly.pWindow}] · T ∈ [${poly.tWindow}]`,
       `d₀ = ${poly.bondLengthA} Å · B₀ = ${poly.bulkModulusGPa} GPa · HV = ${poly.vickersGPa} GPa · Eg = ${poly.bandgapEv} eV`,
-      `T_actual = ${temperatureK} K · Tb/Tsub = ${poly.boil} K`,
+      `T = ${temperatureK} K · Tb/Tsub = ${poly.boil} K`,
       `${poly.enthalpy} kJ/mol${dGTag}`,
       '0 Debye (RED CRISTALINA)',
       `99% · POLIMORFO CRISTALOGRÁFICO VERIFICADO`,
-      `${poly.note} · [${seal}]`
+      poly.note
     );
     if (hudCompatibility) {
-      hudCompatibility.textContent = `FASE CRISTALINA: ${poly.name} (${poly.spaceGroup})`;
+      hudCompatibility.textContent = `FASE CRISTALINA [${nextIdx + 1}/${list.length}]: ${poly.name} (${poly.spaceGroup})`;
       hudCompatibility.style.color = '#FFD166';
     }
     if (hudConditions) {
-      hudConditions.textContent = `THEORIA-NULLA + INYEKTOR [P: ${poly.pWindow} | T: ${poly.tWindow}] · [${seal}]`;
+      hudConditions.textContent = `Ventana de estabilidad P–T: P ∈ [${poly.pWindow}] · T ∈ [${poly.tWindow}]${dGTag}`;
     }
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // SYNKRONIA-SNN-CORE: NEUROMORPHIC MEMRISTOR & ION-CHANNEL ENGINE
+  // REAL 3D POTENTIAL ENERGY MINIMIZATION & FORCE-FIELD RELAXATION (∇U → 0)
+  // Operates computationally in-place on the active atomic structure
+  // without overwriting chemical identity (ASSEMBLY, FORMULA, ENTHALPY)
   // ═══════════════════════════════════════════════════════════════
-  const SYNKRONIA_KEYS = ['SrTiO₃', 'TiO₂', 'BaTiO₃', 'MoS₂', 'LiCoO₂', 'NaCl'];
-  let activeSynkroniaIndex = 0;
-  let synkroniaPulseCount = 0;
+  let relaxationPassCount = 0;
 
   function triggerSynkroniaPulse() {
-    playTone(840 + (synkroniaPulseCount % 4) * 60, 'sine', 0.18);
-    isDnaMode = false;
-    activeCollisionMode = 'chemical';
+    const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
+    if (realAtoms.length < 2) return;
+    relaxationPassCount++;
+    playTone(760 + (relaxationPassCount % 4) * 45, 'sine', 0.16);
 
-    const currentFormula = activeReactionRef?.formula;
-    if (currentFormula && SYNKRONIA_KEYS.includes(currentFormula)) {
-      activeSynkroniaIndex = SYNKRONIA_KEYS.indexOf(currentFormula);
-    } else if (synkroniaPulseCount >= 4) {
-      activeSynkroniaIndex = (activeSynkroniaIndex + 1) % SYNKRONIA_KEYS.length;
-      synkroniaPulseCount = 0;
-    }
-    synkroniaPulseCount++;
-    const targetKey = SYNKRONIA_KEYS[activeSynkroniaIndex];
-    const synk = window.NULLA_COMPATIBILITY?.evaluateSynkroniaState?.(targetKey, synkroniaPulseCount, temperatureK);
-    if (!synk) return;
+    const scaleA = angstromPerWorldUnit || 0.42;
+    const atomsInput = realAtoms.map(a => ({
+      z: a.z,
+      x: a.targetPos.x,
+      y: a.targetPos.y,
+      zCoord: a.targetPos.z,
+      electronegativity: a.elData?.electronegativity || 2.0
+    }));
 
-    const atoms = [];
-    const bonds = [];
-    const d = 5.0;
-    // Build 3x3x3 host oxide/perovskite/2D matrix + conductive oxygen-vacancy filament along X-axis
-    for (let ix = -1; ix <= 1; ix++) {
-      for (let iy = -1; iy <= 1; iy++) {
-        for (let iz = -1; iz <= 1; iz++) {
-          const isFilamentCore = (iy === 0 && iz === 0);
-          const idx = atoms.length;
-          const zAtom = (Math.abs(ix + iy + iz) % 2 === 0) ? synk.zA : synk.zB;
-          atoms.push({
-            z: zAtom,
-            pos: new THREE.Vector3(ix * d, iy * d, iz * d),
-            col: isFilamentCore ? (synk.synapticWeight >= 0.8 ? 0x00FF9D : 0x00F0FF) : undefined,
-            scale: isFilamentCore ? 1.85 : 1.4
-          });
-          if (idx > 0 && isFilamentCore && atoms[idx - 1]) {
-            bonds.push({ a: idx, b: Math.max(0, idx - 9), order: 2 });
-          }
-        }
+    const rel = window.NULLA_COMPATIBILITY?.relaxAtomicStructure?.(atomsInput, scaleA, temperatureK);
+    if (!rel || !Array.isArray(rel.relaxedPositions)) return;
+
+    // Apply the relaxed minimum-energy coordinates in-place to the active 3D atoms
+    realAtoms.forEach((a, idx) => {
+      const rp = rel.relaxedPositions[idx];
+      if (rp && Number.isFinite(rp.x) && Number.isFinite(rp.y) && Number.isFinite(rp.z)) {
+        a.targetPos.set(rp.x, rp.y, rp.z);
+        if (a.basePos) a.basePos.set(rp.x, rp.y, rp.z);
       }
-    }
-    for (let i = 0; i < atoms.length; i++) {
-      for (let j = i + 1; j < atoms.length; j++) {
-        if (atoms[i].pos.distanceTo(atoms[j].pos) <= d * 1.08) {
-          bonds.push({ a: i, b: j, order: (atoms[i].col && atoms[j].col) ? 2 : 1 });
-        }
-      }
+    });
+
+    if (activeVisualMode !== 'BALL_STICK') {
+      applyVisualRepresentationMode(false);
     }
 
-    angstromPerWorldUnit = 2.0 / d;
-    measurementScaleVerified = true;
-    activeStructureId = `synkronia-${targetKey}-p${synkroniaPulseCount}`;
-    spawnAtoms(atoms, bonds);
-
-    updateTelemetry(
-      `⚡ SYNKRONIA SNN · ${synk.device}`,
-      `Matriz: ${synk.formula} | Pulso #${synk.pulseCount} | Peso Sináptico w = ${synk.synapticWeight}`,
-      `CONDUCTANCIA SINÁPTICA G = ${synk.conductanceMicroS} μS · Ratio ON/OFF = ${synk.onOffRatio}:1`,
-      synk.mechanism,
-      `V_set = +${synk.vSetV} V · V_reset = ${synk.vResetV} V · τ_STDP = ${synk.tauStdpMs} ms · E = ${synk.energySpikeFJ} fJ/spike`,
-      `-${synk.energySpikeFJ} fJ/spike (ULTRA-FRUGAL SNN)`,
-      `${synk.vSetV} V (UMBRAL DE CONMUTACIÓN)`,
-      `${Math.round(synk.synapticWeight * 100)}% · ${synk.stateLabel}`,
-      `Plasticidad dependiente del tiempo de espiga (STDP): Δw = A₊·exp(-Δt/τ₊) @ ${temperatureK} K · [${synk.chronolithSeal}]`
-    );
     if (hudCompatibility) {
-      hudCompatibility.textContent = `${synk.stateLabel} (G = ${synk.conductanceMicroS} μS)`;
-      hudCompatibility.style.color = synk.synapticWeight >= 0.8 ? '#00FF9D' : '#00F0FF';
+      hudCompatibility.textContent = `EQUILIBRIO MECÁNICO 3D (ΔU = ${rel.deltaEnergyKJmol} kJ/mol · |∇U|_rms = ${rel.rmsForceEvA} eV/Å)`;
+      hudCompatibility.style.color = '#00FF9D';
     }
     if (hudConditions) {
-      hudConditions.textContent = `SYNKRONIA-SNN-CORE + LEGION [C02_BIO + C03_MATH] · Pulso #${synk.pulseCount} · [${synk.chronolithSeal}]`;
+      hudConditions.textContent = `Relajación 3D (Lennard-Jones 12-6 + Coulomb) · d̄_eq = ${rel.meanBondLengthA} Å · Eg_est = ${rel.estimatedBandgapEv} eV · T = ${temperatureK} K`;
     }
   }
 
@@ -4312,7 +4321,7 @@ window.addEventListener('DOMContentLoaded', function() {
       .join(' · ');
 
     if (hudConditions) {
-      hudConditions.textContent = `📊 XRD BRAGG (${xrd.radiation}): ${peakSummary} · [${xrd.chronolithSeal}]`;
+      hudConditions.textContent = `📊 XRD BRAGG (${xrd.radiation}): ${peakSummary}`;
     }
     if (hudCompatibility) {
       hudCompatibility.textContent = `PICO PRINCIPAL 2θ = ${xrd.peaks[0].twoThetaDeg}° (d = ${xrd.peaks[0].dSpacingA} Å)`;
