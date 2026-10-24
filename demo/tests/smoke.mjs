@@ -285,11 +285,16 @@ function parseFormula(formula) {
 }
 for (const [key, reaction] of Object.entries(chemistrySandbox.NULLA_VERIFIED_REACTIONS)) {
   const formulaCounts = parseFormula(reaction.formula);
-  const symbolsByZ = {1:'H',3:'Li',5:'B',6:'C',7:'N',8:'O',9:'F',11:'Na',12:'Mg',13:'Al',16:'S',17:'Cl',19:'K',20:'Ca',22:'Ti',26:'Fe',29:'Cu',30:'Zn',35:'Br',47:'Ag',53:'I',56:'Ba'};
+  const symbolsByZ = {
+    1:'H',3:'Li',5:'B',6:'C',7:'N',8:'O',9:'F',11:'Na',12:'Mg',13:'Al',14:'Si',15:'P',16:'S',17:'Cl',
+    19:'K',20:'Ca',22:'Ti',26:'Fe',27:'Co',28:'Ni',29:'Cu',30:'Zn',31:'Ga',33:'As',35:'Br',38:'Sr',
+    39:'Y',40:'Zr',41:'Nb',42:'Mo',47:'Ag',50:'Sn',52:'Te',53:'I',56:'Ba',60:'Nd',72:'Hf',73:'Ta',74:'W',83:'Bi'
+  };
   const atomCounts = Object.fromEntries(reaction.atoms.map(group => [symbolsByZ[group.z], group.c]));
   assert.deepEqual(formulaCounts, atomCounts, `${key} formula does not match atom groups`);
   assert.equal(reaction.evidenceLevel, 'CATALOGUED', `${key} lacks evidence classification`);
 }
+assert.ok(Object.keys(chemistrySandbox.NULLA_MOLECULAR_REACTIONS || {}).length >= 12, 'molecular and heterostructure synthesis catalogue must be populated');
 
 const compatibilitySandbox = {};
 compatibilitySandbox.globalThis = compatibilitySandbox;
@@ -311,6 +316,20 @@ const legacyCompatibility = compatibility.chemical({
   reaction:{evidenceLevel:'LEGACY_CURATED_ILLUSTRATION'}, temperatureK:298
 });
 assert.equal(legacyCompatibility.status, 'REFERENCE_MODEL_INCOMPLETE_DATA');
+const alloyCompatibility = compatibility.multidisciplinary({
+  reactants:[{z:29,symbol:'Cu',electronegativity:1.90},{z:28,symbol:'Ni',electronegativity:1.91}],
+  reaction:null,
+  temperatureK:298
+});
+assert.equal(alloyCompatibility.canCombine, true, 'Hume-Rothery Cu-Ni solid solution must be evaluated as combinable');
+assert.equal(alloyCompatibility.stabilityClass, 'STABLE');
+const nobleCompatibility = compatibility.multidisciplinary({
+  reactants:[{z:2,symbol:'He'},{z:10,symbol:'Ne'}],
+  reaction:null,
+  temperatureK:298
+});
+assert.equal(nobleCompatibility.canCombine, false, 'Noble gas pair must be rejected as chemically unstable');
+assert.equal(nobleCompatibility.stabilityClass, 'UNSTABLE_BOND');
 const dtCompatibility = compatibility.nuclear({reaction:nuclear.fusion['H+H'][0],isotopes:nuclear.isotopes});
 assert.equal(dtCompatibility.status, 'EXOENERGETIC_CHANNEL_KINETICS_UNEVALUATED');
 assert.equal(dtCompatibility.confidence, null, 'Q and contact barrier do not justify a probability score');

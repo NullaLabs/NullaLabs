@@ -144,10 +144,30 @@
       margin-top:4px; box-sizing:border-box; width:100%; overflow:hidden;
     }
     .fusion-slot {
-      width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
-      font-family:'Orbitron',sans-serif; font-size:11.5px; font-weight:700;
+      min-width:28px; height:28px; padding:0 5px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700;
       border:1px solid rgba(255,255,255,0.32); background:linear-gradient(145deg, rgba(20,26,38,0.9) 0%, rgba(8,12,20,0.95) 100%);
       color:#FFFFFF; box-shadow:inset 0 2px 4px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.5); flex-shrink:0;
+    }
+    .mol-tray-bar {
+      display:flex; align-items:center; gap:4px; margin-top:5px; padding:4px 8px;
+      border-radius:10px; background:rgba(8,14,24,0.86); border:1px solid rgba(0,240,255,0.28);
+      overflow-x:auto; scrollbar-width:thin; scrollbar-color:rgba(0,240,255,0.45) transparent;
+    }
+    .mol-chip {
+      padding:3px 6px; border-radius:6px; border:1px solid rgba(0,240,255,0.38);
+      background:linear-gradient(180deg, rgba(0,240,255,0.16), rgba(14,20,32,0.94));
+      color:#E8FBFF; font:700 8px 'Fira Code',monospace; cursor:pointer; flex-shrink:0;
+      transition:all 0.16s ease; white-space:nowrap;
+    }
+    .mol-chip:hover {
+      border-color:#00FF9D; color:#00FF9D; transform:translateY(-1px);
+      box-shadow:0 0 10px rgba(0,255,157,0.28);
+    }
+    .mol-chip-stage {
+      border-color:rgba(255,215,0,0.55); color:#FFD700;
+      background:linear-gradient(180deg, rgba(255,215,0,0.2), rgba(18,22,32,0.95));
+      font-family:'Orbitron',sans-serif; font-size:7.5px;
     }
     .fusion-plus { font-size:13px; color:rgba(255,255,255,0.75); }
     .fusion-btn, .fusion-btn-undo, .fusion-btn-clear {
@@ -316,15 +336,15 @@
     <div class="hud-row"><span class="hud-label" data-i18n="assembly">ASSEMBLY</span><span class="hud-val" id="hud-name" aria-live="polite">B-DNA Double Helix</span></div>
     <div class="hud-row"><span class="hud-label" data-i18n="formulaLabel">FORMULA</span><span class="hud-val scientific-token" id="hud-formula">—</span></div>
     <div class="hud-row"><span class="hud-label" data-i18n="classLabel">CLASS</span><span class="hud-val" id="hud-class">—</span></div>
-    <div class="hud-row experience-lab"><span class="hud-label" data-i18n="bonding">BONDING</span><span class="hud-val" id="hud-bonds">—</span></div>
-    <div class="hud-row experience-science"><span class="hud-label" data-i18n="enthalpy">ENTHALPY</span><span class="hud-val" id="hud-enthalpy">—</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="bonding">BONDING</span><span class="hud-val" id="hud-bonds">—</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="enthalpy">ENTHALPY</span><span class="hud-val" id="hud-enthalpy">—</span></div>
     <div class="hud-row experience-science"><span class="hud-label" data-i18n="dipole">DIPOLE (μ)</span><span class="hud-val" id="hud-dipole">—</span></div>
-    <div class="hud-row experience-science"><span class="hud-label" data-i18n="stabilityLabel">STABILITY</span><span class="hud-val" id="hud-stability">—</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="stabilityLabel">STABILITY</span><span class="hud-val" id="hud-stability">—</span></div>
     <div class="hud-row experience-science"><span class="hud-label" data-i18n="spectrum">SPECTRUM</span><span class="hud-val" id="hud-spectrum" style="color:#00F0FF; font-weight:700;">220 nm (UV)</span></div>
     <div class="hud-row experience-science"><span class="hud-label" data-i18n="irStretch">IR STRETCH</span><span class="hud-val" id="hud-ir" style="font-size:8.5px;">3000 cm⁻¹</span></div>
     <div class="hud-row"><span class="hud-label" data-i18n="stateLabel">STATE</span><span class="hud-val" id="hud-epi">—</span></div>
-    <div class="hud-row experience-science"><span class="hud-label" data-i18n="compatibilityLabel">COMPATIBILITY</span><span class="hud-val" id="hud-compatibility">—</span></div>
-    <div class="hud-row experience-science"><span class="hud-label" data-i18n="conditions">CONDITIONS</span><span class="hud-val" id="hud-conditions">—</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="compatibilityLabel">COMPATIBILITY</span><span class="hud-val" id="hud-compatibility">—</span></div>
+    <div class="hud-row"><span class="hud-label" data-i18n="conditions">CONDITIONS</span><span class="hud-val" id="hud-conditions">—</span></div>
     
     <!-- THERMAL KINETIC CONTROLLER (0-1000 K) -->
     <div class="hud-row" id="thermal-controller" style="flex-direction:column; margin-top:4px; gap:2px;">
@@ -545,6 +565,30 @@
     </div>
     </div>
 
+    <!-- MOLECULAR & MATERIAL BUILDING BLOCKS TRAY INJECTOR -->
+    <div class="mol-tray-bar" id="molecular-tray-bar" aria-label="Molecular building blocks">
+      <span class="fusion-label" style="color:#00F0FF;">MOL+:</span>
+      <button type="button" class="mol-chip mol-chip-stage" id="btn-stage-active" title="Añadir compuesto o material actual a la bandeja">+ACTUAL</button>
+      <button type="button" class="mol-chip" data-mol-id="H2O">+H₂O</button>
+      <button type="button" class="mol-chip" data-mol-id="CO2">+CO₂</button>
+      <button type="button" class="mol-chip" data-mol-id="NH3">+NH₃</button>
+      <button type="button" class="mol-chip" data-mol-id="HCl">+HCl</button>
+      <button type="button" class="mol-chip" data-mol-id="SO2">+SO₂</button>
+      <button type="button" class="mol-chip" data-mol-id="CaO">+CaO</button>
+      <button type="button" class="mol-chip" data-mol-id="SiO2">+SiO₂</button>
+      <button type="button" class="mol-chip" data-mol-id="Al2O3">+Al₂O₃</button>
+      <button type="button" class="mol-chip" data-mol-id="TiO2">+TiO₂</button>
+      <button type="button" class="mol-chip" data-mol-id="BaO">+BaO</button>
+      <button type="button" class="mol-chip" data-mol-id="NaCl">+NaCl</button>
+      <button type="button" class="mol-chip" data-mol-id="SiC">+SiC</button>
+      <button type="button" class="mol-chip" data-mol-id="TiC">+TiC</button>
+      <button type="button" class="mol-chip" data-mol-id="BN">+BN</button>
+      <button type="button" class="mol-chip" data-mol-id="C60">+C₆₀</button>
+      <button type="button" class="mol-chip" data-mol-id="Graphene">+Grafeno</button>
+      <button type="button" class="mol-chip" data-mol-id="SWCNT">+SWCNT</button>
+      <button type="button" class="mol-chip" data-mol-id="Diamond">+Diamante</button>
+    </div>
+
     <!-- FUSION BAR -->
     <div class="fusion-bar" id="reaction-actions">
       <span class="fusion-label">TRAY:</span>
@@ -552,11 +596,12 @@
         <div class="fusion-slot" id="slot-0">—</div>
         <div class="fusion-slot" id="slot-1">—</div>
         <div class="fusion-slot" id="slot-2">—</div>
+        <div class="fusion-slot" id="slot-3">—</div>
       </div>
       <button class="fusion-btn" id="btn-fuse">🧪 COMBINAR</button>
       <button class="fusion-btn" id="btn-mix" data-i18n="mixButton">◌ MEZCLAR</button>
-      <button class="fusion-btn experience-lab" id="btn-suggest">💡 SUGGEST</button>
-      <button class="fusion-btn experience-lab" id="btn-random">🔀 RANDOM</button>
+      <button class="fusion-btn" id="btn-suggest">💡 SUGGEST</button>
+      <button class="fusion-btn" id="btn-random">🔀 RANDOM</button>
       <button class="fusion-btn-undo" id="btn-undo">↩ UNDO</button>
       <button class="fusion-btn-clear" id="btn-clear">✕ CLEAR</button>
     </div>

@@ -1,20 +1,309 @@
 (function exposeCompatibilityEngine(root) {
   'use strict';
 
+  const NOBLE_GASES = new Set([2, 10, 18, 36, 54, 86, 118]);
+  const TRANSITION_METALS = new Set([
+    21,22,23,24,25,26,27,28,29,30,
+    39,40,41,42,43,44,45,46,47,48,
+    72,73,74,75,76,77,78,79,80
+  ]);
+  const METALS = new Set([
+    3,4,11,12,13,19,20,21,22,23,24,25,26,27,28,29,30,31,
+    37,38,39,40,41,42,43,44,45,46,47,48,49,50,
+    55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,
+    72,73,74,75,76,77,78,79,80,81,82,83,87,88,89,90,91,92,93,94,95,96,97,98
+  ]);
+  const SMALL_INTERSTITIALS = new Set([1, 5, 6, 7]); // H, B, C, N
+
+  // Empirical covalent/metallic radii in Angstroms for Hume-Rothery & Hägg evaluation
+  const ATOMIC_RADII_ANGSTROM = {
+    1:0.31, 2:0.28, 3:1.28, 4:0.96, 5:0.84, 6:0.76, 7:0.71, 8:0.66, 9:0.57, 10:0.58,
+    11:1.66, 12:1.41, 13:1.21, 14:1.11, 15:1.07, 16:1.05, 17:1.02, 18:1.06,
+    19:2.03, 20:1.76, 21:1.70, 22:1.60, 23:1.53, 24:1.39, 25:1.39, 26:1.32, 27:1.26, 28:1.24, 29:1.32, 30:1.22,
+    31:1.22, 32:1.20, 33:1.19, 34:1.20, 35:1.20, 36:1.16,
+    37:2.20, 38:1.95, 39:1.90, 40:1.75, 41:1.64, 42:1.54, 44:1.46, 45:1.42, 46:1.39, 47:1.45, 48:1.44, 49:1.42, 50:1.39, 51:1.39, 52:1.38, 53:1.39, 54:1.40,
+    55:2.44, 56:2.15, 57:2.07, 58:2.04, 60:2.01, 64:1.96, 72:1.75, 73:1.70, 74:1.62, 75:1.51, 76:1.44, 77:1.41, 78:1.36, 79:1.36, 80:1.32, 82:1.46, 83:1.48, 90:2.06, 92:1.96
+  };
+
+  function paulingIonicityPct(deltaEN) {
+    if (!Number.isFinite(deltaEN) || deltaEN < 0) return null;
+    return Math.round((1 - Math.exp(-0.25 * deltaEN * deltaEN)) * 100);
+  }
+
+  function vanArkelRegime(meanEN, deltaEN, allMetals) {
+    if (allMetals && (deltaEN === null || deltaEN < 0.45)) return 'METALLIC / SOLID-SOLUTION BAND';
+    if (allMetals && deltaEN >= 0.45) return 'ORDERED INTERMETALLIC (d-p Hybridized)';
+    if (deltaEN === null) return 'COVALENT / METALLIC';
+    if (deltaEN >= 1.7) return 'IONIC LATTICE (Pauling > 50% Ionic)';
+    if (deltaEN >= 0.5) return 'POLAR COVALENT / IONIC-COVALENT CERAMIC';
+    if (meanEN >= 2.0) return 'DIRECTIONAL COVALENT NETWORK';
+    return 'METALLIC / INTERMETALLIC';
+  }
+
+  /**
+   * LEGION Multidisciplinary Synergistic Evaluator (Cohorts C01, C03, C04, C05, C07, C10)
+   * Evaluates stability, Hume-Rothery alloy rules, Hägg interstitial ratios, and molecular interactions.
+   */
+  function multidisciplinary({ reactants = [], reaction = null, molecularReaction = null, temperatureK = 298 }) {
+    const activeReaction = molecularReaction || reaction;
+    const hasMolecules = reactants.some(r => r && r.isMolecule);
+    const zList = reactants.map(r => Number(r?.z)).filter(z => Number.isInteger(z) && z > 0);
+    const enList = reactants.map(r => Number(r?.electronegativity)).filter(e => Number.isFinite(e) && e > 0);
+    const deltaEN = enList.length >= 2 ? Math.max(...enList) - Math.min(...enList) : null;
+    const meanEN = enList.length >= 1 ? enList.reduce((a, b) => a + b, 0) / enList.length : null;
+    const ionicityPct = paulingIonicityPct(deltaEN);
+    const allMetals = zList.length >= 2 && zList.every(z => METALS.has(z));
+    const hasNoble = zList.some(z => NOBLE_GASES.has(z));
+    const hasRadioactive = zList.some(z => z >= 84 || z === 43 || z === 61);
+
+    // 1. If we have a verified reaction (elemental or molecular)
+    if (activeReaction) {
+      const enthalpy = activeReaction.enthalpy;
+      const isEndothermic = typeof enthalpy === 'number' && enthalpy > 0;
+      const isMetastable = isEndothermic || /metastable|equilibrium|decompose|reversible/i.test(
+        `${activeReaction.stabilityVerdict || ''} ${activeReaction.note || ''}`
+      );
+      const stabilityClass = isMetastable ? 'METASTABLE' : 'STABLE';
+      const stabilityVerdict = activeReaction.stabilityVerdict || (
+        isMetastable
+          ? `METASTABLE · CONDITION-DEPENDENT (${activeReaction.formula})`
+          : `STABLE · VERIFIED THERMODYNAMIC PHASE (${activeReaction.formula})`
+      );
+      return {
+        canCombine: true,
+        combinationMode: hasMolecules ? 'MOLECULAR_SYNTHESIS' : 'STOICHIOMETRIC_COMPOUND',
+        stabilityClass,
+        stabilityVerdict,
+        bondingRegime: activeReaction.type || vanArkelRegime(meanEN, deltaEN, allMetals),
+        ionicityPct,
+        deltaEN,
+        enthalpy: typeof enthalpy === 'number' ? enthalpy : null,
+        legionCohorts: ['C03_MATH_CONTROL (Graph Topology)', 'C05_BIOMED_OMICS (Stoichiometry)', 'C10_CYBERNETIC_GOV (Catalogued Gate)'],
+        engineeringSummary: activeReaction.note || `${activeReaction.type} · ${activeReaction.geom}`
+      };
+    }
+
+    // 2. Noble gas barrier check
+    if (hasNoble) {
+      const canExcimerOrFluoride = zList.includes(54) && zList.includes(9); // Xe + F -> XeF2/XeF4
+      if (canExcimerOrFluoride) {
+        return {
+          canCombine: true,
+          combinationMode: 'HYPERVALENT_FLUORIDE',
+          stabilityClass: 'METASTABLE',
+          stabilityVerdict: 'METASTABLE · XENON FLUORIDE (XeF₂ / XeF₄ · 3-Center 4-Electron Bond)',
+          bondingRegime: 'HYPERVALENT 3c-4e COVALENT',
+          ionicityPct,
+          deltaEN,
+          enthalpy: -108.0,
+          legionCohorts: ['C03_MATH_CONTROL', 'C05_BIOMED_OMICS'],
+          engineeringSummary: 'Stable crystal at 298 K under dry conditions; hydrolyzes rapidly in water; excimer laser precursor.'
+        };
+      }
+      return {
+        canCombine: false,
+        combinationMode: 'INERT_PHYSICAL_MIXTURE_ONLY',
+        stabilityClass: 'UNSTABLE_BOND',
+        stabilityVerdict: 'INESTABLE COMO COMPUESTO · CAPA DE VALENCIA CERRADA (ns²np⁶ · ΔG > 0)',
+        bondingRegime: 'VAN DER WAALS DISPERSION ONLY (No Chemical Bond)',
+        ionicityPct: 0,
+        deltaEN: null,
+        enthalpy: null,
+        legionCohorts: ['C03_MATH_CONTROL', 'C10_CYBERNETIC_GOV'],
+        engineeringSummary: 'Los gases nobles poseen octeto completo y alta energía de ionización; solo forman mezclas físicas o excímeros transitorios en plasma.'
+      };
+    }
+
+    // 3. Molecule + Molecule / Material + Material physical composite or uncatalogued pair
+    if (hasMolecules && reactants.length >= 2) {
+      const names = reactants.map(r => r.sym || r.name).join(' + ');
+      const anyPolar = reactants.some(r => r.polar);
+      const allPolar = reactants.every(r => r.polar);
+      const interactionType = allPolar
+        ? 'DIPOLE–DIPOLE / HYDROGEN-BOND SOLVATION'
+        : anyPolar
+          ? 'DEBYE DIPOLE–INDUCED-DIPOLE INTERFACE'
+          : 'LONDON DISPERSION / VAN DER WAALS HETEROINTERFACE';
+      return {
+        canCombine: true,
+        combinationMode: 'MULTIPHASIC_COMPOSITE_HETEROSTRUCTURE',
+        stabilityClass: 'STABLE_COMPOSITE',
+        stabilityVerdict: `ESTABLE COMO COMPOSITE / HETEROESTRUCTURA (${interactionType})`,
+        bondingRegime: interactionType,
+        ionicityPct: null,
+        deltaEN: null,
+        enthalpy: null,
+        legionCohorts: ['C03_MATH_CONTROL (Interface Topology)', 'C04_GRAPHICS_SHADERS (3D Composite)', 'C08_COGNITIVE_UX'],
+        engineeringSummary: `Coexistencia supramolecular o matriz compuesta (${names}) gobernada por fuerzas interfaciales ${interactionType}.`
+      };
+    }
+
+    // 4. Metal + Metal: Hume-Rothery Alloy & Intermetallic Analysis (LEGION C01 + C03)
+    if (allMetals && zList.length >= 2) {
+      const radii = zList.map(z => ATOMIC_RADII_ANGSTROM[z] || 1.45);
+      const rMin = Math.min(...radii);
+      const rMax = Math.max(...radii);
+      const mismatchPct = ((rMax - rMin) / rMin) * 100;
+      const isHEA = zList.length >= 4;
+
+      if (isHEA) {
+        return {
+          canCombine: true,
+          combinationMode: 'HIGH_ENTROPY_ALLOY',
+          stabilityClass: 'STABLE',
+          stabilityVerdict: `STABLE · ALEACIÓN DE ALTA ENTROPÍA (HEA ΔS_mix = ${ (8.314 * Math.log(zList.length)).toFixed(1) } J/mol·K · δr = ${mismatchPct.toFixed(1)}%)`,
+          bondingRegime: 'MULTI-PRINCIPAL-ELEMENT METALLIC LATTICE (FCC/BCC)',
+          ionicityPct,
+          deltaEN,
+          humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
+          enthalpy: -12.0,
+          legionCohorts: ['C01_SYSTEMS', 'C03_MATH_CONTROL (Statistical Entropy)', 'C07_GAME_THEORY_ECON'],
+          engineeringSummary: 'La alta entropía configuracional estabiliza una solución sólida monofásica con resistencia criogénica y térmica superior.'
+        };
+      }
+
+      if (mismatchPct <= 15.0 && (deltaEN === null || deltaEN <= 0.45)) {
+        return {
+          canCombine: true,
+          combinationMode: 'HUME_ROTHERY_SOLID_SOLUTION',
+          stabilityClass: 'STABLE',
+          stabilityVerdict: `ESTABLE · SOLUCIÓN SÓLIDA SUSTITUCIONAL HUME-ROTHERY (δr = ${mismatchPct.toFixed(1)}% ≤ 15%, Δχ = ${(deltaEN ?? 0).toFixed(2)})`,
+          bondingRegime: 'METALLIC SUBSTITUTIONAL ALLOY LATTICE',
+          ionicityPct,
+          deltaEN,
+          humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
+          enthalpy: -15.0,
+          legionCohorts: ['C01_SYSTEMS', 'C03_MATH_CONTROL (Lattice Elasticity)'],
+          engineeringSummary: `Cumple la 1ª y 3ª regla de Hume-Rothery (desajuste de radio atómico ${mismatchPct.toFixed(1)}% < 15%), formando una red metálica continua.`
+        };
+      }
+
+      if (deltaEN !== null && deltaEN > 0.45) {
+        return {
+          canCombine: true,
+          combinationMode: 'ORDERED_INTERMETALLIC',
+          stabilityClass: 'STABLE',
+          stabilityVerdict: `ESTABLE · COMPUESTO INTERMETÁLICO ORDENADO (Δχ = ${deltaEN.toFixed(2)}, δr = ${mismatchPct.toFixed(1)}%)`,
+          bondingRegime: 'ORDERED INTERMETALLIC SUPERLATTICE (B2 / L1₂ / Laves)',
+          ionicityPct,
+          deltaEN,
+          humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
+          enthalpy: -45.0,
+          legionCohorts: ['C01_SYSTEMS', 'C03_MATH_CONTROL (Superlattice Symmetry)'],
+          engineeringSummary: `La diferencia electrónica (Δχ = ${deltaEN.toFixed(2)}) favorece una superred intermetálica ordenada de alta rigidez específica.`
+        };
+      }
+
+      return {
+        canCombine: true,
+        combinationMode: 'BIPHASIC_EUTECTIC_ALLOY',
+        stabilityClass: 'METASTABLE',
+        stabilityVerdict: `METAESTABLE / BIFÁSICO · DESAJUSTE RETICULAR ALTO (δr = ${mismatchPct.toFixed(1)}% > 15% · Límite de Solubilidad)`,
+        bondingRegime: 'EUTECTIC / LAVES PHASE METALLIC COMPOSITE',
+        ionicityPct,
+        deltaEN,
+        humeRotheryMismatchPct: Number(mismatchPct.toFixed(2)),
+        enthalpy: 8.0,
+        legionCohorts: ['C03_MATH_CONTROL (Strain Tensor)', 'C07_GAME_THEORY_ECON (Phase Separation)'],
+        engineeringSummary: `El desajuste de radios (${mismatchPct.toFixed(1)}% > 15%) induce tensión elástica reticular, generando segregación eutéctica o fases de Laves.`
+      };
+    }
+
+    // 5. Transition Metal + Small Interstitial (C, N, B, H): Hägg's Rule (LEGION C03)
+    const metalsInTray = zList.filter(z => TRANSITION_METALS.has(z) || METALS.has(z));
+    const interstitialsInTray = zList.filter(z => SMALL_INTERSTITIALS.has(z));
+    if (metalsInTray.length >= 1 && interstitialsInTray.length >= 1 && metalsInTray.length + interstitialsInTray.length === zList.length) {
+      const rMetal = Math.max(...metalsInTray.map(z => ATOMIC_RADII_ANGSTROM[z] || 1.55));
+      const rInter = Math.min(...interstitialsInTray.map(z => ATOMIC_RADII_ANGSTROM[z] || 0.75));
+      const haggRatio = rInter / rMetal;
+      const isSimpleHagg = haggRatio <= 0.59;
+      return {
+        canCombine: true,
+        combinationMode: 'HAGG_INTERSTITIAL_CERAMIC',
+        stabilityClass: isSimpleHagg ? 'STABLE' : 'METASTABLE',
+        stabilityVerdict: isSimpleHagg
+          ? `ESTABLE · CERÁMICA INTERSTICIAL DE HÄGG (r_i/r_M = ${haggRatio.toFixed(2)} ≤ 0.59 · Alta Dureza Refractaria)`
+          : `METAESTABLE / RED COMPLEJA · RATIO DE HÄGG (r_i/r_M = ${haggRatio.toFixed(2)} > 0.59)`,
+        bondingRegime: 'MIXED COVALENT-METALLIC INTERSTITIAL LATTICE',
+        ionicityPct,
+        deltaEN,
+        haggRatio: Number(haggRatio.toFixed(3)),
+        enthalpy: isSimpleHagg ? -140.0 : -35.0,
+        legionCohorts: ['C03_MATH_CONTROL (Octahedral Interstices)', 'C04_GRAPHICS_SHADERS'],
+        engineeringSummary: isSimpleHagg
+          ? `El soluto ligero ocupa intersticios octaédricos/trigonales de la red metálica sin romper su empaquetamiento compacto (Regla de Hägg ≤ 0.59).`
+          : `El radio intersticial supera el umbral simple de Hägg (0.59), formando prismas trigonales distorsionados tipo cementita/boruro.`
+      };
+    }
+
+    // 6. General Ionic / Covalent Electronegativity Drive (Pauling Rule)
+    if (zList.length >= 2 && deltaEN !== null) {
+      const isStronglyFavorable = deltaEN >= 1.2;
+      const isModeratelyFavorable = deltaEN >= 0.35;
+      const stabilityClass = hasRadioactive
+        ? 'METASTABLE'
+        : isStronglyFavorable
+          ? 'STABLE'
+          : isModeratelyFavorable
+            ? 'METASTABLE'
+            : 'METASTABLE';
+      const estimatedEnthalpy = Math.round(-96.5 * deltaEN * deltaEN);
+      return {
+        canCombine: true,
+        combinationMode: isStronglyFavorable ? 'IONIC_COVALENT_SYNTHESIS' : 'COVALENT_MOLECULAR_HYBRID',
+        stabilityClass,
+        stabilityVerdict: isStronglyFavorable
+          ? `ESTABLE · IMPULSO ELECTRONEGATIVO FAVORABLE (Δχ = ${deltaEN.toFixed(2)}, Ionicidad ≈ ${ionicityPct}%, ΔH_est ≈ ${estimatedEnthalpy} kJ/mol)`
+          : `VIABLE CONDICIONAL · COVALENCIA POLAR / HOMOPOLAR (Δχ = ${deltaEN.toFixed(2)}, Ionicidad ≈ ${ionicityPct}%)`,
+        bondingRegime: vanArkelRegime(meanEN, deltaEN, allMetals),
+        ionicityPct,
+        deltaEN,
+        enthalpy: estimatedEnthalpy,
+        legionCohorts: ['C03_MATH_CONTROL', 'C05_BIOMED_OMICS (Pauling Valence)', 'C10_CYBERNETIC_GOV'],
+        engineeringSummary: hasRadioactive
+          ? 'Contiene radionúclido pesado (Z ≥ 84); la red química sufre radiólisis y retroceso alfa.'
+          : `Evaluación sinérgica de Pauling–Van Arkel: diferencia de electronegatividad Δχ = ${deltaEN.toFixed(2)} (${ionicityPct}% carácter iónico).`
+      };
+    }
+
+    return {
+      canCombine: false,
+      combinationMode: 'INSUFFICIENT_REACTANTS',
+      stabilityClass: 'UNKNOWN',
+      stabilityVerdict: 'SELECCIONA AL MENOS 2 ESPECIES (ELEMENTOS O MOLÉCULAS)',
+      bondingRegime: 'N/D',
+      ionicityPct: null,
+      deltaEN: null,
+      enthalpy: null,
+      legionCohorts: ['C10_CYBERNETIC_GOV'],
+      engineeringSummary: 'Añade elementos de la tabla periódica o moléculas del laboratorio para evaluar su síntesis.'
+    };
+  }
+
   function chemical({ reactants, reaction, temperatureK = 298 }) {
     const factors = [];
     const requirements = [];
     const instability = [];
+    const electronegativities = (reactants || []).map(item => Number(item?.electronegativity)).filter(Number.isFinite);
+    const deltaEN = electronegativities.length >= 2 ? Math.max(...electronegativities) - Math.min(...electronegativities) : null;
+    const multi = multidisciplinary({ reactants, reaction, temperatureK });
+
     if (!reaction) {
+      if (deltaEN !== null) factors.push(`Δχ=${deltaEN.toFixed(2)} (${multi.ionicityPct}% ionic)`);
+      if (multi.humeRotheryMismatchPct !== undefined) factors.push(`Hume-Rothery δr=${multi.humeRotheryMismatchPct}%`);
+      if (multi.haggRatio !== undefined) factors.push(`Hägg r_i/r_M=${multi.haggRatio}`);
       return {
-        domain:'chemical', status:'NO_CATALOGUED_PATH', score:null, confidence:0,
-        factors:['CATALOGUE: N/D'],
+        domain:'chemical',
+        status:'NO_CATALOGUED_PATH',
+        score:null,
+        confidence:0,
+        factors:['CATALOGUE: N/D', ...factors],
         requirements:['ΔHf°, Ea and k(T): N/D'],
-        instability:['Products / competing pathways: N/D']
+        instability:['Products / competing pathways: N/D'],
+        multidisciplinary:multi
       };
     }
-    const electronegativities = reactants.map(item => Number(item.electronegativity)).filter(Number.isFinite);
-    const deltaEN = electronegativities.length >= 2 ? Math.max(...electronegativities) - Math.min(...electronegativities) : null;
+
     if (deltaEN !== null) factors.push(`Δχ=${deltaEN.toFixed(2)}`);
     factors.push(`CATALOGUE: ${reaction.evidenceLevel || 'LEGACY_ENTRY'}`);
     if (reaction.enthalpy !== undefined) factors.push(`ΔH=${reaction.enthalpy} kJ/mol`);
@@ -22,7 +311,9 @@
     if (!reaction.activationEnergy) requirements.push('Ea / k(T): N/D');
     if (!reaction.pressure) requirements.push('p° ≈ 1 atm · SOURCE: N/D');
     if (!reaction.temperatureRange) requirements.push(`T=${temperatureK} K · RANGE: N/D`);
-    if (/metastable|decompose|unstable/i.test(reaction.note || '')) instability.push(reaction.note);
+    if (/metastable|decompose|unstable/i.test(`${reaction.note || ''} ${reaction.stabilityVerdict || ''}`)) {
+      instability.push(reaction.stabilityVerdict || reaction.note);
+    }
     return {
       domain:'chemical',
       status:reaction.evidenceLevel === 'CATALOGUED'
@@ -30,7 +321,10 @@
         : 'REFERENCE_MODEL_INCOMPLETE_DATA',
       score:null,
       confidence:null,
-      factors, requirements, instability
+      factors,
+      requirements,
+      instability,
+      multidisciplinary:multi
     };
   }
 
@@ -56,5 +350,5 @@
     };
   }
 
-  root.NULLA_COMPATIBILITY = Object.freeze({ chemical, nuclear });
+  root.NULLA_COMPATIBILITY = Object.freeze({ chemical, nuclear, multidisciplinary });
 })(globalThis);

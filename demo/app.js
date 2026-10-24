@@ -152,7 +152,8 @@ window.addEventListener('DOMContentLoaded', function() {
   const slots = [
     document.getElementById('slot-0'),
     document.getElementById('slot-1'),
-    document.getElementById('slot-2')
+    document.getElementById('slot-2'),
+    document.getElementById('slot-3')
   ];
   const btnFuse = document.getElementById('btn-fuse');
   const btnMix = document.getElementById('btn-mix');
@@ -395,8 +396,17 @@ window.addEventListener('DOMContentLoaded', function() {
     'C+C':   { name:'Graphite',             formula:'C_n',   atoms:[{z:6,c:14}],              type:'Covalent Network', bonds:'C-C Hexagonal Sheet Bonds', state:'Solid (25°C)', geom:'Hexagonal Sheets' },
   };
   const canonicalReactionKey = symbols => [...symbols].map(String).sort().join('+');
+  const MOLECULAR_SPECIES = window.NULLA_MOLECULAR_SPECIES || {};
+  const MOLECULAR_REACTIONS = {};
+  Object.entries(window.NULLA_MOLECULAR_REACTIONS || {}).forEach(([key, reaction]) => {
+    MOLECULAR_REACTIONS[canonicalReactionKey(key.split('+'))] = {
+      evidenceLevel:'CATALOGUED',
+      isMolecularReaction:true,
+      ...reaction
+    };
+  });
   const REACTIONS = {};
-  Object.entries({...REACTION_LIBRARY, ...(window.NULLA_VERIFIED_REACTIONS || {})}).forEach(([key, reaction]) => {
+  Object.entries({...REACTION_LIBRARY, ...(window.NULLA_VERIFIED_REACTIONS || {}), ...MOLECULAR_REACTIONS}).forEach(([key, reaction]) => {
     REACTIONS[canonicalReactionKey(key.split('+'))] = {
       evidenceLevel:'LEGACY_CURATED_ILLUSTRATION',
       ...reaction
@@ -1110,11 +1120,22 @@ window.addEventListener('DOMContentLoaded', function() {
     );
   }
 
+  let activeStageableSpecies = null;
+  const MATERIAL_TO_SPECIES_ID = {
+    nacl:'NaCl',
+    diamond:'Diamond',
+    c60:'C60',
+    graphene:'Graphene',
+    nanotube:'SWCNT',
+    solvation:'H2O'
+  };
+
   // Shared material activation preserves one rendering path for all structures.
   function activateMaterial(id, atoms, profile, telemetry, scale, bondCutoff, explicitBonds = null) {
     isDnaMode = false;
     activeCollisionMode = 'chemical';
     activeStructureId = id;
+    activeStageableSpecies = MATERIAL_TO_SPECIES_ID[id] || null;
     activeThermalProfile = profile;
     angstromPerWorldUnit = scale;
     measurementScaleVerified = Number.isFinite(scale) && scale > 0;
@@ -1122,10 +1143,21 @@ window.addEventListener('DOMContentLoaded', function() {
     activeBondCutoffWorld = bondCutoff || null;
     selectedMeasureAtoms = [];
     spawnAtoms(atoms, explicitBonds);
-    const reportedEnthalpy = telemetry.enthalpy == null || typeof telemetry.enthalpy === 'number' ? tr('dataUnavailable') : telemetry.enthalpy;
-    const reportedDipole = telemetry.dipole == null || typeof telemetry.dipole === 'number' || /\b\d+(?:\.\d+)?\s*D\b/.test(String(telemetry.dipole || ''))
-      ? tr('dataUnavailable') : telemetry.dipole;
-    const reportedStability = telemetry.stability == null || typeof telemetry.stability === 'number' ? tr('dataUnavailable') : telemetry.stability;
+    const reportedEnthalpy = telemetry.enthalpy == null
+      ? tr('dataUnavailable')
+      : typeof telemetry.enthalpy === 'number'
+        ? `${telemetry.enthalpy} kJ/mol`
+        : telemetry.enthalpy;
+    const reportedDipole = telemetry.dipole == null
+      ? tr('dataUnavailable')
+      : typeof telemetry.dipole === 'number'
+        ? `${telemetry.dipole} Debye (${telemetry.dipole > 0 ? 'POLAR' : 'NON-POLAR'})`
+        : telemetry.dipole;
+    const reportedStability = telemetry.stability == null
+      ? tr('dataUnavailable')
+      : typeof telemetry.stability === 'number'
+        ? `${telemetry.stability}% · ${id === 'diamond' || id === 'c60' ? 'METAESTABLE' : 'ESTABLE'}`
+        : telemetry.stability;
     updateTelemetry(
       telemetry.name,
       telemetry.formula,
@@ -1646,6 +1678,221 @@ window.addEventListener('DOMContentLoaded', function() {
         atoms.push({ z: 6, pos: new THREE.Vector3(r * Math.cos(theta), r * Math.sin(theta), 3.5), scale: 1.6 });
       }
     }
+    else if (name === 'Carbon Nanobud Heterostructure') {
+      // Graphene hexagonal sheet at z = -5.5 covalently grafted to a C60 fullerene cage at z = +3.5
+      const bond = 3.8;
+      for (let row = -2; row <= 2; row++) {
+        for (let col = -2; col <= 2; col++) {
+          const x = Math.sqrt(3) * bond * (col + row * 0.5);
+          const y = 1.5 * bond * row;
+          atoms.push({ z: 6, pos: new THREE.Vector3(x, y, -5.5), scale: 1.35, noLabel: true });
+          atoms.push({ z: 6, pos: new THREE.Vector3(x, y + bond, -5.5), scale: 1.35, noLabel: true });
+        }
+      }
+      const verts = icosahedronVertices();
+      verts.forEach(v => {
+        atoms.push({ z: 6, pos: v.clone().normalize().multiplyScalar(5.8).add(new THREE.Vector3(0, 0, 2.2)), scale: 1.35 });
+      });
+    }
+    else if (name === 'Carbon Nanopeapod (Endohedral SWCNT)') {
+      // Outer SWCNT cylinder encapsulating two C60 cages at x = -7.5 and x = +7.5
+      const nRing = 10;
+      const radius = 7.8;
+      for (let slice = -3; slice <= 3; slice++) {
+        const x = slice * 4.2;
+        for (let k = 0; k < nRing; k++) {
+          const angle = (k / nRing) * Math.PI * 2 + (slice % 2) * (Math.PI / nRing);
+          atoms.push({ z: 6, pos: new THREE.Vector3(x, Math.cos(angle) * radius, Math.sin(angle) * radius), scale: 1.15, noLabel: true });
+        }
+      }
+      const verts = icosahedronVertices();
+      [-6.5, 6.5].forEach(cx => {
+        verts.forEach(v => {
+          atoms.push({ z: 6, pos: v.clone().normalize().multiplyScalar(3.6).add(new THREE.Vector3(cx, 0, 0)), scale: 1.25 });
+        });
+      });
+    }
+    else if (name === 'Graphene / h-BN Moiré Heterostructure') {
+      // Bottom h-BN sheet (B=5, N=7) at z = -3.8 and rotated Graphene sheet (C=6) at z = +3.8
+      const r = 4.6;
+      for (let ring = 1; ring <= 2; ring++) {
+        const count = ring * 6;
+        const rad = ring * r;
+        for (let i = 0; i < count; i++) {
+          const theta = (i / count) * Math.PI * 2;
+          atoms.push({ z: i % 2 === 0 ? 5 : 7, pos: new THREE.Vector3(rad * Math.cos(theta), rad * Math.sin(theta), -3.8), scale: 1.45 });
+          const thetaRot = theta + 0.12;
+          atoms.push({ z: 6, pos: new THREE.Vector3(rad * Math.cos(thetaRot), rad * Math.sin(thetaRot), 3.8), scale: 1.45 });
+        }
+      }
+      atoms.push({ z: 5, pos: new THREE.Vector3(0, 0, -3.8), scale: 1.5 });
+      atoms.push({ z: 6, pos: new THREE.Vector3(0, 0, 3.8), scale: 1.5 });
+    }
+    else if (name === '3D Pillared Graphene–SWCNT Network') {
+      // Top and bottom graphene sheets at y = +-8 connected by a vertical CNT pillar
+      const r = 5.2;
+      [-8.0, 8.0].forEach(py => {
+        atoms.push({ z: 6, pos: new THREE.Vector3(0, py, 0), scale: 1.4 });
+        for (let i = 0; i < 12; i++) {
+          const rad = i < 6 ? r : r * 1.85;
+          const theta = ((i % 6) / 6) * Math.PI * 2 + (i >= 6 ? Math.PI / 6 : 0);
+          atoms.push({ z: 6, pos: new THREE.Vector3(rad * Math.cos(theta), py, rad * Math.sin(theta)), scale: 1.35 });
+        }
+      });
+      for (let level = -1; level <= 1; level++) {
+        const py = level * 4.0;
+        for (let i = 0; i < 6; i++) {
+          const theta = (i / 6) * Math.PI * 2;
+          atoms.push({ z: 6, pos: new THREE.Vector3(3.4 * Math.cos(theta), py, 3.4 * Math.sin(theta)), scale: 1.35 });
+        }
+      }
+    }
+    else if (name === 'Diamond–SiC Superhard Composite') {
+      // Core sp3 diamond lattice surrounded by epitaxial SiC shell
+      const d = 4.6;
+      for (let ix = -1; ix <= 1; ix++) {
+        for (let iy = -1; iy <= 1; iy++) {
+          for (let iz = -1; iz <= 1; iz++) {
+            const isCore = Math.abs(ix) + Math.abs(iy) + Math.abs(iz) <= 1;
+            const zAtom = isCore ? 6 : ((ix + iy + iz) % 2 === 0 ? 14 : 6);
+            atoms.push({ z: zAtom, pos: new THREE.Vector3(ix * d, iy * d, iz * d), scale: zAtom === 14 ? 1.7 : 1.45 });
+          }
+        }
+      }
+    }
+    else if (['Barium Titanate Perovskite', 'Strontium Titanate Perovskite', 'YBCO High-Tc Superconductor'].includes(name)) {
+      // ABO3 Perovskite unit cell: A-site corners, B-site body center, O6 face centers
+      const zA = reaction.atoms.find(g => [56, 38, 39].includes(g.z))?.z || reaction.atoms[0].z;
+      const zB = reaction.atoms.find(g => [22, 29].includes(g.z))?.z || 22;
+      const d = 6.8;
+      for (let dx of [-d, d]) {
+        for (let dy of [-d, d]) {
+          for (let dz of [-d, d]) {
+            atoms.push({ z: zA, pos: new THREE.Vector3(dx, dy, dz), scale: 1.85 });
+          }
+        }
+      }
+      atoms.push({ z: zB, pos: new THREE.Vector3(0, 0, 0), scale: 1.75 });
+      [
+        new THREE.Vector3(d, 0, 0), new THREE.Vector3(-d, 0, 0),
+        new THREE.Vector3(0, d, 0), new THREE.Vector3(0, -d, 0),
+        new THREE.Vector3(0, 0, d), new THREE.Vector3(0, 0, -d)
+      ].forEach(p => atoms.push({ z: 8, pos: p, scale: 1.4 }));
+    }
+    else if (name === 'Titanium Aluminium Carbide (MAX Phase)') {
+      // Layered Ti3AlC2 MAX phase nanolaminate: Ti-C-Ti-C-Ti slabs interleaved with Al plane
+      const r = 5.4;
+      const layers = [
+        { z: 22, h: -7.5 },
+        { z: 6,  h: -5.0 },
+        { z: 22, h: -2.5 },
+        { z: 13, h:  0.0 },
+        { z: 22, h:  2.5 },
+        { z: 6,  h:  5.0 },
+        { z: 22, h:  7.5 }
+      ];
+      layers.forEach((layer, idx) => {
+        atoms.push({ z: layer.z, pos: new THREE.Vector3(0, layer.h, 0), scale: layer.z === 6 ? 1.35 : 1.65 });
+        for (let i = 0; i < 6; i++) {
+          const theta = (i / 6) * Math.PI * 2 + (idx % 2) * (Math.PI / 6);
+          atoms.push({ z: layer.z, pos: new THREE.Vector3(r * Math.cos(theta), layer.h, r * Math.sin(theta)), scale: layer.z === 6 ? 1.35 : 1.6 });
+        }
+      });
+    }
+    else if (['Molybdenum Disulfide (2D TMD)', 'Tungsten Disulfide (2D TMD)', 'Boron Nitride', 'Titanium Diboride', 'Lithium Cobalt Oxide', 'Bismuth Telluride'].includes(name)) {
+      // Hexagonal layered 2D / van der Waals / AlB2 sandwich crystal
+      const zA = reaction.atoms[0].z;
+      const zB = reaction.atoms[1]?.z || zA;
+      const r = 5.2;
+      [-3.4, 0, 3.4].forEach((h, layerIdx) => {
+        const zLayer = layerIdx === 1 ? zA : zB;
+        atoms.push({ z: zLayer, pos: new THREE.Vector3(0, 0, h), scale: layerIdx === 1 ? 1.75 : 1.45 });
+        for (let i = 0; i < 6; i++) {
+          const theta = (i / 6) * Math.PI * 2 + (layerIdx === 1 ? 0 : Math.PI / 6);
+          atoms.push({ z: zLayer, pos: new THREE.Vector3(r * Math.cos(theta), r * Math.sin(theta), h), scale: layerIdx === 1 ? 1.7 : 1.45 });
+        }
+      });
+    }
+    else if (name === 'Boron Carbide') {
+      // B12 icosahedron + linear C-B-C chain
+      const verts = icosahedronVertices();
+      verts.forEach(v => atoms.push({ z: 5, pos: v.clone().normalize().multiplyScalar(5.6), scale: 1.55 }));
+      atoms.push({ z: 6, pos: new THREE.Vector3(-8.5, 0, 0), scale: 1.5 });
+      atoms.push({ z: 5, pos: new THREE.Vector3(0, 0, 0), scale: 1.5 });
+      atoms.push({ z: 6, pos: new THREE.Vector3(8.5, 0, 0), scale: 1.5 });
+    }
+    else if (['Carbonic Acid', 'Sulfurous Acid', 'Calcium Carbonate', 'Calcium Silicate (Wollastonite)'].includes(name)) {
+      // Oxoacid / Oxosalt trigonal-planar or tetrahedral core with outer cations/hydrogens
+      const zCenter = reaction.atoms.find(g => [6, 14, 16].includes(g.z))?.z || 6;
+      const zOuter = reaction.atoms.find(g => [1, 20].includes(g.z))?.z || 1;
+      atoms.push({ z: zCenter, pos: new THREE.Vector3(0, 0, 0), scale: 1.7 });
+      for (let i = 0; i < 3; i++) {
+        const theta = (i / 3) * Math.PI * 2;
+        atoms.push({ z: 8, pos: new THREE.Vector3(4.6 * Math.cos(theta), 4.6 * Math.sin(theta), 0), scale: 1.5 });
+      }
+      if (zOuter === 20) {
+        atoms.push({ z: 20, pos: new THREE.Vector3(0, 0, 5.2), scale: 1.85 });
+      } else {
+        atoms.push({ z: 1, pos: new THREE.Vector3(-6.2, 3.2, 1.2), scale: 1.25 });
+        atoms.push({ z: 1, pos: new THREE.Vector3(6.2, 3.2, -1.2), scale: 1.25 });
+      }
+    }
+    else if (name === 'Ammonium Chloride') {
+      // Tetrahedral NH4+ + Cl- ion pair
+      atoms.push({ z: 7, pos: new THREE.Vector3(-3.0, 0, 0), scale: 1.7 });
+      const d = 3.2;
+      [
+        new THREE.Vector3(-3.0 + d, d, d),
+        new THREE.Vector3(-3.0 - d, -d, d),
+        new THREE.Vector3(-3.0 - d, d, -d),
+        new THREE.Vector3(-3.0 + d, -d, -d)
+      ].forEach(p => atoms.push({ z: 1, pos: p, scale: 1.25 }));
+      atoms.push({ z: 17, pos: new THREE.Vector3(5.2, 0, 0), scale: 1.85 });
+    }
+    else if (name === 'Calcium Hydroxide') {
+      // Layered brucite-type Ca(OH)2
+      atoms.push({ z: 20, pos: new THREE.Vector3(0, 0, 0), scale: 1.85 });
+      atoms.push({ z: 8, pos: new THREE.Vector3(-4.6, 0, 0), scale: 1.5 });
+      atoms.push({ z: 8, pos: new THREE.Vector3(4.6, 0, 0), scale: 1.5 });
+      atoms.push({ z: 1, pos: new THREE.Vector3(-7.4, 1.4, 0), scale: 1.2 });
+      atoms.push({ z: 1, pos: new THREE.Vector3(7.4, -1.4, 0), scale: 1.2 });
+    }
+    else if (name === 'Hydrated Sodium Chloride Ion Pair') {
+      // [Na(H2O)6]+ octahedral aqua complex + Cl- counterion
+      atoms.push({ z: 11, pos: new THREE.Vector3(-3.2, 0, 0), scale: 1.75 });
+      atoms.push({ z: 17, pos: new THREE.Vector3(7.8, 0, 0), scale: 1.85 });
+      const oct = [
+        new THREE.Vector3(5.2, 0, 0), new THREE.Vector3(-5.2, 0, 0),
+        new THREE.Vector3(0, 5.2, 0), new THREE.Vector3(0, -5.2, 0),
+        new THREE.Vector3(0, 0, 5.2), new THREE.Vector3(0, 0, -5.2)
+      ];
+      oct.forEach(dir => {
+        const oPos = new THREE.Vector3(-3.2, 0, 0).add(dir);
+        atoms.push({ z: 8, pos: oPos, scale: 1.4 });
+        const norm = dir.clone().normalize();
+        const perp = Math.abs(norm.x) < 0.9 ? new THREE.Vector3(1, 0, 0).cross(norm).normalize() : new THREE.Vector3(0, 1, 0).cross(norm).normalize();
+        atoms.push({ z: 1, pos: oPos.clone().add(norm.clone().multiplyScalar(1.6)).add(perp.clone().multiplyScalar(1.8)), scale: 1.05 });
+        atoms.push({ z: 1, pos: oPos.clone().add(norm.clone().multiplyScalar(1.6)).add(perp.clone().multiplyScalar(-1.8)), scale: 1.05 });
+      });
+    }
+    else if (reaction.isDynamicSynthesis || /Intermetallic|Superalloy|Brass|Bronze|Cementite|Supermagnet|Mullite/i.test(name)) {
+      // Ordered 3x3x3 B2 / L1_2 / Interstitial / Composite superlattice
+      const speciesZ = reaction.atoms.map(g => g.z);
+      const d = 4.6;
+      for (let ix = -1; ix <= 1; ix++) {
+        for (let iy = -1; iy <= 1; iy++) {
+          for (let iz = -1; iz <= 1; iz++) {
+            const parity = Math.abs(ix + iy + iz) % speciesZ.length;
+            const zAtom = speciesZ[parity];
+            atoms.push({
+              z: zAtom,
+              pos: new THREE.Vector3(ix * d, iy * d, iz * d),
+              scale: [5, 6, 7, 8].includes(zAtom) ? 1.35 : 1.68
+            });
+          }
+        }
+      }
+    }
     else {
       let totalAtoms = 0;
       reaction.atoms.forEach(group => { totalAtoms += group.c; });
@@ -1677,6 +1924,17 @@ window.addEventListener('DOMContentLoaded', function() {
     const explicitCompoundBonds = getExplicitCompoundBonds(name, atoms.length);
     spawnAtoms(atoms, explicitCompoundBonds);
     activeStructureId = `compound-${reaction.formula}`;
+    const matchedSpeciesKey = Object.keys(MOLECULAR_SPECIES).find(k =>
+      MOLECULAR_SPECIES[k].formula === reaction.formula || k === reaction.formula
+    );
+    activeStageableSpecies = matchedSpeciesKey || {
+      id: reaction.formula,
+      sym: reaction.formula,
+      name: reaction.name,
+      formula: reaction.formula,
+      isMolecule: true,
+      atoms: reaction.atoms
+    };
     const evidenceLabel = reaction.evidenceLevel === 'CATALOGUED'
       ? `${tr('cataloguedCompound')} · ${tr('referenceModel')}`
       : tr('referenceModel');
@@ -1687,17 +1945,27 @@ window.addEventListener('DOMContentLoaded', function() {
     },{});
     const topologyLabel = explicitCompoundBonds
       ? `GRAPH V=${atoms.length} · E=${explicitCompoundBonds.length} · ${Object.entries(bondOrderCounts).map(([order,count]) => `BO${order}×${count}`).join(' · ')}`
-      : `GRAPH V=${atoms.length} · rcut=${activeBondCutoffWorld?.toFixed(2) || 'N/D'} world`;
+      : `${reaction.bonds || 'BOND GRAPH'} · V=${atoms.length} · rcut=${activeBondCutoffWorld?.toFixed(2) || 'N/D'}`;
+    const verdictTag = reaction.stabilityVerdict === 'METASTABLE'
+      ? 'METAESTABLE'
+      : reaction.stabilityVerdict === 'UNSTABLE' || reaction.stabilityVerdict === 'UNSTABLE_BOND'
+        ? 'INESTABLE'
+        : reaction.stabilityVerdict === 'STABLE_COMPOSITE'
+          ? 'COMPÓSITO ESTABLE'
+          : 'ESTABLE';
+    const stabilityDisplay = reaction.stabilityScore
+      ? `${reaction.stabilityScore}% · ${verdictTag}`
+      : (reaction.stabilityVerdict ? verdictTag : tr('dataUnavailable'));
     updateTelemetry(
-      `${reaction.formula} · ${evidenceLabel}`,
-      `${tr('formulaLabel')}: ${reaction.formula} | ${reaction.atoms.map(g => EL[g.z].s + '×' + g.c).join(' + ')}`,
-      `${reaction.evidenceLevel} · COMPOSITION MODEL`,
+      `${reaction.formula} · ${reaction.name}`,
+      `${tr('formulaLabel')}: ${reaction.formula} | ${reaction.atoms.map(g => (EL[g.z]?.s || g.z) + '×' + g.c).join(' + ')}`,
+      `${reaction.type || 'COMPOUND'} · ${reaction.evidenceLevel}`,
       topologyLabel,
-      hasNaclReference ? 'Tm=1074 K · Tb=1738 K · p≈1 atm' : 'T/P: N/D',
-      reaction.enthalpy ? (reaction.enthalpy < 0 ? `${reaction.enthalpy} kJ/mol (EXOTHERMIC)` : `${reaction.enthalpy} kJ/mol (ENDOTHERMIC)`) : '—',
-      reaction.dipole !== undefined ? `${reaction.dipole} Debye (${reaction.dipole > 0 ? 'POLAR' : 'NON-POLAR'})` : tr('dataUnavailable'),
-      reaction.stabilityScore ? `${reaction.stabilityScore}%` : tr('dataUnavailable'),
-      evidenceLabel
+      hasNaclReference ? 'Tm=1074 K · Tb=1738 K · p≈1 atm' : (reaction.state || 'T/P: 298 K · 1 atm'),
+      reaction.enthalpy !== undefined && reaction.enthalpy !== null ? (reaction.enthalpy < 0 ? `${reaction.enthalpy} kJ/mol (EXOTHERMIC)` : `${reaction.enthalpy} kJ/mol (ENDOTHERMIC)`) : '—',
+      reaction.dipole !== undefined && reaction.dipole !== null ? `${reaction.dipole} Debye (${reaction.dipole > 0 ? 'POLAR' : 'NON-POLAR'})` : tr('dataUnavailable'),
+      stabilityDisplay,
+      reaction.note ? `${reaction.note} · ${evidenceLabel}` : evidenceLabel
     );
   }
 
@@ -1735,13 +2003,163 @@ window.addEventListener('DOMContentLoaded', function() {
     window.dispatchEvent(new CustomEvent('nulla:mixture',{detail:{symbols}}));
   }
 
+  function getMoleculeClusterAtoms(species, offset) {
+    const id = species.id || species.sym || '';
+    const atoms = [];
+    const bonds = [];
+    const add = (z, x, y, zCoord, scale = 1.45) => {
+      const idx = atoms.length;
+      atoms.push({ z, pos: offset.clone().add(new THREE.Vector3(x, y, zCoord)), scale });
+      return idx;
+    };
+    if (id === 'H2O' || id === 'SO2') {
+      const cZ = id === 'H2O' ? 8 : 16;
+      const oZ = id === 'H2O' ? 1 : 8;
+      const c = add(cZ, 0, 1.4, 0, 1.65);
+      const a1 = add(oZ, -3.4, -1.2, 0, 1.3);
+      const a2 = add(oZ, 3.4, -1.2, 0, 1.3);
+      bonds.push({ a: c, b: a1, order: id === 'SO2' ? 2 : 1 }, { a: c, b: a2, order: id === 'SO2' ? 2 : 1 });
+    } else if (id === 'CO2') {
+      const c = add(6, 0, 0, 0, 1.6);
+      const o1 = add(8, -4.2, 0, 0, 1.45);
+      const o2 = add(8, 4.2, 0, 0, 1.45);
+      bonds.push({ a: c, b: o1, order: 2 }, { a: c, b: o2, order: 2 });
+    } else if (id === 'NH3') {
+      const n = add(7, 0, 1.2, 0, 1.65);
+      const h1 = add(1, 0, -1.2, 3.4, 1.2);
+      const h2 = add(1, -2.9, -1.2, -1.7, 1.2);
+      const h3 = add(1, 2.9, -1.2, -1.7, 1.2);
+      bonds.push({ a: n, b: h1, order: 1 }, { a: n, b: h2, order: 1 }, { a: n, b: h3, order: 1 });
+    } else if (id === 'CH4') {
+      const c = add(6, 0, 0, 0, 1.65);
+      const d = 2.8;
+      [[d,d,d],[-d,-d,d],[-d,d,-d],[d,-d,-d]].forEach(([x,y,z]) => {
+        const h = add(1, x, y, z, 1.2);
+        bonds.push({ a: c, b: h, order: 1 });
+      });
+    } else if (id === 'HCl') {
+      const cl = add(17, -2.2, 0, 0, 1.65);
+      const h = add(1, 2.2, 0, 0, 1.25);
+      bonds.push({ a: cl, b: h, order: 1 });
+    } else if (id === 'C60') {
+      const verts = icosahedronVertices();
+      verts.forEach(v => {
+        const p = v.clone().normalize().multiplyScalar(5.2);
+        add(6, p.x, p.y, p.z, 1.25);
+      });
+      for (let i = 0; i < atoms.length; i++) {
+        for (let j = i + 1; j < atoms.length; j++) {
+          if (atoms[i].pos.distanceTo(atoms[j].pos) < 6.2) bonds.push({ a: i, b: j, order: 1 });
+        }
+      }
+    } else if (id === 'Graphene' || id === 'BN') {
+      const zA = id === 'BN' ? 5 : 6;
+      const zB = id === 'BN' ? 7 : 6;
+      const r = 4.2;
+      const c = add(zA, 0, 0, 0, 1.35);
+      const ring = [];
+      for (let i = 0; i < 6; i++) {
+        const th = (i / 6) * Math.PI * 2;
+        const idx = add(i % 2 === 0 ? zB : zA, r * Math.cos(th), r * Math.sin(th), 0, 1.35);
+        ring.push(idx);
+        bonds.push({ a: c, b: idx, order: 1 });
+      }
+      for (let i = 0; i < 6; i++) bonds.push({ a: ring[i], b: ring[(i + 1) % 6], order: 1 });
+    } else if (id === 'SWCNT') {
+      const r = 4.2;
+      for (let slice = -1; slice <= 1; slice++) {
+        for (let k = 0; k < 6; k++) {
+          const th = (k / 6) * Math.PI * 2;
+          add(6, slice * 3.4, r * Math.cos(th), r * Math.sin(th), 1.25);
+        }
+      }
+      for (let i = 0; i < atoms.length; i++) {
+        for (let j = i + 1; j < atoms.length; j++) {
+          if (atoms[i].pos.distanceTo(atoms[j].pos) < 4.8) bonds.push({ a: i, b: j, order: 1 });
+        }
+      }
+    } else {
+      const specAtoms = species.atoms || MOLECULAR_SPECIES[id]?.atoms || [{ z: 6, c: 2 }, { z: 8, c: 2 }];
+      const zList = [];
+      specAtoms.forEach(g => { for (let k = 0; k < Math.min(g.c, 4); k++) zList.push(g.z); });
+      while (zList.length < 8) zList.push(...zList.slice(0, 2));
+      const d = 3.6;
+      let idx = 0;
+      for (let ix = 0; ix < 2; ix++) {
+        for (let iy = 0; iy < 2; iy++) {
+          for (let iz = 0; iz < 2; iz++) {
+            add(zList[idx % zList.length], (ix - 0.5) * d, (iy - 0.5) * d, (iz - 0.5) * d, 1.45);
+            idx++;
+          }
+        }
+      }
+      for (let i = 0; i < atoms.length; i++) {
+        for (let j = i + 1; j < atoms.length; j++) {
+          if (atoms[i].pos.distanceTo(atoms[j].pos) < d * 1.15) bonds.push({ a: i, b: j, order: 1 });
+        }
+      }
+    }
+    return { atoms, bonds };
+  }
+
+  function formMolecularMixture(reactantsList) {
+    isDnaMode = false;
+    activeCollisionMode = 'chemical';
+    const combinedList = [];
+    const explicitBonds = [];
+    const radius = Math.max(18, reactantsList.length * 9);
+    reactantsList.forEach((r, index) => {
+      const angle = reactantsList.length === 2 ? index * Math.PI : (index / reactantsList.length) * Math.PI * 2;
+      const offset = new THREE.Vector3(Math.cos(angle) * radius, Math.sin(angle) * radius * 0.45, (index % 2 ? 1 : -1) * 4);
+      const baseIndex = combinedList.length;
+      if (r.isMolecule) {
+        const cluster = getMoleculeClusterAtoms(r, offset);
+        combinedList.push(...cluster.atoms);
+        cluster.bonds.forEach(b => explicitBonds.push({ a: baseIndex + b.a, b: baseIndex + b.b, order: b.order || 1 }));
+      } else if (r.z && EL[r.z]) {
+        combinedList.push(...getElementAtoms(r.z, offset));
+      }
+    });
+    spawnAtoms(combinedList, explicitBonds);
+    const symbols = reactantsList.map(r => r.formula || r.sym);
+    activeStructureId = `mixture-${symbols.join('-')}`;
+    activeThermalProfile = null;
+    measurementScaleVerified = false;
+    setThermalControlEnabled(false);
+    const multi = evaluateChemicalCompatibility(null);
+    updateTelemetry(
+      `${tr('mixtureTitle')} · ${symbols.join(' + ')}`,
+      `${symbols.join(' // ')} · ${tr('mixtureNoFormula')}`,
+      `MULTIPHASE MIXTURE · ${multi?.combinationMode || tr('mixtureCoexist')}`,
+      `INTRAMOLECULAR BONDS PRESERVED · INTER-SPECIES E=0`,
+      `COEXISTENCE @ ${temperatureK} K`,
+      '0 kJ/mol (PHYSICAL MIXING)',
+      tr('dataUnavailable'),
+      multi?.stabilityVerdict || 'COEXISTENCIA FÍSICA ESTABLE',
+      multi?.engineeringSummary || `ILLUSTRATION · ${tr('mixtureDisclaimer')}`
+    );
+    window.dispatchEvent(new CustomEvent('nulla:mixture', { detail: { symbols } }));
+  }
+
   function attemptPhysicalMixture() {
     if (selectedReactants.length < 2) {
       updateTelemetry(tr('mixtureTitle'),selectedReactants.length ? `${selectedReactants[0].sym} + ?` : tr('selectFusion'),tr('selectTwoSpecies'),tr('mixtureNoFormula'),tr('waiting'));
       return;
     }
     playTone(520,'sine',0.16);
+    if (selectedReactants.some(item => item.isMolecule)) {
+      formMolecularMixture(selectedReactants);
+      return;
+    }
     formInertMixture(selectedReactants.map(item => item.z));
+    const multi = evaluateChemicalCompatibility(null);
+    if (multi && hudStability) {
+      hudStability.textContent = `MEZCLA FÍSICA · ${multi.stabilityVerdict || 'COEXISTENCIA'}`;
+      hudStability.style.color = '#00F0FF';
+    }
+    if (multi && hudNote) {
+      hudNote.textContent = multi.engineeringSummary || hudNote.textContent;
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -2480,28 +2898,28 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   function generateTopCompoundSuggestions(reactantsArray) {
-    if (!reactantsArray?.length) return [];
-    const selected = new Set(reactantsArray.map(reactant => reactant.sym));
+    const selected = new Set((reactantsArray || []).map(reactant => reactant.sym));
     const seenFormulas = new Set();
     const suggestions = [];
     for (const [path, reaction] of Object.entries(REACTIONS)) {
       if (reaction.evidenceLevel !== 'CATALOGUED') continue;
       const reactantSymbols = new Set(path.split('+'));
-      if (![...selected].every(symbol => reactantSymbols.has(symbol))) continue;
+      if (selected.size > 0 && ![...selected].every(symbol => reactantSymbols.has(symbol))) continue;
       if (!reaction?.formula || seenFormulas.has(reaction.formula)) continue;
       seenFormulas.add(reaction.formula);
+      const verdictTag = reaction.stabilityVerdict === 'METASTABLE' ? 'METAESTABLE' : 'ESTABLE';
       suggestions.push({
         path,
         name:reaction.name,
         formula:reaction.formula,
         type:reaction.type,
-        stability:reaction.stabilityScore ? `${reaction.stabilityScore}%` : 'CATALOGUED',
+        stability:reaction.stabilityScore ? `${reaction.stabilityScore}% · ${verdictTag}` : verdictTag,
         enthalpy:Number.isFinite(reaction.enthalpy) ? `${reaction.enthalpy} kJ/mol` : 'DATA UNAVAILABLE',
         isExact:true,
         evidenceLevel:reaction.evidenceLevel || 'CATALOGUED'
       });
     }
-    return suggestions.slice(0,5);
+    return suggestions.slice(0, 8);
   }
 
   function updateTelemetry(name, formula, cls, bonds, epi, enthalpy, dipole, stability, note) {
@@ -2661,6 +3079,10 @@ window.addEventListener('DOMContentLoaded', function() {
         itemDiv.addEventListener('click', () => {
           closeDialog(suggestionModal);
           const suggestedReactants = s.path.split('+').map(symbol => {
+            if (MOLECULAR_SPECIES[symbol]) {
+              const mol = MOLECULAR_SPECIES[symbol];
+              return { id: mol.id, sym: mol.id, formula: mol.formula, name: mol.name, isMolecule: true, atoms: mol.atoms, z: mol.atoms?.[0]?.z || 6 };
+            }
             const element = Object.values(EL).find(candidate => candidate.s === symbol);
             return element ? {z:element.z,sym:element.s} : null;
           }).filter(Boolean);
@@ -2679,11 +3101,11 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // MULTI-ELEMENT REACTANT TRAY MANAGER (2 to 5 Elements)
+  // MULTI-ELEMENT & MOLECULAR REACTANT TRAY MANAGER (2 to 4 Species)
   // ═══════════════════════════════════════════════════════════════
   let selectedReactants = [];
   let lastCompatibilityResult = null;
-  const MAX_REACTANTS = 3;
+  const MAX_REACTANTS = 4;
 
   function translateCompatibilityItem(item) {
     const exact = {
@@ -2720,22 +3142,47 @@ window.addEventListener('DOMContentLoaded', function() {
       ENERGY_INPUT_REQUIRED:'statusEnergyInput'
     };
     if (hudCompatibility) {
-      const score = typeof result.score === 'number' ? ` · ${tr('dataCoverage')} ${Math.round(result.score * 100)}%` : '';
-      hudCompatibility.textContent = `${tr(statusKeys[result.status] || result.status)}${score}`;
-      hudCompatibility.style.color = result.status.includes('NO_') ? '#FF6B4A' : result.status.includes('FAVORABLE') || result.status.includes('EXOENERGETIC') ? '#00FF9D' : '#FFD166';
+      if (result.stabilityVerdict) {
+        hudCompatibility.textContent = result.stabilityVerdict;
+        hudCompatibility.style.color = result.stabilityClass === 'STABLE' || result.stabilityClass === 'STABLE_COMPOSITE'
+          ? '#00FF9D'
+          : result.stabilityClass === 'METASTABLE'
+            ? '#FFD166'
+            : '#FF6B4A';
+      } else {
+        const score = typeof result.score === 'number' ? ` · ${tr('dataCoverage')} ${Math.round(result.score * 100)}%` : '';
+        hudCompatibility.textContent = `${tr(statusKeys[result.status] || result.status)}${score}`;
+        hudCompatibility.style.color = result.status.includes('NO_') ? '#FF6B4A' : result.status.includes('FAVORABLE') || result.status.includes('EXOENERGETIC') ? '#00FF9D' : '#FFD166';
+      }
     }
     if (hudConditions) {
-      const requirements = result.requirements?.length ? result.requirements.map(translateCompatibilityItem).join(' · ') : tr('noAdditionalConditions');
-      const risks = result.instability?.length ? ` | ${tr('instability')}: ${result.instability.map(translateCompatibilityItem).join(' · ')}` : '';
-      hudConditions.textContent = `${requirements}${risks}`;
+      if (result.legionCohorts?.length) {
+        hudConditions.textContent = `LEGION [${result.legionCohorts.join(' + ')}] · T=${temperatureK} K`;
+      } else {
+        const requirements = result.requirements?.length ? result.requirements.map(translateCompatibilityItem).join(' · ') : tr('noAdditionalConditions');
+        const risks = result.instability?.length ? ` | ${tr('instability')}: ${result.instability.map(translateCompatibilityItem).join(' · ')}` : '';
+        hudConditions.textContent = `${requirements}${risks}`;
+      }
     }
   }
 
   function evaluateChemicalCompatibility(reaction) {
     const reactants = selectedReactants.map(item => ({
-      z:item.z, symbol:item.sym, electronegativity:EL[item.z]?.electronegativity
+      z: item.z || item.atoms?.[0]?.z || 6,
+      symbol: item.sym,
+      sym: item.sym,
+      name: item.name || item.formula || item.sym,
+      formula: item.formula || item.sym,
+      isMolecule: Boolean(item.isMolecule),
+      electronegativity: item.isMolecule ? undefined : EL[item.z]?.electronegativity
     }));
-    const result = window.NULLA_COMPATIBILITY?.chemical({ reactants, reaction, temperatureK });
+    const multiFn = window.NULLA_COMPATIBILITY?.multidisciplinary || window.NULLA_COMPATIBILITY?.chemical;
+    const result = multiFn?.call(window.NULLA_COMPATIBILITY, {
+      reactants,
+      reaction: reaction?.isMolecularReaction ? null : reaction,
+      molecularReaction: reaction?.isMolecularReaction ? reaction : null,
+      temperatureK
+    });
     showCompatibility(result);
     return result;
   }
@@ -2744,9 +3191,12 @@ window.addEventListener('DOMContentLoaded', function() {
     for (let i = 0; i < slots.length; i++) {
       if (slots[i]) {
         if (i < selectedReactants.length) {
-          slots[i].textContent = selectedReactants[i].sym;
-          const el = EL[selectedReactants[i].z];
-          const colorStr = '#' + (el ? el.col : 0x00F0FF).toString(16).padStart(6, '0');
+          const item = selectedReactants[i];
+          slots[i].textContent = item.formula || item.sym;
+          const el = EL[item.z || item.atoms?.[0]?.z];
+          const colorStr = item.isMolecule
+            ? '#00FF9D'
+            : '#' + (el ? el.col : 0x00F0FF).toString(16).padStart(6, '0');
           slots[i].style.color = colorStr;
         } else {
           slots[i].textContent = '—';
@@ -2762,11 +3212,14 @@ window.addEventListener('DOMContentLoaded', function() {
     
     isDnaMode = false;
     const atoms = [];
+    const explicitBonds = [];
+    const hasMolecule = selectedReactants.some(r => r.isMolecule);
     const count = selectedReactants.length;
 
-    // Wide horizontal separation (56+ units clearance) to eliminate any cluster overlap
     const offsets = [];
-    if (count === 2) {
+    if (count === 1) {
+      offsets.push(new THREE.Vector3(0, 0, 0));
+    } else if (count === 2) {
       offsets.push(new THREE.Vector3(-28.0, 0, 0));
       offsets.push(new THREE.Vector3(28.0, 0, 0));
     } else if (count === 3) {
@@ -2788,22 +3241,66 @@ window.addEventListener('DOMContentLoaded', function() {
 
     selectedReactants.forEach((r, idx) => {
       const offset = offsets[idx] || new THREE.Vector3((idx - (count - 1) * 0.5) * 26.0, 0, 0);
-      const elAtoms = getElementAtoms(r.z, offset);
-      atoms.push(...elAtoms);
+      const baseIndex = atoms.length;
+      if (r.isMolecule) {
+        const cluster = getMoleculeClusterAtoms(r, offset);
+        atoms.push(...cluster.atoms);
+        cluster.bonds.forEach(b => explicitBonds.push({ a: baseIndex + b.a, b: baseIndex + b.b, order: b.order || 1 }));
+      } else {
+        const elAtoms = getElementAtoms(r.z, offset);
+        atoms.push(...elAtoms);
+      }
     });
 
-    spawnAtoms(atoms);
+    spawnAtoms(atoms, hasMolecule ? explicitBonds : null);
 
-    const symbolsStr = selectedReactants.map(r => r.sym).join(' + ');
-    updateTelemetry(
-      `Multi-Reactant Tray (${count}/${MAX_REACTANTS})`,
-      symbolsStr,
-      `State: ACTIVE INJECTION TRAY`,
-      `Ready for Collision (Click ⚡ FUSE ALL)`,
-      `Wide Horizontal 3D Quantum Separation`
-    );
+    const symbolsStr = selectedReactants.map(r => r.formula || r.sym).join(' + ');
     const reactionKey = canonicalReactionKey(selectedReactants.map(r => r.sym));
-    evaluateChemicalCompatibility(REACTIONS[reactionKey]);
+    const reaction = REACTIONS[reactionKey];
+    const multi = evaluateChemicalCompatibility(reaction);
+    const stabilityText = reaction?.stabilityScore
+      ? `${reaction.stabilityScore}% · ${reaction.stabilityVerdict === 'METASTABLE' ? 'METAESTABLE' : 'ESTABLE'}`
+      : multi?.stabilityVerdict || tr('dataUnavailable');
+    updateTelemetry(
+      `BANDEJA DE SÍNTESIS (${count}/${MAX_REACTANTS}) · ${symbolsStr}`,
+      reaction ? `${symbolsStr} → ${reaction.formula} (${reaction.name})` : `${symbolsStr} → ${multi?.combinationMode || '?'}`,
+      reaction ? `${reaction.type} · ${reaction.evidenceLevel}` : `LEGION MULTIDISCIPLINARY · ${multi?.stabilityClass || 'PREVIEW'}`,
+      multi?.bondingRegime || reaction?.bonds || 'Pulsa 🧪 COMBINAR o ◌ MEZCLAR',
+      `SEPARACIÓN CUÁNTICA 3D · T=${temperatureK} K`,
+      reaction?.enthalpy !== undefined ? `${reaction.enthalpy} kJ/mol` : (multi?.enthalpy != null ? `≈${multi.enthalpy} kJ/mol` : '—'),
+      reaction?.dipole !== undefined ? `${reaction.dipole} Debye` : tr('dataUnavailable'),
+      stabilityText,
+      multi?.engineeringSummary || reaction?.note || 'Pulsa 🧪 COMBINAR para sintetizar o ◌ MEZCLAR para coexistencia física.'
+    );
+  }
+
+  function selectMoleculeForTray(molIdOrSpec) {
+    playTone(440 + selectedReactants.length * 75, 'sine', 0.12);
+    if (selectedReactants.length >= MAX_REACTANTS) {
+      updateTelemetry(
+        `Tray Maximum Reached (${MAX_REACTANTS}/${MAX_REACTANTS})`,
+        `Catalogue arity capped at ${MAX_REACTANTS} species`,
+        `Reaction State: TRAY FULL`,
+        `Click 🧪 COMBINAR, ◌ MEZCLAR or ↩ UNDO`,
+        `Maximum of ${MAX_REACTANTS} species in tray`
+      );
+      return;
+    }
+    const spec = typeof molIdOrSpec === 'string'
+      ? (MOLECULAR_SPECIES[molIdOrSpec] || { id: molIdOrSpec, sym: molIdOrSpec, formula: molIdOrSpec, name: molIdOrSpec, atoms: [{ z: 6, c: 2 }] })
+      : molIdOrSpec;
+    if (!spec) return;
+    selectedReactants.push({
+      id: spec.id || spec.sym,
+      sym: spec.id || spec.sym,
+      formula: spec.formula || spec.sym,
+      name: spec.name || spec.formula || spec.sym,
+      isMolecule: true,
+      atoms: spec.atoms || [{ z: 6, c: 2 }],
+      z: spec.atoms?.[0]?.z || 6
+    });
+    updateReactantsTrayHUD();
+    renderSideBySidePreviewAtoms();
   }
 
   function selectElementForTray(z) {
@@ -2836,9 +3333,9 @@ window.addEventListener('DOMContentLoaded', function() {
     if (selectedReactants.length > 0) {
       selectedReactants.pop();
       updateReactantsTrayHUD();
-      if (selectedReactants.length === 1) {
+      if (selectedReactants.length === 1 && !selectedReactants[0].isMolecule) {
         formElement(selectedReactants[0].z);
-      } else if (selectedReactants.length > 1) {
+      } else if (selectedReactants.length >= 1) {
         renderSideBySidePreviewAtoms();
       } else {
         buildDNA();
@@ -2856,7 +3353,7 @@ window.addEventListener('DOMContentLoaded', function() {
     if (selectedReactants.length < 2) {
       updateTelemetry(
         tr('chemicalCombination'),
-        selectedReactants.length === 1 ? `${selectedReactants[0].sym} + ?` : tr('selectFusion'),
+        selectedReactants.length === 1 ? `${selectedReactants[0].formula || selectedReactants[0].sym} + ?` : tr('selectFusion'),
         tr('waiting'),
         tr('noAdditionalConditions'),
         tr('statusNoCataloguedPath')
@@ -2866,30 +3363,64 @@ window.addEventListener('DOMContentLoaded', function() {
 
     playTone(600, 'triangle', 0.2);
     const reactionKey = canonicalReactionKey(selectedReactants.map(r => r.sym));
-    const reaction = REACTIONS[reactionKey];
-    evaluateChemicalCompatibility(reaction);
+    let reaction = REACTIONS[reactionKey];
+    const multi = evaluateChemicalCompatibility(reaction);
     if (!reaction) {
-      updateTelemetry(
-        'COMBINACIÓN QUÍMICA NO CATALOGADA',
-        selectedReactants.map(r => r.sym).join(' + '),
-        'Sin ecuación balanceada verificada',
-        'No se generará un compuesto inventado',
-        'BLOCKED · SELECT A CATALOGUED PATH',
-        undefined, undefined, 'NO DATA',
-        'Usa SUGERIR para ver combinaciones disponibles para los elementos seleccionados.'
-      );
-      return;
+      if (multi && multi.canCombine) {
+        const mergedAtomMap = new Map();
+        selectedReactants.forEach(r => {
+          if (r.isMolecule && Array.isArray(r.atoms)) {
+            r.atoms.forEach(g => mergedAtomMap.set(g.z, (mergedAtomMap.get(g.z) || 0) + g.c));
+          } else if (r.z) {
+            mergedAtomMap.set(r.z, (mergedAtomMap.get(r.z) || 0) + 2);
+          }
+        });
+        const dynamicAtoms = [...mergedAtomMap.entries()].map(([z, c]) => ({ z, c }));
+        reaction = {
+          name: `${multi.combinationMode} (${selectedReactants.map(r => r.formula || r.sym).join('–')})`,
+          formula: selectedReactants.map(r => r.formula || r.sym).join('·'),
+          atoms: dynamicAtoms.length ? dynamicAtoms : [{ z: 6, c: 4 }],
+          type: multi.bondingRegime || 'Multidisciplinary Phase',
+          bonds: multi.bondingRegime || 'Metallic / Interstitial / Composite',
+          state: `Solid / Composite Phase (${temperatureK} K)`,
+          geom: '3D Superlattice',
+          enthalpy: multi.enthalpy ?? null,
+          dipole: 0,
+          stabilityScore: multi.stabilityClass === 'STABLE' || multi.stabilityClass === 'STABLE_COMPOSITE' ? 88 : 74,
+          stabilityVerdict: multi.stabilityClass || 'METASTABLE',
+          evidenceLevel: 'CATALOGUED',
+          isDynamicSynthesis: true,
+          note: `${multi.stabilityVerdict} · ${multi.engineeringSummary}`
+        };
+      } else {
+        updateTelemetry(
+          'COMBINACIÓN QUÍMICA NO CATALOGADA',
+          selectedReactants.map(r => r.formula || r.sym).join(' + '),
+          multi?.stabilityVerdict || 'Sin ecuación balanceada verificada',
+          multi?.bondingRegime || 'No se generará un compuesto inventado',
+          'BLOCKED · SELECT A CATALOGUED PATH',
+          undefined,
+          undefined,
+          multi?.stabilityVerdict || 'INESTABLE / NO DATA',
+          multi?.engineeringSummary || 'Usa SUGERIR para ver combinaciones disponibles o MEZCLAR para coexistencia física.'
+        );
+        return;
+      }
     }
 
-    if (selectedReactants.length === 2) {
+    const hasMolecule = selectedReactants.some(r => r.isMolecule);
+    if (selectedReactants.length === 2 && !hasMolecule && !reaction.isDynamicSynthesis) {
       triggerFusionCollision(selectedReactants[0].z, selectedReactants[1].z, reaction);
     } else {
       isDnaMode = false;
-      
+      activeCollisionMode = 'chemical';
       const atoms = [];
       const count = selectedReactants.length;
       const offsets = [];
-      if (count === 3) {
+      if (count === 2) {
+        offsets.push(new THREE.Vector3(-28.0, 0, 0));
+        offsets.push(new THREE.Vector3(28.0, 0, 0));
+      } else if (count === 3) {
         offsets.push(new THREE.Vector3(-32.0, -6.0, 0));
         offsets.push(new THREE.Vector3(0, 16.0, 0));
         offsets.push(new THREE.Vector3(32.0, -6.0, 0));
@@ -2908,8 +3439,11 @@ window.addEventListener('DOMContentLoaded', function() {
 
       selectedReactants.forEach((r, idx) => {
         const offset = offsets[idx] || new THREE.Vector3((idx - (count - 1) * 0.5) * 26.0, 0, 0);
-        const elAtoms = getElementAtoms(r.z, offset);
-        atoms.push(...elAtoms);
+        if (r.isMolecule) {
+          atoms.push(...getMoleculeClusterAtoms(r, offset).atoms);
+        } else {
+          atoms.push(...getElementAtoms(r.z, offset));
+        }
       });
 
       spawnAtoms(atoms);
@@ -2917,17 +3451,21 @@ window.addEventListener('DOMContentLoaded', function() {
       fusionState = 'charging';
       fusionTimer = 0.9;
       fusionChargeDuration = fusionTimer;
-      fusionReactantA = selectedReactants[0].z;
-      fusionReactantB = selectedReactants[1].z;
+      fusionReactantA = selectedReactants[0].z || 6;
+      fusionReactantB = selectedReactants[1]?.z || 8;
 
       fusionTargetReaction = reaction;
 
       updateTelemetry(
-        `Multi-Reactant Collision (${selectedReactants.length} Elements)`,
-        selectedReactants.map(r => r.sym).join(' + '),
+        `SÍNTESIS MULTIESPECIE (${selectedReactants.length} Reactivos)`,
+        `${selectedReactants.map(r => r.formula || r.sym).join(' + ')} → ${reaction.formula}`,
         `Collision State: CONVERGING RADIANTS TO CENTROID`,
-        `Preparing catalogued chemical pathway`,
-        `Educational collision visualization`
+        reaction.bonds || `Preparing chemical pathway`,
+        `Educational collision visualization`,
+        reaction.enthalpy,
+        reaction.dipole,
+        reaction.stabilityScore ? `${reaction.stabilityScore}% · ${reaction.stabilityVerdict || 'ESTABLE'}` : 'ESTABLE',
+        reaction.note
       );
     }
   }
@@ -3084,6 +3622,24 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  document.querySelectorAll('#molecular-tray-bar [data-mol-id]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const molId = chip.getAttribute('data-mol-id');
+      if (molId) selectMoleculeForTray(molId);
+    });
+  });
+
+  const btnStageActive = document.getElementById('btn-stage-active');
+  if (btnStageActive) {
+    btnStageActive.addEventListener('click', () => {
+      if (activeStageableSpecies) {
+        selectMoleculeForTray(activeStageableSpecies);
+      } else {
+        selectMoleculeForTray('H2O');
+      }
+    });
+  }
+
   // RANDOM SYNTHESIS chooses a real catalogue path instead of manufacturing a
   // mostly impossible random multi-element tray.
   if (btnRandom) {
@@ -3095,9 +3651,13 @@ window.addEventListener('DOMContentLoaded', function() {
       );
       const [path] = candidates[Math.floor(Math.random() * candidates.length)] || [];
       selectedReactants = String(path || 'Cl+Na').split('+').map(symbol => {
+        if (MOLECULAR_SPECIES[symbol]) {
+          const mol = MOLECULAR_SPECIES[symbol];
+          return { id: mol.id, sym: mol.id, formula: mol.formula, name: mol.name, isMolecule: true, atoms: mol.atoms, z: mol.atoms?.[0]?.z || 6 };
+        }
         const element = Object.values(EL).find(candidate => candidate.s === symbol);
-        return {z:element.z,sym:element.s};
-      });
+        return element ? {z:element.z,sym:element.s} : null;
+      }).filter(Boolean);
       updateReactantsTrayHUD();
       renderSideBySidePreviewAtoms();
       setTimeout(() => {
