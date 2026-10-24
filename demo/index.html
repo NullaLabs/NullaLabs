@@ -30,47 +30,79 @@
 
     #webgl-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; display:block; z-index:0; touch-action:none; }
 
-    /* ─── NEXT-GEN 3D iOS / VISION-OS CRYSTAL BUTTON SYSTEM ─── */
+    /* ─── NEXT-GEN 3D iOS / VISION-OS SOLID CRYSTAL BUTTON SYSTEM (NO SE TRANSPARENTAN) ─── */
     .ios-crystal-btn, #btn-reassemble, #btn-open-pt, #btn-orbitals, #btn-visual-mode, #btn-xrd, #btn-synkronia, #btn-polymorph,
     #btn-measure, #btn-export-gltf, #btn-export-usdz, #btn-export-xyz, #btn-export-cif,
     #btn-tutorial, #btn-docs, #btn-quiz, #btn-share-url, #btn-webxr,
-    #btn-quality-low, #btn-quality-med, #btn-quality-ultra {
+    #btn-quality-low, #btn-quality-med, #btn-quality-ultra,
+    .shader-btn, .fusion-btn, .fusion-btn-undo, .fusion-btn-clear, .mol-chip, .stat-chip, .experience-mode-btn,
+    .hud-collapse-btn, .hud-restore-pill {
       position:relative; overflow:hidden;
       border-radius:10px !important;
-      border:1px solid rgba(255,255,255,0.44) !important;
-      background:linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.14) 46%, rgba(255,255,255,0.03) 52%, rgba(0,240,255,0.12) 100%) !important;
-      backdrop-filter:blur(14px) saturate(1.9); -webkit-backdrop-filter:blur(14px) saturate(1.9);
-      box-shadow:0 6px 16px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.82), inset 0 -2px 4px rgba(0,0,0,0.38) !important;
-      text-shadow:0 1px 3px rgba(0,0,0,0.85);
+      border:1px solid rgba(255,255,255,0.52) !important;
+      background:linear-gradient(180deg, #24354b 0%, #172435 24%, #0d1520 50%, #121c29 76%, #080d15 100%) !important;
+      opacity:1 !important;
+      color:#FFFFFF !important;
+      box-shadow:0 4px 14px rgba(0,0,0,0.65), 0 1px 3px rgba(0,0,0,0.85),
+                 inset 0 1.5px 0.5px rgba(255,255,255,0.95), inset 0 3px 2px rgba(255,255,255,0.28),
+                 inset 0 -3px 5px rgba(0,0,0,0.88), inset 0 -1px 2px rgba(0,0,0,0.98) !important;
+      text-shadow:0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,240,255,0.45) !important;
       transition:all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
     #btn-tutorial, #btn-share-url, #btn-export-cif, #btn-synkronia {
-      border-color:rgba(0,255,157,0.62) !important;
-      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(0,255,157,0.24) 48%, rgba(0,255,157,0.08) 100%) !important;
-      box-shadow:0 6px 16px rgba(0,255,157,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,120,80,0.42) !important;
+      border-color:rgba(0,255,157,0.72) !important;
+      background:linear-gradient(180deg, #1b4938 0%, #123629 24%, #0a2018 50%, #0f2c22 76%, #05120d 100%) !important;
+      box-shadow:0 4px 14px rgba(0,255,157,0.25), 0 1px 3px rgba(0,0,0,0.85),
+                 inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
+                 inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-docs, #btn-quality-med, #btn-visual-mode {
-      border-color:rgba(0,240,255,0.62) !important;
-      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(0,240,255,0.24) 48%, rgba(0,240,255,0.08) 100%) !important;
-      box-shadow:0 6px 16px rgba(0,240,255,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,110,160,0.42) !important;
+    #btn-docs, #btn-quality-med, #btn-visual-mode, #btn-open-pt {
+      border-color:rgba(0,240,255,0.72) !important;
+      background:linear-gradient(180deg, #16465c 0%, #103345 24%, #081e2b 50%, #0d2a3a 76%, #041018 100%) !important;
+      box-shadow:0 4px 14px rgba(0,240,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
+                 inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
+                 inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
     #btn-quiz, #btn-xrd, #btn-polymorph {
-      border-color:rgba(255,215,0,0.62) !important;
-      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,215,0,0.24) 48%, rgba(255,180,0,0.08) 100%) !important;
-      box-shadow:0 6px 16px rgba(255,215,0,0.18), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(140,95,0,0.42) !important;
+      border-color:rgba(255,215,0,0.72) !important;
+      background:linear-gradient(180deg, #4f3b14 0%, #3a2a0c 24%, #221805 50%, #30230a 76%, #120c02 100%) !important;
+      box-shadow:0 4px 14px rgba(255,215,0,0.25), 0 1px 3px rgba(0,0,0,0.85),
+                 inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
+                 inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
     #btn-webxr {
-      border-color:rgba(191,0,255,0.62) !important;
-      background:linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(191,0,255,0.25) 48%, rgba(140,0,220,0.09) 100%) !important;
-      box-shadow:0 6px 16px rgba(191,0,255,0.2), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(95,0,140,0.42) !important;
+      border-color:rgba(191,0,255,0.72) !important;
+      background:linear-gradient(180deg, #431f54 0%, #2f143c 24%, #1a0922 50%, #260e32 76%, #0e0314 100%) !important;
+      box-shadow:0 4px 14px rgba(191,0,255,0.25), 0 1px 3px rgba(0,0,0,0.85),
+                 inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
+                 inset 0 -3px 5px rgba(0,0,0,0.9) !important;
     }
-    #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover,
+    #btn-nuclear-fusion, #btn-nuclear-fission {
+      border-color:rgba(255,60,90,0.72) !important;
+      background:linear-gradient(180deg, #521622 0%, #3a0d16 24%, #20050b 50%, #2e0b12 76%, #100205 100%) !important;
+      box-shadow:0 4px 14px rgba(255,60,90,0.25), 0 1px 3px rgba(0,0,0,0.85),
+                 inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
+                 inset 0 -3px 5px rgba(0,0,0,0.9) !important;
+    }
+    .ios-crystal-btn:hover, #btn-reassemble:hover, #btn-open-pt:hover, #btn-orbitals:hover, #btn-visual-mode:hover, #btn-xrd:hover, #btn-synkronia:hover, #btn-polymorph:hover,
     #btn-measure:hover, #btn-export-gltf:hover, #btn-export-usdz:hover, #btn-export-xyz:hover, #btn-export-cif:hover,
     #btn-tutorial:hover, #btn-docs:hover, #btn-quiz:hover, #btn-share-url:hover, #btn-webxr:hover,
-    #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover {
-      transform:translateY(-2px) scale(1.015);
-      border-color:rgba(255,255,255,0.85) !important;
-      box-shadow:0 10px 24px rgba(0,240,255,0.28), inset 0 2px 2px rgba(255,255,255,0.95), inset 0 -2px 5px rgba(0,0,0,0.4) !important;
+    #btn-quality-low:hover, #btn-quality-med:hover, #btn-quality-ultra:hover,
+    .shader-btn:hover, .fusion-btn:hover, .fusion-btn-undo:hover, .fusion-btn-clear:hover, .mol-chip:hover, button.stat-chip:hover, .experience-mode-btn:hover,
+    .hud-collapse-btn:hover, .hud-restore-pill:hover {
+      transform:translateY(-2px) scale(1.02);
+      filter:brightness(1.16);
+      border-color:#FFFFFF !important;
+      box-shadow:0 8px 24px rgba(0,240,255,0.38), inset 0 2px 0.5px #FFFFFF, inset 0 3.5px 2px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.9) !important;
+    }
+    .ios-crystal-btn:active, #btn-reassemble:active, #btn-open-pt:active, #btn-orbitals:active, #btn-visual-mode:active, #btn-xrd:active, #btn-synkronia:active, #btn-polymorph:active,
+    #btn-measure:active, #btn-export-gltf:active, #btn-export-usdz:active, #btn-export-xyz:active, #btn-export-cif:active,
+    #btn-tutorial:active, #btn-docs:active, #btn-quiz:active, #btn-share-url:active, #btn-webxr:active,
+    .shader-btn:active, .fusion-btn:active, .fusion-btn-undo:active, .fusion-btn-clear:active, .mol-chip:active, button.stat-chip:active, .experience-mode-btn:active,
+    .hud-collapse-btn:active, .hud-restore-pill:active {
+      transform:translateY(1px) scale(0.985);
+      filter:brightness(0.92);
+      box-shadow:0 2px 6px rgba(0,0,0,0.8), inset 0 2px 4px rgba(0,0,0,0.9), inset 0 -1px 1px rgba(255,255,255,0.3) !important;
     }
 
     /* ─── HEADER (PURE TRANSPARENT CRYSTAL) ─── */
@@ -144,12 +176,17 @@
     .pt-el {
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       padding:3px 0px; border-radius:7px; cursor:pointer;
-      min-height:25px; border:1px solid rgba(255,255,255,0.34);
+      min-height:25px; border:1px solid rgba(255,255,255,0.48);
       transition: all 0.2s cubic-bezier(0.175,0.885,0.32,1.275); position:relative;
-      box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.62), inset 0 -1.5px 3px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.3);
-      text-shadow:0 1px 2px rgba(0,0,0,0.9);
+      box-shadow:inset 0 1.5px 0.5px rgba(255,255,255,0.92), inset 0 2.5px 1.5px rgba(255,255,255,0.25), inset 0 -2.5px 4px rgba(0,0,0,0.85), 0 2px 6px rgba(0,0,0,0.5);
+      text-shadow:0 1px 2px rgba(0,0,0,0.95);
+      opacity:1 !important;
     }
-    .pt-el:hover { transform:scale(1.34) translateY(-1px); z-index:5; box-shadow:0 0 18px currentColor, inset 0 1.5px 2px rgba(255,255,255,0.9); border-color:#FFFFFF; }
+    .pt-el:hover {
+      transform:scale(1.34) translateY(-1px); z-index:5;
+      box-shadow:0 0 18px currentColor, inset 0 2px 1px #FFFFFF, inset 0 -2.5px 4px rgba(0,0,0,0.9);
+      border-color:#FFFFFF; filter:brightness(1.15);
+    }
     .pt-el:focus-visible {
       outline:2px solid #FFFFFF; outline-offset:2px; z-index:6;
       transform:scale(1.22); box-shadow:0 0 18px currentColor;
@@ -158,17 +195,17 @@
     .pt-el-num { font-size:6px; color:rgba(255,255,255,0.88); line-height:1; }
     .pt-el-sym { font-family:'Orbitron',sans-serif; font-size:9.5px; font-weight:700; line-height:1; margin-top:1px; }
 
-    /* Category Colors — 3D Tinted iOS Crystal Tiles */
-    .cat-nonmetal   { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(0,240,255,0.28) 55%, rgba(0,180,255,0.12) 100%); border-color:rgba(0,240,255,0.52); color:#FFFFFF; }
-    .cat-noble      { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(191,0,255,0.28) 55%, rgba(140,0,220,0.12) 100%); border-color:rgba(191,0,255,0.52); color:#FFFFFF; }
-    .cat-alkali     { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,215,0,0.28) 55%, rgba(200,150,0,0.12) 100%); border-color:rgba(255,215,0,0.52); color:#FFFFFF; }
-    .cat-alkaline   { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,153,0,0.28) 55%, rgba(200,100,0,0.12) 100%); border-color:rgba(255,153,0,0.52); color:#FFFFFF; }
-    .cat-transition { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(0,212,255,0.26) 55%, rgba(0,140,220,0.10) 100%); border-color:rgba(0,212,255,0.48); color:#FFFFFF; }
-    .cat-post       { background:linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(185,200,220,0.26) 55%, rgba(120,140,165,0.10) 100%); border-color:rgba(200,215,235,0.48); color:#FFFFFF; }
-    .cat-metalloid  { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(0,255,157,0.28) 55%, rgba(0,180,110,0.12) 100%); border-color:rgba(0,255,157,0.52); color:#FFFFFF; }
-    .cat-halogen    { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,0,85,0.28) 55%, rgba(190,0,60,0.12) 100%); border-color:rgba(255,0,85,0.52); color:#FFFFFF; }
-    .cat-lanthanide { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,105,180,0.28) 55%, rgba(200,60,140,0.12) 100%); border-color:rgba(255,105,180,0.52); color:#FFFFFF; }
-    .cat-actinide   { background:linear-gradient(180deg, rgba(255,255,255,0.32) 0%, rgba(255,100,50,0.28) 55%, rgba(200,60,20,0.12) 100%); border-color:rgba(255,100,50,0.52); color:#FFFFFF; }
+    /* Category Colors — Solid 3D Gemstone Crystal Tiles (No Transparentan) */
+    .cat-nonmetal   { background:linear-gradient(180deg, #1b4b60 0%, #103342 28%, #081d26 50%, #0d2c3a 76%, #051218 100%) !important; border-color:rgba(0,240,255,0.68) !important; color:#FFFFFF; }
+    .cat-noble      { background:linear-gradient(180deg, #441e58 0%, #2e133d 28%, #1a0923 50%, #270e34 76%, #0d0312 100%) !important; border-color:rgba(191,0,255,0.68) !important; color:#FFFFFF; }
+    .cat-alkali     { background:linear-gradient(180deg, #523e14 0%, #3a2b0c 28%, #201705 50%, #322409 76%, #120c02 100%) !important; border-color:rgba(255,215,0,0.68) !important; color:#FFFFFF; }
+    .cat-alkaline   { background:linear-gradient(180deg, #533010 0%, #3a200a 28%, #221204 50%, #341c07 76%, #140a02 100%) !important; border-color:rgba(255,153,0,0.68) !important; color:#FFFFFF; }
+    .cat-transition { background:linear-gradient(180deg, #174256 0%, #0e2d3c 28%, #071922 50%, #0c2734 76%, #040e14 100%) !important; border-color:rgba(0,212,255,0.68) !important; color:#FFFFFF; }
+    .cat-post       { background:linear-gradient(180deg, #374554 0%, #25313d 28%, #141b22 50%, #1f2933 76%, #0a0e13 100%) !important; border-color:rgba(200,215,235,0.68) !important; color:#FFFFFF; }
+    .cat-metalloid  { background:linear-gradient(180deg, #1b4b38 0%, #113426 28%, #081d15 50%, #0d2c20 76%, #04120d 100%) !important; border-color:rgba(0,255,157,0.68) !important; color:#FFFFFF; }
+    .cat-halogen    { background:linear-gradient(180deg, #551627 0%, #3b0d19 28%, #21050d 50%, #330b15 76%, #110206 100%) !important; border-color:rgba(255,0,85,0.68) !important; color:#FFFFFF; }
+    .cat-lanthanide { background:linear-gradient(180deg, #531c3c 0%, #3a1129 28%, #210716 50%, #310c22 76%, #11020b 100%) !important; border-color:rgba(255,105,180,0.68) !important; color:#FFFFFF; }
+    .cat-actinide   { background:linear-gradient(180deg, #542214 0%, #3b160c 28%, #210a05 50%, #331209 76%, #110402 100%) !important; border-color:rgba(255,100,50,0.68) !important; color:#FFFFFF; }
 
     /* Lanthanide/Actinide separator indicator */
     .pt-spacer { grid-column: span 18; height:4px; }
@@ -341,7 +378,7 @@
       #nuclear-route-selector { flex:0 0 168px; }
       .nuclear-mode-bar .nuclear-btn { flex:0 0 auto; }
     }
-    /* ─── COLLAPSIBLE PANEL TRANSITIONS & 3D CRYSTAL RESTORE TABS ─── */
+    /* ─── COLLAPSIBLE PANEL TRANSITIONS & 3D SOLID CRYSTAL DRAWER TABS ─── */
     #molecular-hud, #pt-hud-panel {
       transition:transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
     }
@@ -354,32 +391,74 @@
       opacity:0; pointer-events:none;
     }
     .hud-collapse-btn {
-      padding:3px 8px; border-radius:8px;
-      border:1px solid rgba(255,255,255,0.48);
-      background:linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(0,240,255,0.18) 50%, rgba(0,180,255,0.06) 100%);
-      color:#FFFFFF; font:800 7.5px 'Orbitron',sans-serif; letter-spacing:0.6px; cursor:pointer;
-      box-shadow:inset 0 1.5px 1px rgba(255,255,255,0.82), 0 3px 10px rgba(0,0,0,0.38);
-      text-shadow:0 1px 2px rgba(0,0,0,0.85);
+      padding:4px 9px; border-radius:8px;
+      font:800 7.5px 'Orbitron',sans-serif; letter-spacing:0.6px; cursor:pointer;
+      border:1px solid rgba(0,240,255,0.68) !important;
+      background:linear-gradient(180deg, #16465c 0%, #103345 24%, #081e2b 50%, #0d2a3a 76%, #041018 100%) !important;
+      color:#FFFFFF !important;
+      box-shadow:0 3px 10px rgba(0,0,0,0.55), inset 0 1.5px 0.5px #FFFFFF, inset 0 -2px 3px rgba(0,0,0,0.85);
+      text-shadow:0 1px 2px rgba(0,0,0,0.95);
       transition:all 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
     }
     .hud-collapse-btn:hover {
-      transform:translateY(-1px) scale(1.04); border-color:#00FF9D; color:#00FF9D;
-      box-shadow:0 6px 16px rgba(0,255,157,0.32), inset 0 1.5px 2px rgba(255,255,255,0.95);
+      transform:translateY(-1px) scale(1.04); border-color:#00FF9D !important; color:#00FF9D !important;
+      box-shadow:0 6px 16px rgba(0,255,157,0.35), inset 0 1.5px 1px #FFFFFF, inset 0 -2px 3px rgba(0,0,0,0.9);
     }
     .hud-restore-pill {
-      position:fixed; z-index:15; display:none;
-      padding:7px 14px; border-radius:12px;
-      border:1px solid rgba(0,240,255,0.62);
-      background:linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(0,240,255,0.22) 50%, rgba(8,20,36,0.18) 100%);
-      backdrop-filter:blur(16px) saturate(1.9); -webkit-backdrop-filter:blur(16px) saturate(1.9);
-      color:#FFFFFF; font:800 8.5px 'Orbitron',sans-serif; letter-spacing:1px; cursor:pointer;
-      box-shadow:0 8px 24px rgba(0,0,0,0.45), inset 0 1.5px 1px rgba(255,255,255,0.86), inset 0 -2px 4px rgba(0,120,180,0.38);
-      text-shadow:0 0 8px rgba(0,240,255,0.8), 0 1px 2px rgba(0,0,0,0.9);
-      transition:all 0.22s cubic-bezier(0.175,0.885,0.32,1.275);
+      position:fixed; z-index:25; display:flex !important; align-items:center; justify-content:center;
+      padding:7px 15px; border-radius:12px;
+      border:1px solid rgba(0,240,255,0.72) !important;
+      background:linear-gradient(180deg, #16465c 0%, #103345 24%, #081e2b 50%, #0d2a3a 76%, #041018 100%) !important;
+      color:#FFFFFF !important; font:800 8.5px 'Orbitron',sans-serif; letter-spacing:1px; cursor:pointer;
+      box-shadow:0 6px 18px rgba(0,0,0,0.65), 0 1px 3px rgba(0,0,0,0.85),
+                 inset 0 1.5px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.35),
+                 inset 0 -3px 5px rgba(0,0,0,0.9) !important;
+      text-shadow:0 1px 3px rgba(0,0,0,0.95), 0 0 10px rgba(0,240,255,0.6) !important;
+      transition:all 0.38s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      opacity:1 !important; pointer-events:auto !important; white-space:nowrap;
     }
     .hud-restore-pill:hover {
-      transform:scale(1.05); border-color:#00FF9D; color:#00FF9D;
-      box-shadow:0 10px 28px rgba(0,255,157,0.35), inset 0 2px 2px rgba(255,255,255,0.95);
+      transform:translateY(-2px) scale(1.03); filter:brightness(1.15);
+      border-color:#00FF9D !important; color:#00FF9D !important;
+      box-shadow:0 10px 26px rgba(0,255,157,0.4), inset 0 2px 0.5px #FFFFFF, inset 0 3px 2px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.9) !important;
+    }
+    .hud-restore-pill:active {
+      transform:translateY(1px) scale(0.98); filter:brightness(0.92);
+      box-shadow:0 2px 6px rgba(0,0,0,0.8), inset 0 2px 4px rgba(0,0,0,0.9) !important;
+    }
+    /* Left Drawer Tab: Outside panel on its right when open; on left screen edge when collapsed */
+    #btn-restore-left-hud {
+      top:66px;
+      left:342px;
+    }
+    body.hud-left-collapsed #btn-restore-left-hud {
+      left:12px !important;
+      border-color:rgba(0,255,157,0.75) !important;
+      background:linear-gradient(180deg, #1b4938 0%, #123629 24%, #0a2018 50%, #0f2c22 76%, #05120d 100%) !important;
+    }
+    /* Bottom Drawer Tab: Above elements panel when open; on bottom screen edge when collapsed */
+    #btn-restore-pt-hud {
+      right:28px;
+      bottom:calc(min(450px, 48vh) + 20px);
+    }
+    body.hud-pt-collapsed #btn-restore-pt-hud {
+      bottom:12px !important;
+      border-color:rgba(0,255,157,0.75) !important;
+      background:linear-gradient(180deg, #1b4938 0%, #123629 24%, #0a2018 50%, #0f2c22 76%, #05120d 100%) !important;
+    }
+    @media (max-width: 900px) {
+      #btn-restore-left-hud {
+        top:92px; left:auto; right:14px;
+      }
+      body.hud-left-collapsed #btn-restore-left-hud {
+        left:8px !important; right:auto !important; top:92px !important;
+      }
+      #btn-restore-pt-hud {
+        right:14px; bottom:calc(min(450px, 48vh) + 16px);
+      }
+      body.hud-pt-collapsed #btn-restore-pt-hud {
+        bottom:8px !important; right:14px !important;
+      }
     }
     @media (prefers-reduced-motion: reduce) {
       *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
@@ -391,8 +470,8 @@
   <output id="runtime-diagnostics" hidden aria-hidden="true"></output>
 
   <!-- FLOATING CRYSTAL RESTORE PILLS FOR HIDDEN PANELS -->
-  <button id="btn-restore-left-hud" class="hud-restore-pill" style="top:66px; left:14px;" title="Mostrar panel de telemetría molecular">▶ TELEMETRÍA</button>
-  <button id="btn-restore-pt-hud" class="hud-restore-pill" style="bottom:14px; right:14px;" title="Mostrar tabla periódica y controlador de síntesis">▲ TABLA IUPAC</button>
+  <button id="btn-restore-left-hud" class="hud-restore-pill" data-i18n="collapseLeft" title="Ocultar panel de telemetría molecular">◀ OCULTAR</button>
+  <button id="btn-restore-pt-hud" class="hud-restore-pill" data-i18n="collapsePt" title="Ocultar tabla periódica y controlador de síntesis">▼ OCULTAR TABLA</button>
 
   <!-- TOOLTIP -->
   <div id="pt-tooltip"></div>
@@ -410,11 +489,11 @@
     </div>
     <div id="active-synthesis-banner" style="position:absolute; left:50%; transform:translateX(-50%); font-family:'Orbitron',sans-serif; font-size:13px; font-weight:900; letter-spacing:3px; color:#FFFFFF; text-transform:uppercase; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(0,240,255,0.08) 100%); backdrop-filter:blur(16px) saturate(1.85); -webkit-backdrop-filter:blur(16px) saturate(1.85); border:1px solid rgba(255,255,255,0.48); border-radius:13px; padding:6px 24px; box-shadow:0 8px 24px rgba(0,0,0,0.42), inset 0 1.5px 1px rgba(255,255,255,0.75); text-shadow:0 0 14px rgba(0,240,255,0.85), 0 1px 3px rgba(0,0,0,0.9); pointer-events:none;">B-DNA DOUBLE HELIX</div>
     <div style="display:flex; align-items:center; gap:6px;">
-      <button id="btn-tutorial" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,255,157,0.5); background:rgba(0,255,157,0.25); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🚀 TUTORIAL</button>
-      <button id="btn-docs" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,240,255,0.4); background:rgba(0,240,255,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">📖 DOCS</button>
-      <button id="btn-quiz" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,215,0,0.4); background:rgba(255,215,0,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🎓 QUIZ EDUCATIVO</button>
-      <button class="experience-lab" id="btn-share-url" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(0,255,157,0.4); background:rgba(0,255,157,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🔗 SHARE</button>
-      <button class="experience-science" id="btn-webxr" style="padding:4px 8px; border-radius:6px; border:1px solid rgba(191,0,255,0.4); background:rgba(191,0,255,0.15); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700; cursor:pointer;">🥽 VR / WEBXR</button>
+      <button id="btn-tutorial" data-i18n="tutorial">🚀 TUTORIAL</button>
+      <button id="btn-docs" data-i18n="docs">📖 DOCS</button>
+      <button id="btn-quiz" data-i18n="quiz">🎓 QUIZ EDUCATIVO</button>
+      <button class="experience-lab" id="btn-share-url" data-i18n="share">🔗 SHARE</button>
+      <button class="experience-science" id="btn-webxr">🥽 VR / WEBXR</button>
       <span class="hud-badge experience-science" id="gpu-status-badge">▸ WEBGPU / WEBGL2 · 118 ELEMENTS</span>
     </div>
   </div>
@@ -422,13 +501,13 @@
   <!-- TELEMETRY PANEL -->
   <div id="molecular-hud" tabindex="0" data-i18n-aria-label="scientificTelemetryLabel" aria-label="Scientific telemetry" style="width:320px; max-height:calc(100vh - 110px); overflow-y:auto; scrollbar-width:thin;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <h3 style="margin-bottom:0;">◆ MOLECULAR TELEMETRY</h3>
-      <button id="btn-collapse-left-hud" class="hud-collapse-btn" title="Esconder panel hacia la izquierda">◀ OCULTAR</button>
+      <h3 style="margin-bottom:0;" data-i18n="telemetry">◆ MOLECULAR TELEMETRY</h3>
+      <button id="btn-collapse-left-hud" class="hud-collapse-btn" data-i18n="collapseLeft" title="Esconder panel hacia la izquierda">◀ OCULTAR</button>
     </div>
     <div id="experience-mode-bar" class="experience-mode-bar" role="radiogroup" data-i18n-aria-label="experienceLevelLabel" aria-label="Nivel de experiencia">
-      <button class="experience-mode-btn" id="mode-basic" role="radio" data-experience-mode="basic" aria-checked="true">MODO BÁSICO</button>
-      <button class="experience-mode-btn" id="mode-lab" role="radio" data-experience-mode="lab" aria-checked="false">LABORATORIO</button>
-      <button class="experience-mode-btn" id="mode-science" role="radio" data-experience-mode="science" aria-checked="false">DATOS</button>
+      <button class="experience-mode-btn" id="mode-basic" role="radio" data-experience-mode="basic" aria-checked="true" data-i18n="modeBasic">MODO BÁSICO</button>
+      <button class="experience-mode-btn" id="mode-lab" role="radio" data-experience-mode="lab" aria-checked="false" data-i18n="modeLab">LABORATORIO</button>
+      <button class="experience-mode-btn" id="mode-science" role="radio" data-experience-mode="science" aria-checked="false" data-i18n="modeScience">DATOS</button>
     </div>
     <p id="experience-mode-description">Explora estructuras y reacciones con la información esencial visible.</p>
     <div class="hud-row"><span class="hud-label" data-i18n="assembly">ASSEMBLY</span><span class="hud-val" id="hud-name" aria-live="polite">B-DNA Double Helix</span></div>
@@ -460,25 +539,25 @@
     <div class="hud-row" style="flex-direction:column; margin-top:4px;"><span class="hud-label" data-i18n="explanation" style="width:100%;">EXPLANATION NOTE:</span><span class="hud-val" id="hud-note" style="font-size:9px; color:rgba(255,255,255,0.85); font-style:italic; margin-top:2px;">B-DNA teaching schema · repeating base-pair motif · not a TP53 sequence · scale not calibrated.</span></div>
     
     <div class="experience-lab" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:8px;">
-      <button id="btn-reassemble">🧬 ADN</button>
-      <button id="btn-orbitals" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">⚛️ ORBITALES (±ψ)</button>
+      <button id="btn-reassemble" data-i18n="dna">🧬 ADN</button>
+      <button id="btn-orbitals" data-i18n="orbitals">⚛️ ORBITALES (±ψ)</button>
     </div>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
-      <button id="btn-visual-mode" style="padding:6px 0; color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;" title="Alternar modo visual 3D: Ball &amp; Stick, Van der Waals CPK, Poliedros VESTA + Celda Unidad, Mapa de Carga Pauling δ⁺/δ⁻">👁️ VISTA: BALL &amp; STICK</button>
-      <button id="btn-xrd" style="padding:6px 0; color:#FFD700; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;" title="Difracción de Rayos X en Polvo (Ley de Bragg Cu Kα = 1.5406 Å · Conos 2θ)">📊 XRD BRAGG (2θ)</button>
+      <button id="btn-visual-mode" data-i18n="visualMode" title="Alternar modo visual 3D: Ball &amp; Stick, Van der Waals CPK, Poliedros VESTA + Celda Unidad, Mapa de Carga Pauling δ⁺/δ⁻">👁️ VISTA: BALL &amp; STICK</button>
+      <button id="btn-xrd" data-i18n="xrdBragg" title="Difracción de Rayos X en Polvo (Ley de Bragg Cu Kα = 1.5406 Å · Conos 2θ)">📊 XRD BRAGG (2θ)</button>
     </div>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
-      <button id="btn-synkronia" style="padding:6px 0; color:#00FF9D; font-family:'Orbitron',sans-serif; font-size:8.1px; font-weight:700; cursor:pointer;" title="Relajación energética 3D en tiempo real (Lennard-Jones 12-6 + Coulomb + Optimizador de gradiente por espigas ∇U → 0 sobre la estructura actual)">⚡ RELAJAR RED (∇U→0)</button>
-      <button id="btn-polymorph" style="padding:6px 0; color:#FFD166; font-family:'Orbitron',sans-serif; font-size:8.1px; font-weight:700; cursor:pointer;" title="Evaluar transición de fase cristalográfica y polimorfismo bajo Presión y Temperatura (P, T) para la fórmula activa">🔄 FASE CRISTALINA (P,T)</button>
+      <button id="btn-synkronia" data-i18n="relaxLattice" title="Relajación energética 3D en tiempo real (Lennard-Jones 12-6 + Coulomb + Optimizador de gradiente por espigas ∇U → 0 sobre la estructura actual)">⚡ RELAJAR RED (∇U→0)</button>
+      <button id="btn-polymorph" data-i18n="crystalPhase" title="Evaluar transición de fase cristalográfica y polimorfismo bajo Presión y Temperatura (P, T) para la fórmula activa">🔄 FASE CRISTALINA (P,T)</button>
     </div>
     <div class="experience-science" id="global-tools" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px; margin-top:4px;">
-      <button id="btn-measure" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">📏 MEDIR 3D</button>
-      <button id="btn-export-gltf" data-i18n="exportGltf" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;">📱 GLTF COORDS</button>
-      <button id="btn-export-usdz" data-i18n="exportUsda" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; cursor:pointer;"> USDA SOURCE</button>
+      <button id="btn-measure" data-i18n="measure">📏 MEDIR 3D</button>
+      <button id="btn-export-gltf" data-i18n="exportGltf">📱 GLTF COORDS</button>
+      <button id="btn-export-usdz" data-i18n="exportUsda"> USDA SOURCE</button>
     </div>
     <div class="experience-science" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
-      <button id="btn-export-xyz" data-i18n="exportXyz" style="padding:6px 0; border:1px solid rgba(255,255,255,0.35); border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#FFFFFF; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;">💾 EXPORTAR .XYZ</button>
-      <button id="btn-export-cif" style="padding:6px 0; border:1px solid rgba(0,255,157,0.45); border-radius:8px; background:linear-gradient(180deg, rgba(0,255,157,0.22) 0%, rgba(0,240,255,0.08) 45%, rgba(18,24,36,0.9) 100%); color:#00FF9D; font-family:'Orbitron',sans-serif; font-size:8.2px; font-weight:700; cursor:pointer;" title="Exportar archivo cristalográfico estándar IUCr (.CIF)">🔬 CRISTAL .CIF (IUCr)</button>
+      <button id="btn-export-xyz" data-i18n="exportXyz">💾 EXPORTAR .XYZ</button>
+      <button id="btn-export-cif" data-i18n="exportCif" title="Exportar archivo cristalográfico estándar IUCr (.CIF)">🔬 CRISTAL .CIF (IUCr)</button>
     </div>
 
     <div class="material-lab" data-i18n-aria-label="materialsBarLabel" aria-label="Barra de materiales">
@@ -500,7 +579,7 @@
     <div class="stat-chip"><span id="atom-count">0 ATOMS</span></div>
     <button class="stat-chip" id="btn-audio" data-i18n="audioOn" style="cursor:pointer; color:#FFFFFF;">🔊 AUDIO: ON</button>
     <button class="stat-chip" id="btn-export" data-i18n="capture" style="cursor:pointer; color:#FFFFFF;">📸 CAPTURA HD</button>
-    <button class="stat-chip" id="btn-record" style="cursor:pointer; color:#FFFFFF;">🎥 GRABAR HD</button>
+    <button class="stat-chip" id="btn-record" data-i18n="record" style="cursor:pointer; color:#FFFFFF;">🎥 GRABAR HD</button>
   </div>
  
   <!-- ═══════════════════════════════════════════════════════════════
@@ -509,7 +588,7 @@
   <div id="pt-hud-panel">
     <div class="pt-panel-header">
       <span class="pt-panel-title">SYNTHESIS CONTROLLER</span>
-      <button id="btn-collapse-pt-hud" class="hud-collapse-btn" title="Esconder tabla periódica hacia abajo">▼ OCULTAR TABLA</button>
+      <button id="btn-collapse-pt-hud" class="hud-collapse-btn" data-i18n="collapsePt" title="Esconder tabla periódica hacia abajo">▼ OCULTAR TABLA</button>
     </div>
  
     <div class="pt-scroll">
@@ -676,7 +755,7 @@
     <!-- MOLECULAR & MATERIAL BUILDING BLOCKS TRAY INJECTOR -->
     <div class="mol-tray-bar" id="molecular-tray-bar" aria-label="Molecular building blocks">
       <span class="fusion-label" style="color:#00F0FF;">MOL+:</span>
-      <button type="button" class="mol-chip mol-chip-stage" id="btn-stage-active" title="Añadir compuesto o material actual a la bandeja">+ACTUAL</button>
+      <button type="button" class="mol-chip mol-chip-stage" id="btn-stage-active" data-i18n="stageActive" title="Añadir compuesto o material actual a la bandeja">+ACTUAL</button>
       <button type="button" class="mol-chip" data-mol-id="H2O">+H₂O</button>
       <button type="button" class="mol-chip" data-mol-id="CO2">+CO₂</button>
       <button type="button" class="mol-chip" data-mol-id="NH3">+NH₃</button>

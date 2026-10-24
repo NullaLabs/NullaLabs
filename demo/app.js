@@ -4086,18 +4086,30 @@ window.addEventListener('DOMContentLoaded', function() {
   // 4-MODE SCIENTIFIC 3D VISUALIZATION ENGINE + BRAGG XRD + COLLAPSIBLE CRYSTAL PANELS
   // ═══════════════════════════════════════════════════════════════
   const VISUAL_MODES = ['BALL_STICK', 'VDW_CPK', 'POLYHEDRA_CELL', 'CHARGE_MAP'];
-  const VISUAL_MODE_LABELS = {
-    BALL_STICK: '👁️ VISTA: BALL & STICK',
-    VDW_CPK: '👁️ VISTA: VDW ESPACIAL (CPK)',
-    POLYHEDRA_CELL: '👁️ VISTA: POLIEDROS + CELDA',
-    CHARGE_MAP: '👁️ VISTA: MAPA CARGA (δ+/δ-)'
+  const VISUAL_MODE_DICTIONARIES = {
+    es: { BALL_STICK: '👁️ VISTA: BALL & STICK', VDW_CPK: '👁️ VISTA: VDW ESPACIAL (CPK)', POLYHEDRA_CELL: '👁️ VISTA: POLIEDROS + CELDA', CHARGE_MAP: '👁️ VISTA: MAPA CARGA (δ+/δ-)' },
+    en: { BALL_STICK: '👁️ VIEW: BALL & STICK', VDW_CPK: '👁️ VIEW: SPACE-FILLING (CPK)', POLYHEDRA_CELL: '👁️ VIEW: POLYHEDRA + CELL', CHARGE_MAP: '👁️ VIEW: CHARGE MAP (δ+/δ-)' },
+    ja: { BALL_STICK: '👁️ 表示: 球棒モデル', VDW_CPK: '👁️ 表示: 空間充填 (CPK)', POLYHEDRA_CELL: '👁️ 表示: 多面体 + 単位胞', CHARGE_MAP: '👁️ 表示: 電荷マップ (δ+/δ-)' },
+    ru: { BALL_STICK: '👁️ ВИД: ШАР И СТЕРЖЕНЬ', VDW_CPK: '👁️ ВИД: СФЕРЫ ВАН-ДЕР-ВААЛЬСА', POLYHEDRA_CELL: '👁️ ВИД: ПОЛИЭДРЫ + ЯЧЕЙКА', CHARGE_MAP: '👁️ ВИД: КАРТА ЗАРЯДОВ (δ+/δ-)' },
+    zh: { BALL_STICK: '👁️ 视图：球棍模型', VDW_CPK: '👁️ 视图：空间填充 (CPK)', POLYHEDRA_CELL: '👁️ 视图：多面体 + 晶胞', CHARGE_MAP: '👁️ 视图：电荷分布 (δ+/δ-)' },
+    fr: { BALL_STICK: '👁️ VUE : BOULES ET BÂTONNETS', VDW_CPK: '👁️ VUE : REMPLISSAGE (CPK)', POLYHEDRA_CELL: '👁️ VUE : POLYÈDRES + MAILLE', CHARGE_MAP: '👁️ VUE : CARTE CHARGES (δ+/δ-)' },
+    it: { BALL_STICK: '👁️ VISTA: SFERE E ASTE', VDW_CPK: '👁️ VISTA: SPAZIALE (CPK)', POLYHEDRA_CELL: '👁️ VISTA: POLIEDRI + CELLA', CHARGE_MAP: '👁️ VISTA: MAPPA CARICHE (δ+/δ-)' },
+    de: { BALL_STICK: '👁️ ANSICHT: KUGEL-STAB', VDW_CPK: '👁️ ANSICHT: KALOTTEN (CPK)', POLYHEDRA_CELL: '👁️ ANSICHT: POLYEDER + ZELLE', CHARGE_MAP: '👁️ ANSICHT: LADUNGSKARTE (δ+/δ-)' },
+    pt: { BALL_STICK: '👁️ VISTA: ESFERA E BASTÃO', VDW_CPK: '👁️ VISTA: ESPACIAL (CPK)', POLYHEDRA_CELL: '👁️ VISTA: POLIEDROS + CÉLULA', CHARGE_MAP: '👁️ VISTA: MAPA CARGA (δ+/δ-)' },
+    ko: { BALL_STICK: '👁️ 보기: 공-막대 모델', VDW_CPK: '👁️ 보기: 공간 채움 (CPK)', POLYHEDRA_CELL: '👁️ 보기: 다면체 + 단위포', CHARGE_MAP: '👁️ 보기: 전하 지도 (δ+/δ-)' },
+    ar: { BALL_STICK: '👁️ العرض: كرات وعصي', VDW_CPK: '👁️ العرض: ملء الفراغ (CPK)', POLYHEDRA_CELL: '👁️ العرض: متعدد السطوح + خلية', CHARGE_MAP: '👁️ العرض: خريطة الشحنة (δ+/δ-)' }
   };
+  function getVisualModeLabel(mode) {
+    const locale = window.NULLA_I18N?.locale || 'es';
+    const dict = VISUAL_MODE_DICTIONARIES[locale] || VISUAL_MODE_DICTIONARIES.es;
+    return dict[mode] || VISUAL_MODE_DICTIONARIES.es[mode] || mode;
+  }
 
   function applyVisualRepresentationMode(announce = true) {
     clearVisualOverlays();
     const btnVis = document.getElementById('btn-visual-mode');
     if (btnVis) {
-      btnVis.textContent = VISUAL_MODE_LABELS[activeVisualMode] || VISUAL_MODE_LABELS.BALL_STICK;
+      btnVis.textContent = getVisualModeLabel(activeVisualMode);
     }
 
     const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
@@ -4338,42 +4350,100 @@ window.addEventListener('DOMContentLoaded', function() {
     btnXrd.addEventListener('click', triggerBraggXRDAnalysis);
   }
 
-  // Collapsible Left Telemetry Panel & Bottom Periodic Table Panel
+  // Collapsible Left Telemetry Panel & Bottom Periodic Table Panel (3D Solid Crystal Drawer Tabs)
   const leftHudPanel = document.getElementById('molecular-hud');
   const btnCollapseLeftHud = document.getElementById('btn-collapse-left-hud');
   const btnRestoreLeftHud = document.getElementById('btn-restore-left-hud');
-  if (btnCollapseLeftHud && leftHudPanel) {
-    btnCollapseLeftHud.addEventListener('click', (e) => {
-      e.stopPropagation();
-      leftHudPanel.classList.add('hud-collapsed-left');
-      if (btnRestoreLeftHud) btnRestoreLeftHud.classList.add('visible');
-    });
-  }
-  if (btnRestoreLeftHud && leftHudPanel) {
-    btnRestoreLeftHud.addEventListener('click', (e) => {
-      e.stopPropagation();
-      leftHudPanel.classList.remove('hud-collapsed-left');
-      btnRestoreLeftHud.classList.remove('visible');
-    });
-  }
-
   const ptHudCollapsePanel = document.getElementById('pt-hud-panel');
   const btnCollapsePtHud = document.getElementById('btn-collapse-pt-hud');
   const btnRestorePtHud = document.getElementById('btn-restore-pt-hud');
-  if (btnCollapsePtHud && ptHudCollapsePanel) {
+
+  function updateDrawerTabs() {
+    const isLeftCollapsed = document.body.classList.contains('hud-left-collapsed');
+    const isPtCollapsed = document.body.classList.contains('hud-pt-collapsed');
+
+    if (btnRestoreLeftHud) {
+      btnRestoreLeftHud.textContent = tr(isLeftCollapsed ? 'restoreLeft' : 'collapseLeft');
+      btnRestoreLeftHud.title = tr(isLeftCollapsed ? 'restoreLeft' : 'collapseLeft');
+      btnRestoreLeftHud.setAttribute('aria-expanded', !isLeftCollapsed);
+    }
+    if (btnCollapseLeftHud) {
+      btnCollapseLeftHud.textContent = tr('collapseLeft');
+      btnCollapseLeftHud.title = tr('collapseLeft');
+    }
+    if (btnRestorePtHud) {
+      btnRestorePtHud.textContent = tr(isPtCollapsed ? 'restorePt' : 'collapsePt');
+      btnRestorePtHud.title = tr(isPtCollapsed ? 'restorePt' : 'collapsePt');
+      btnRestorePtHud.setAttribute('aria-expanded', !isPtCollapsed);
+      if (!isPtCollapsed && ptHudCollapsePanel) {
+        const h = ptHudCollapsePanel.offsetHeight || 380;
+        btnRestorePtHud.style.bottom = `${h + 20}px`;
+      } else {
+        btnRestorePtHud.style.bottom = '';
+      }
+    }
+    if (btnCollapsePtHud) {
+      btnCollapsePtHud.textContent = tr('collapsePt');
+      btnCollapsePtHud.title = tr('collapsePt');
+    }
+  }
+
+  function toggleLeftHud(forceState) {
+    if (!leftHudPanel) return;
+    const shouldCollapse = forceState !== undefined ? forceState : !document.body.classList.contains('hud-left-collapsed');
+    if (shouldCollapse) {
+      leftHudPanel.classList.add('hud-collapsed-left');
+      document.body.classList.add('hud-left-collapsed');
+    } else {
+      leftHudPanel.classList.remove('hud-collapsed-left');
+      document.body.classList.remove('hud-left-collapsed');
+    }
+    updateDrawerTabs();
+  }
+
+  function togglePtHud(forceState) {
+    if (!ptHudCollapsePanel) return;
+    const shouldCollapse = forceState !== undefined ? forceState : !document.body.classList.contains('hud-pt-collapsed');
+    if (shouldCollapse) {
+      ptHudCollapsePanel.classList.add('hud-collapsed-bottom');
+      document.body.classList.add('hud-pt-collapsed');
+    } else {
+      ptHudCollapsePanel.classList.remove('hud-collapsed-bottom');
+      document.body.classList.remove('hud-pt-collapsed');
+    }
+    updateDrawerTabs();
+  }
+
+  if (btnCollapseLeftHud) {
+    btnCollapseLeftHud.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleLeftHud(true);
+    });
+  }
+  if (btnRestoreLeftHud) {
+    btnRestoreLeftHud.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleLeftHud();
+    });
+  }
+  if (btnCollapsePtHud) {
     btnCollapsePtHud.addEventListener('click', (e) => {
       e.stopPropagation();
-      ptHudCollapsePanel.classList.add('hud-collapsed-bottom');
-      if (btnRestorePtHud) btnRestorePtHud.classList.add('visible');
+      togglePtHud(true);
     });
   }
-  if (btnRestorePtHud && ptHudCollapsePanel) {
+  if (btnRestorePtHud) {
     btnRestorePtHud.addEventListener('click', (e) => {
       e.stopPropagation();
-      ptHudCollapsePanel.classList.remove('hud-collapsed-bottom');
-      btnRestorePtHud.classList.remove('visible');
+      togglePtHud();
     });
   }
+  window.addEventListener('resize', () => {
+    if (!document.body.classList.contains('hud-pt-collapsed')) {
+      updateDrawerTabs();
+    }
+  });
+  updateDrawerTabs();
 
   document.querySelectorAll('#molecular-tray-bar [data-mol-id]').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -4975,6 +5045,8 @@ window.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('nulla:locale', () => {
     renderEducationContent();
     translateVisibleRuntimeValues();
+    updateDrawerTabs();
+    applyVisualRepresentationMode(false);
     periodicCells.forEach(cell => {
       const z = parseInt(cell.dataset.z);
       const element = EL[z];
