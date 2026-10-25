@@ -117,6 +117,41 @@ window.addEventListener('DOMContentLoaded', function() {
     if (!inert) dialogBackgroundState.clear();
   }
 
+  // Hill-notation empirical formula (C, H first, then alphabetical) with Unicode subscripts
+  const SUBSCRIPT_DIGITS = ['\u2080','\u2081','\u2082','\u2083','\u2084','\u2085','\u2086','\u2087','\u2088','\u2089'];
+  function hillFormula(atoms) {
+    const counts = new Map();
+    for (const a of atoms) {
+      const sym = a.symbol || a.s || a.elData?.s;
+      if (!sym) continue;
+      counts.set(sym, (counts.get(sym) || 0) + 1);
+    }
+    if (!counts.size) return '—';
+    const keys = [...counts.keys()];
+    const hasC = counts.has('C');
+    keys.sort((x, y) => {
+      if (hasC) {
+        if (x === 'C') return -1; if (y === 'C') return 1;
+        if (x === 'H') return -1; if (y === 'H') return 1;
+      }
+      return x.localeCompare(y);
+    });
+    return keys.map(k => {
+      const n = counts.get(k);
+      return n === 1 ? k : k + String(n).replace(/\d/g, d => SUBSCRIPT_DIGITS[d]);
+    }).join('');
+  }
+
+  // Renders at most `limit` rows and appends a single overflow summary row
+  const MAX_LIST_ROWS = 60;
+  function appendOverflowRow(container, hidden) {
+    if (hidden <= 0) return;
+    const more = document.createElement('div');
+    more.style.cssText = 'padding:3px 6px; color:rgba(255,255,255,0.55); font-size:7.5px; text-align:center;';
+    more.textContent = `+${hidden} …`;
+    container.appendChild(more);
+  }
+
   function openDialog(dialog, trigger = null) {
     if (!dialog) return;
     if (activeDialog !== dialog) lastDialogFocus = trigger || document.activeElement;
@@ -469,12 +504,52 @@ window.addEventListener('DOMContentLoaded', function() {
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
   camera.position.set(0, 0, 75);
 
-  // Studio Lighting (3-Point)
+  // Studio Lighting (3-Point with Quantum Specular Accent)
   scene.add(new THREE.DirectionalLight(0x00F0FF, 2.0).translateX(50).translateY(60).translateZ(50));
   const rimLight = new THREE.DirectionalLight(0x8A2BE2, 1.4);
   rimLight.position.set(-50, -40, -30);
   scene.add(rimLight);
+  const fillLight = new THREE.PointLight(0x00FF88, 0.75, 160);
+  fillLight.position.set(0, 35, 45);
+  scene.add(fillLight);
   scene.add(new THREE.AmbientLight(0xFFFFFF, 0.75));
+
+  // Quantum Nebula Particle Field (Depth & Cinematic Space)
+  const nebulaCount = 450;
+  const nebulaGeo = new THREE.BufferGeometry();
+  const nebulaPos = new Float32Array(nebulaCount * 3);
+  const nebulaCols = new Float32Array(nebulaCount * 3);
+  const nebulaPalette = [
+    new THREE.Color(0x00F0FF),
+    new THREE.Color(0xBF00FF),
+    new THREE.Color(0x00FF88),
+    new THREE.Color(0x4361EE),
+    new THREE.Color(0xFFD700)
+  ];
+  for (let i = 0; i < nebulaCount; i++) {
+    const r = 90 + Math.random() * 140;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    nebulaPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    nebulaPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    nebulaPos[i * 3 + 2] = r * Math.cos(phi);
+    const col = nebulaPalette[Math.floor(Math.random() * nebulaPalette.length)];
+    nebulaCols[i * 3] = col.r;
+    nebulaCols[i * 3 + 1] = col.g;
+    nebulaCols[i * 3 + 2] = col.b;
+  }
+  nebulaGeo.setAttribute('position', new THREE.BufferAttribute(nebulaPos, 3));
+  nebulaGeo.setAttribute('color', new THREE.BufferAttribute(nebulaCols, 3));
+  const nebulaMat = new THREE.PointsMaterial({
+    size: 1.8,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.65,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const quantumNebula = new THREE.Points(nebulaGeo, nebulaMat);
+  scene.add(quantumNebula);
 
   // ═══════════════════════════════════════════════════════════════
   // DYNAMIC ATOM POOL - Spawn/despawn with smooth educational transitions
@@ -4358,7 +4433,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const elTemp = document.getElementById('ftir-temp-k');
     const elBandsList = document.getElementById('ftir-bands-list');
 
-    const formulaStr = activeReactionRef?.formula || activeFtirData.formula || 'H₂O';
+    const formulaStr = activeReactionRef?.formula || hillFormula(realAtoms);
     if (elFormula) elFormula.textContent = formulaStr;
     if (elAtomCount) elAtomCount.textContent = activeFtirData.atomCount;
     if (elBondCount) elBondCount.textContent = activeFtirData.bondCount;
@@ -4372,11 +4447,18 @@ window.addEventListener('DOMContentLoaded', function() {
       if (!activeFtirData.modes.length) {
         elBandsList.innerHTML = '<div style="color:rgba(255,255,255,0.5);">Sin enlaces covalentes vibracionales activos.</div>';
       } else {
-        activeFtirData.modes.forEach(m => {
+        const bandGroups = new Map();
+        for (const mode of activeFtirData.modes) {
+          const key = `${mode.wavenumberCm1}|${mode.name}`;
+          const g = bandGroups.get(key);
+          if (g) g.count++; else bandGroups.set(key, { mode, count: 1 });
+        }
+        const groupedBands = [...bandGroups.values()].sort((a, b) => b.mode.wavenumberCm1 - a.mode.wavenumberCm1);
+        groupedBands.slice(0, MAX_LIST_ROWS).forEach(({ mode: m, count }) => {
           const row = document.createElement('div');
           row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; background:rgba(255,255,255,0.06); cursor:pointer;';
           row.title = `Fuerza k=${m.forceConstantNm} N/m · Masa reducida μ=${m.reducedMassU} u`;
-          row.innerHTML = `<span style="color:#00F0FF; font-weight:700;">${m.wavenumberCm1} cm⁻¹</span> <span style="color:#FFF; font-size:7.5px;">${m.name}</span> <span style="color:#FFD700; font-size:7px;">${m.transmittancePct}% T</span>`;
+          row.innerHTML = `<span style="color:#00F0FF; font-weight:700;">${m.wavenumberCm1} cm⁻¹</span> <span style="color:#FFF; font-size:7.5px;">${m.name}${count > 1 ? ` <b style="color:#BF00FF;">×${count}</b>` : ''}</span> <span style="color:#FFD700; font-size:7px;">${m.transmittancePct}% T</span>`;
           row.addEventListener('click', () => {
             activeFtirModeId = m.type === 'bend' ? 'bend' : 'sym';
             isFtirVibrating = true;
@@ -4386,6 +4468,7 @@ window.addEventListener('DOMContentLoaded', function() {
           });
           elBandsList.appendChild(row);
         });
+        appendOverflowRow(elBandsList, groupedBands.length - MAX_LIST_ROWS);
       }
     }
 
@@ -4699,7 +4782,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
     if (!realAtoms.length) return;
 
-    const formulaStr = activeReactionRef?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
+    const formulaStr = activeReactionRef?.formula || hillFormula(realAtoms);
     if (!activeHomoLumoData || activeHomoLumoData.formula !== formulaStr.replace(/[^A-Za-z0-9]/g, '')) {
       if (window.NULLA_COMPATIBILITY?.computeHOMOLUMOProperties) {
         activeHomoLumoData = window.NULLA_COMPATIBILITY.computeHOMOLUMOProperties(realAtoms, activeBonds, formulaStr, temperatureK);
@@ -4809,7 +4892,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
     if (!realAtoms.length) return;
 
-    const formulaStr = activeReactionRef?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
+    const formulaStr = activeReactionRef?.formula || hillFormula(realAtoms);
     if (window.NULLA_COMPATIBILITY?.computeHOMOLUMOProperties) {
       activeHomoLumoData = window.NULLA_COMPATIBILITY.computeHOMOLUMOProperties(realAtoms, activeBonds, formulaStr, temperatureK);
     }
@@ -4855,11 +4938,18 @@ window.addEventListener('DOMContentLoaded', function() {
       if (!allSites.length) {
         elSites.innerHTML = '<div style="color:rgba(255,255,255,0.5);">Sin sitios frontera diferenciados.</div>';
       } else {
-        allSites.forEach(s => {
+        const siteGroups = new Map();
+        for (const site of allSites) {
+          const key = `${site.symbol}|${site.tag}|${site.role}`;
+          const g = siteGroups.get(key);
+          if (g) g.count++; else siteGroups.set(key, { ...site, count: 1 });
+        }
+        const groupedSites = [...siteGroups.values()];
+        groupedSites.slice(0, MAX_LIST_ROWS).forEach(s => {
           const row = document.createElement('div');
           row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; background:rgba(255,255,255,0.06); cursor:pointer;';
           row.title = `Átomo ${s.symbol} (Z=${s.z}) · Electronegatividad χ=${s.electronegativity}`;
-          row.innerHTML = `<span style="color:${s.tagCol}; font-weight:700;">${s.symbol}</span> <span style="color:#FFF; font-size:7.5px;">${s.role}</span> <span style="color:#FFD700; font-size:7px;">χ=${s.electronegativity}</span>`;
+          row.innerHTML = `<span style="color:${s.tagCol}; font-weight:700;">${s.symbol}${s.count > 1 ? ` ×${s.count}` : ''}</span> <span style="color:#FFF; font-size:7.5px;">${s.role}</span> <span style="color:#FFD700; font-size:7px;">χ=${s.electronegativity}</span>`;
           row.addEventListener('click', () => {
             activeOrbitalMode = s.tag.includes('HOMO') ? 'homo' : 'lumo';
             updateHomoLumoButtons();
@@ -4868,6 +4958,7 @@ window.addEventListener('DOMContentLoaded', function() {
           });
           elSites.appendChild(row);
         });
+        appendOverflowRow(elSites, groupedSites.length - MAX_LIST_ROWS);
       }
     }
 
@@ -5290,7 +5381,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const elVariance = document.getElementById('mep-variance-val');
     const elHbond = document.getElementById('mep-hbond-sites');
 
-    const formulaStr = activeReactionRef?.formula || activeMEPData.formula || 'H₂O';
+    const formulaStr = activeReactionRef?.formula || hillFormula(activeAtoms.filter(a => !a.isElectron && !a.removing));
     if (elFormula) elFormula.textContent = formulaStr;
     if (elPolarity) {
       elPolarity.textContent = activeMEPData.polarityRegime.replace(/_/g, ' ');
@@ -5323,11 +5414,18 @@ window.addEventListener('DOMContentLoaded', function() {
       if (!allSites.length) {
         elHbond.innerHTML = '<div style="color:rgba(255,255,255,0.5);">Sin sitios activos de puente de hidrógeno.</div>';
       } else {
-        allSites.forEach(s => {
+        const siteGroups = new Map();
+        for (const site of allSites) {
+          const key = `${site.symbol}|${site.tag}|${site.role}`;
+          const g = siteGroups.get(key);
+          if (g) g.count++; else siteGroups.set(key, { ...site, count: 1 });
+        }
+        const groupedSites = [...siteGroups.values()];
+        groupedSites.slice(0, MAX_LIST_ROWS).forEach(s => {
           const row = document.createElement('div');
           row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 6px; border-radius:4px; background:rgba(255,255,255,0.06); cursor:pointer;';
           row.title = `Átomo ${s.symbol} (Z=${s.z}) · Carga q=${s.charge} e`;
-          row.innerHTML = `<span style="color:${s.tagCol}; font-weight:700;">${s.symbol}</span> <span style="color:#FFF; font-size:7.5px;">${s.role}</span> <span style="color:#FFD700; font-size:7px;">q=${s.charge > 0 ? '+' : ''}${s.charge} e</span>`;
+          row.innerHTML = `<span style="color:${s.tagCol}; font-weight:700;">${s.symbol}${s.count > 1 ? ` ×${s.count}` : ''}</span> <span style="color:#FFF; font-size:7.5px;">${s.role}</span> <span style="color:#FFD700; font-size:7px;">q=${s.charge > 0 ? '+' : ''}${s.charge} e</span>`;
           elHbond.appendChild(row);
         });
       }
@@ -7908,6 +8006,11 @@ window.addEventListener('DOMContentLoaded', function() {
 
     moleculeGroup.rotation.x = curRotX;
     moleculeGroup.rotation.y = curRotY + t * 0.3;
+
+    if (quantumNebula) {
+      quantumNebula.rotation.y = t * 0.015;
+      quantumNebula.rotation.x = Math.sin(t * 0.01) * 0.03;
+    }
 
     if (renderer && scene && camera) {
       renderer.render(scene, camera);

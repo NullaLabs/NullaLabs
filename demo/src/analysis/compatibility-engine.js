@@ -879,7 +879,7 @@
 
     const resolvedAtoms = atomsList.map((a, idx) => {
       const z = Number(a.z) || 1;
-      const symbol = a.symbol || a.s || (root.NULLA_PERIODIC_TABLE?.[z]?.s) || 'X';
+      const symbol = a.symbol || a.s || a.elData?.s || (root.NULLA_PERIODIC_TABLE?.[z]?.s) || 'X';
       const mass = Number(a.mass) || Number(a.physicalMass) || STANDARD_ATOMIC_MASSES[z] || 12.0;
       const pos = {
         x: Number(a.x !== undefined ? a.x : (a.targetPos?.x ?? 0)),
@@ -1051,7 +1051,7 @@
     }
 
     return {
-      formula: atomsList.map(a => a.symbol || a.s || 'X').join(''),
+      formula: atomsList.map(a => a.symbol || a.s || a.elData?.s || 'X').join(''),
       atomCount: resolvedAtoms.length,
       bondCount: resolvedBonds.length,
       temperatureK,
@@ -1104,7 +1104,7 @@
       };
     }
 
-    const cleanFormula = (formulaStr || atomsList.map(a => a.symbol || a.s || 'X').join('')).replace(/[^A-Za-z0-9]/g, '');
+    const cleanFormula = (formulaStr || atomsList.map(a => a.symbol || a.s || a.elData?.s || 'X').join('')).replace(/[^A-Za-z0-9]/g, '');
     let benchmark = MOLECULAR_ORBITAL_BENCHMARKS[cleanFormula];
 
     let homoEv = -11.5;
@@ -1169,7 +1169,7 @@
       const z = Number(a.z) || 1;
       const el = root.NULLA_PERIODIC_TABLE?.[z];
       const en = el?.electronegativity || 2.2;
-      const sym = a.symbol || a.s || el?.s || 'X';
+      const sym = a.symbol || a.s || a.elData?.s || el?.s || 'X';
       if (en >= 3.0 || (z === 8 || z === 7 || z === 9 || z === 17)) {
         nucleophilicSites.push({ index: idx, z, symbol: sym, electronegativity: en, role: 'Par no enlazante / Dador nucleófilo' });
       } else if (en <= 2.2 || (z === 1 || z === 6 || z === 11 || z === 22)) {
@@ -1233,7 +1233,7 @@
       };
     }
 
-    const cleanFormula = atomsList.map(a => a.symbol || a.s || 'X').join('').replace(/[^A-Za-z0-9]/g, '');
+    const cleanFormula = atomsList.map(a => a.symbol || a.s || a.elData?.s || 'X').join('').replace(/[^A-Za-z0-9]/g, '');
 
     // Step 1: Assign partial charges q_i
     const charges = new Array(atomsList.length).fill(0.0);
@@ -1378,7 +1378,7 @@
     const hydrogenBondDonors = [];
     atomsList.forEach((a, idx) => {
       const z = Number(a.z) || 1;
-      const sym = a.symbol || a.s || 'X';
+      const sym = a.symbol || a.s || a.elData?.s || 'X';
       const q = Number(charges[idx].toFixed(3));
       if (q <= -0.15 || (z === 8 || z === 7 || z === 9 || z === 17)) {
         hydrogenBondAcceptors.push({ index: idx, z, symbol: sym, charge: q, role: 'Aceptor de Enlace de H (Región Rica en e⁻)' });

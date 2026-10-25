@@ -76,6 +76,42 @@
       attackMs: 3,
       decayMs: 130,
       gainPeak: 0.12
+    },
+    // Window manager: minimize descending sweep (sine wave)
+    windowMinimize: {
+      oscType: 'sine',
+      freqStart: 760,
+      freqEnd: 240,
+      attackMs: 3,
+      decayMs: 70,
+      gainPeak: 0.08
+    },
+    // Window manager: restore ascending sweep (sine wave)
+    windowRestore: {
+      oscType: 'sine',
+      freqStart: 240,
+      freqEnd: 760,
+      attackMs: 3,
+      decayMs: 70,
+      gainPeak: 0.08
+    },
+    // Window manager: maximize crystal ping (triangle wave)
+    windowMaximize: {
+      oscType: 'triangle',
+      freqStart: 540,
+      freqEnd: 1080,
+      attackMs: 2,
+      decayMs: 65,
+      gainPeak: 0.09
+    },
+    // Window manager: tactile corner resize notch (triangle wave)
+    windowResize: {
+      oscType: 'triangle',
+      freqStart: 880,
+      freqEnd: 620,
+      attackMs: 1,
+      decayMs: 18,
+      gainPeak: 0.04
     }
   };
 

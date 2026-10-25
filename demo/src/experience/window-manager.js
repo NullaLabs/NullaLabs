@@ -198,6 +198,9 @@
       modal.style.borderColor = config.colorBorder;
       modal.classList.add('nulla-window-managed');
 
+      // Scrolling moves into an inner body so corner handles stay pinned to the frame
+      this.wrapBody(modal);
+
       // Inject 4 corner transformation handles + 4 edges
       this.injectResizeHandles(modal, config);
 
@@ -219,6 +222,20 @@
             });
           }
         }
+      }
+    }
+
+    wrapBody(modal) {
+      if (modal.querySelector(':scope > .nulla-win-body')) return;
+      const body = document.createElement('div');
+      body.className = 'nulla-win-body';
+      while (modal.firstChild) body.appendChild(modal.firstChild);
+      modal.appendChild(body);
+      // Preserve the authored max-height on the scrolling body (minus vertical padding)
+      const cs = window.getComputedStyle(modal);
+      if (modal.style.maxHeight && modal.style.maxHeight !== 'none') {
+        const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0) + 2;
+        body.style.maxHeight = `calc(${modal.style.maxHeight} - ${pad}px)`;
       }
     }
 
@@ -302,10 +319,11 @@
         );
         if (interactive) return;
 
-        // Check if scrollbar clicked
-        if (modal.scrollHeight > modal.clientHeight) {
-          const rect = modal.getBoundingClientRect();
-          if (e.clientX > rect.right - 18) return;
+        // Check if a scrollbar of the inner body was clicked
+        const body = modal.querySelector(':scope > .nulla-win-body');
+        if (body && (body.scrollHeight > body.clientHeight || body.scrollWidth > body.clientWidth)) {
+          const rect = body.getBoundingClientRect();
+          if (e.clientX > rect.left + body.clientWidth || e.clientY > rect.top + body.clientHeight) return;
         }
 
         this.startDrag(e, modal, state);
@@ -334,6 +352,7 @@
         modal.style.width = `${Math.round(rect.width)}px`;
         modal.style.height = `${Math.round(rect.height)}px`;
         modal.style.maxHeight = 'none';
+        modal.classList.add('is-sized');
       }
     }
 
@@ -421,6 +440,9 @@
 
       document.body.classList.add('nulla-window-resizing');
       modal.classList.add('is-resizing');
+      if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+        window.NULLA_AUDIO.playCue('windowResize');
+      }
     }
 
     onResizeMove(e) {
@@ -507,6 +529,9 @@
       this.createDockTab(state);
       this.updateDockVisibility();
       this.emit('nulla:window-minimized', modal);
+      if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+        window.NULLA_AUDIO.playCue('windowMinimize');
+      }
     }
 
     emit(type, modal) {
@@ -521,8 +546,10 @@
       const { modal } = state;
       const wasMinimized = state.isMinimized;
 
-      // Restore display
+      // Restore display with smooth entrance
       modal.style.display = 'block';
+      modal.classList.add('is-opening');
+      setTimeout(() => modal.classList.remove('is-opening'), 300);
       state.isMinimized = false;
       this.minimizedWindows.delete(modalId);
 
@@ -537,7 +564,12 @@
       this.bringToFront(modal);
       this.removeDockTab(modalId);
       this.updateDockVisibility();
-      if (wasMinimized) this.emit('nulla:window-restored', modal);
+      if (wasMinimized) {
+        this.emit('nulla:window-restored', modal);
+        if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+          window.NULLA_AUDIO.playCue('windowRestore');
+        }
+      }
       // Trigger focus on first input or button
       const target = modal.querySelector('button, [href], select, input');
       if (target) target.focus({ preventScroll: true });
@@ -551,6 +583,9 @@
       const maxBtn = modal.querySelector('.nulla-win-btn-max');
 
       if (!state.isMaximized) {
+        if (typeof window !== 'undefined' && window.NULLA_AUDIO) {
+          window.NULLA_AUDIO.playCue('windowMaximize');
+        }
         // Store pre-maximized bounds
         this.ensurePixelPosition(modal);
         state.preMaxBounds = {

@@ -505,10 +505,29 @@
        ========================================================================== */
     .nulla-window-managed {
       box-sizing: border-box !important;
+      overflow: hidden !important;
       touch-action: none;
       transition: box-shadow 0.2s ease, border-color 0.2s ease;
       cursor: grab;
       user-select: auto;
+    }
+    @keyframes nullaWindowEntrance {
+      0% { opacity: 0; transform: scale(0.92) translateY(12px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .nulla-window-managed.is-opening {
+      animation: nullaWindowEntrance 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .nulla-win-body {
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--win-accent, #00F0FF) transparent;
+      touch-action: pan-x pan-y;
+    }
+    .nulla-window-managed.is-sized > .nulla-win-body {
+      height: 100%;
+      max-height: none !important;
     }
     .nulla-window-managed:active {
       cursor: grabbing;
@@ -558,7 +577,7 @@
     }
     /* Corner Brackets */
     .nulla-win-handle-nw {
-      top: -3px; left: -3px; width: 22px; height: 22px;
+      top: 0; left: 0; width: 22px; height: 22px;
       cursor: nwse-resize;
       border-top: 3.5px solid var(--win-accent, #00F0FF);
       border-left: 3.5px solid var(--win-accent, #00F0FF);
@@ -567,7 +586,7 @@
       transition: transform 0.15s ease, filter 0.15s ease;
     }
     .nulla-win-handle-ne {
-      top: -3px; right: -3px; width: 22px; height: 22px;
+      top: 0; right: 0; width: 22px; height: 22px;
       cursor: nesw-resize;
       border-top: 3.5px solid var(--win-accent, #00F0FF);
       border-right: 3.5px solid var(--win-accent, #00F0FF);
@@ -576,7 +595,7 @@
       transition: transform 0.15s ease, filter 0.15s ease;
     }
     .nulla-win-handle-sw {
-      bottom: -3px; left: -3px; width: 22px; height: 22px;
+      bottom: 0; left: 0; width: 22px; height: 22px;
       cursor: nesw-resize;
       border-bottom: 3.5px solid var(--win-accent, #00F0FF);
       border-left: 3.5px solid var(--win-accent, #00F0FF);
@@ -585,7 +604,7 @@
       transition: transform 0.15s ease, filter 0.15s ease;
     }
     .nulla-win-handle-se {
-      bottom: -3px; right: -3px; width: 22px; height: 22px;
+      bottom: 0; right: 0; width: 22px; height: 22px;
       cursor: nwse-resize;
       border-bottom: 3.5px solid var(--win-accent, #00F0FF);
       border-right: 3.5px solid var(--win-accent, #00F0FF);
@@ -601,10 +620,10 @@
       filter: drop-shadow(0 0 12px var(--win-accent, #00F0FF)) brightness(1.3);
     }
     /* Edge Handles */
-    .nulla-win-handle-n { top: -4px; left: 24px; right: 24px; height: 8px; cursor: ns-resize; }
-    .nulla-win-handle-s { bottom: -4px; left: 24px; right: 24px; height: 8px; cursor: ns-resize; }
-    .nulla-win-handle-w { left: -4px; top: 24px; bottom: 24px; width: 8px; cursor: ew-resize; }
-    .nulla-win-handle-e { right: -4px; top: 24px; bottom: 24px; width: 8px; cursor: ew-resize; }
+    .nulla-win-handle-n { top: 0; left: 24px; right: 24px; height: 8px; cursor: ns-resize; }
+    .nulla-win-handle-s { bottom: 0; left: 24px; right: 24px; height: 8px; cursor: ns-resize; }
+    .nulla-win-handle-w { left: 0; top: 24px; bottom: 24px; width: 8px; cursor: ew-resize; }
+    .nulla-win-handle-e { right: 0; top: 24px; bottom: 24px; width: 8px; cursor: ew-resize; }
 
     /* Window Controls Header */
     .nulla-win-controls {
