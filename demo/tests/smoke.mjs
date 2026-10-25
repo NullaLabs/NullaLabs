@@ -22,6 +22,7 @@ const thermodynamicsSource = readFileSync(new URL('../src/physics/thermodynamics
 const measurementSource = readFileSync(new URL('../src/physics/measurement.js', import.meta.url), 'utf8');
 const quantumSpectroscopySource = readFileSync(new URL('../src/physics/quantum-spectroscopy.js', import.meta.url), 'utf8');
 const vseprSource = readFileSync(new URL('../src/chemistry/vsepr-engine.js', import.meta.url), 'utf8');
+const windowManagerSource = readFileSync(new URL('../src/experience/window-manager.js', import.meta.url), 'utf8');
 
 for (const match of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {
   const sourcePath = match[1].split('?')[0];
@@ -623,3 +624,38 @@ assert.ok(vsepr.VSEPR_MOLECULAR_DATABASE.CO2);
 assert.ok(vsepr.VSEPR_MOLECULAR_DATABASE.SF6);
 
 console.log('Smoke contracts passed.');
+
+// ============================================================================
+// WINDOW MANAGER CONTRACTS (4-CORNER RESIZE, DRAG-ANYWHERE, CRYSTAL DOCK)
+// ============================================================================
+assert.match(html, /id="nulla-minimized-dock"/, 'minimized dock container must be present in HTML');
+assert.match(html, /nulla-window-managed/, 'window manager stylesheet must define managed window styles');
+assert.match(html, /nulla-win-handle-nw/, '4-corner resize handles must be styled');
+assert.match(html, /nulla-dock-tab/, 'crystal dock tabs must be styled');
+assert.match(app, /window\.NULLA_WINDOW_MANAGER\.restoreWindow\(dialog\.id\)/, 'openDialog must notify window manager to restore');
+assert.match(app, /window\.NULLA_WINDOW_MANAGER\.removeDockTab\(dialog\.id\)/, 'closeDialog must remove dock tab');
+
+const wmSandbox = {};
+wmSandbox.globalThis = wmSandbox;
+vm.runInNewContext(windowManagerSource, wmSandbox);
+const wm = wmSandbox.NULLA_WINDOW_MANAGER;
+assert.ok(wm, 'NULLA_WINDOW_MANAGER must be exposed on globalThis');
+
+const wmConfigs = wm.getAllConfigs();
+const expectedModalIds = [
+  'segre-modal', 'ftir-modal', 'homo-lumo-modal', 'mep-modal',
+  'spectroscopy-modal', 'vsepr-modal', 'suggestion-modal', 'docs-modal', 'quiz-modal'
+];
+
+for (const mid of expectedModalIds) {
+  assert.ok(wmConfigs[mid], `Window manager must configure modal ${mid}`);
+  assert.ok(wmConfigs[mid].color, `Modal ${mid} must have distinct color`);
+  assert.ok(wmConfigs[mid].icon, `Modal ${mid} must have distinct icon`);
+  assert.ok(wmConfigs[mid].shortTitle, `Modal ${mid} must have short title`);
+  assert.ok(wmConfigs[mid].minWidth >= 250, `Modal ${mid} must enforce minimum width bound`);
+  assert.ok(wmConfigs[mid].minHeight >= 180, `Modal ${mid} must enforce minimum height bound`);
+}
+
+const uniqueColors = new Set(Object.values(wmConfigs).map(c => c.color));
+assert.equal(uniqueColors.size, expectedModalIds.length, 'Every window must have a unique distinct color for visual identity');
+

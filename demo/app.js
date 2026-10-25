@@ -101,7 +101,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function setDialogBackgroundInert(dialog, inert) {
     for (const element of document.body.children) {
-      if (element === dialog || element.tagName === 'SCRIPT') continue;
+      if (element === dialog || element.tagName === 'SCRIPT' || element.id === 'nulla-minimized-dock') continue;
       if (inert) {
         if (!dialogBackgroundState.has(element)) dialogBackgroundState.set(element,{inert:element.inert,ariaHidden:element.getAttribute('aria-hidden')});
         element.inert = true;
@@ -122,6 +122,9 @@ window.addEventListener('DOMContentLoaded', function() {
     if (activeDialog !== dialog) lastDialogFocus = trigger || document.activeElement;
     activeDialog = dialog;
     dialog.style.display = 'block';
+    if (typeof window !== 'undefined' && window.NULLA_WINDOW_MANAGER) {
+      window.NULLA_WINDOW_MANAGER.restoreWindow(dialog.id);
+    }
     setDialogBackgroundInert(dialog,true);
     const focusTarget = dialog.querySelector('button, [href], select, input, [tabindex]:not([tabindex="-1"])');
     if (focusTarget) focusTarget.focus({preventScroll:true});
@@ -130,10 +133,28 @@ window.addEventListener('DOMContentLoaded', function() {
   function closeDialog(dialog) {
     if (!dialog) return;
     dialog.style.display = 'none';
+    if (typeof window !== 'undefined' && window.NULLA_WINDOW_MANAGER) {
+      window.NULLA_WINDOW_MANAGER.removeDockTab(dialog.id);
+    }
     setDialogBackgroundInert(dialog,false);
     if (activeDialog === dialog) activeDialog = null;
     if (lastDialogFocus && typeof lastDialogFocus.focus === 'function') lastDialogFocus.focus({preventScroll:true});
   }
+
+  // Window manager: a minimized window must release the page; restoring re-isolates it
+  document.addEventListener('nulla:window-minimized', event => {
+    const dialog = event.detail?.modal;
+    if (!dialog) return;
+    setDialogBackgroundInert(dialog,false);
+    if (activeDialog === dialog) activeDialog = null;
+    if (lastDialogFocus && typeof lastDialogFocus.focus === 'function') lastDialogFocus.focus({preventScroll:true});
+  });
+  document.addEventListener('nulla:window-restored', event => {
+    const dialog = event.detail?.modal;
+    if (!dialog) return;
+    activeDialog = dialog;
+    setDialogBackgroundInert(dialog,true);
+  });
 
   document.addEventListener('keydown', event => {
     if (!activeDialog) return;
@@ -4337,7 +4358,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const elTemp = document.getElementById('ftir-temp-k');
     const elBandsList = document.getElementById('ftir-bands-list');
 
-    const formulaStr = currentReaction?.formula || activeFtirData.formula || 'H₂O';
+    const formulaStr = activeReactionRef?.formula || activeFtirData.formula || 'H₂O';
     if (elFormula) elFormula.textContent = formulaStr;
     if (elAtomCount) elAtomCount.textContent = activeFtirData.atomCount;
     if (elBondCount) elBondCount.textContent = activeFtirData.bondCount;
@@ -4678,7 +4699,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
     if (!realAtoms.length) return;
 
-    const formulaStr = currentReaction?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
+    const formulaStr = activeReactionRef?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
     if (!activeHomoLumoData || activeHomoLumoData.formula !== formulaStr.replace(/[^A-Za-z0-9]/g, '')) {
       if (window.NULLA_COMPATIBILITY?.computeHOMOLUMOProperties) {
         activeHomoLumoData = window.NULLA_COMPATIBILITY.computeHOMOLUMOProperties(realAtoms, activeBonds, formulaStr, temperatureK);
@@ -4788,7 +4809,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const realAtoms = activeAtoms.filter(a => !a.isElectron && !a.removing);
     if (!realAtoms.length) return;
 
-    const formulaStr = currentReaction?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
+    const formulaStr = activeReactionRef?.formula || (realAtoms.map(a => a.symbol || a.s || 'X').join(''));
     if (window.NULLA_COMPATIBILITY?.computeHOMOLUMOProperties) {
       activeHomoLumoData = window.NULLA_COMPATIBILITY.computeHOMOLUMOProperties(realAtoms, activeBonds, formulaStr, temperatureK);
     }
@@ -5269,7 +5290,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const elVariance = document.getElementById('mep-variance-val');
     const elHbond = document.getElementById('mep-hbond-sites');
 
-    const formulaStr = currentReaction?.formula || activeMEPData.formula || 'H₂O';
+    const formulaStr = activeReactionRef?.formula || activeMEPData.formula || 'H₂O';
     if (elFormula) elFormula.textContent = formulaStr;
     if (elPolarity) {
       elPolarity.textContent = activeMEPData.polarityRegime.replace(/_/g, ' ');
