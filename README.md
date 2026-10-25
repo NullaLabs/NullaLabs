@@ -67,9 +67,6 @@ source-available under its own license; it is not MIT.
 - Bézier/vector generation and font assembly
 - Local workflow with test-backed release metadata
 
-<sub>[Source-Available · Zone Beta Validation Gate]</sub> ·
-[Repository reference](https://github.com/NullaLabs/FONTS-FORGE-by-Ethernium)
-
 </td>
 <td width="42%" valign="middle">
   <img src="logo-fontforge.png?v=512" alt="Fonts Forge by Ethernium" width="100%" />
@@ -98,9 +95,6 @@ hand a saved master to a separate private companion.
 - Real transcoding and GIF encoding paths
 - Explicit boundary between deterministic scaling and private AI tooling
 
-<sub>[Source-Available · Zone Beta Validation Gate]</sub> ·
-[Repository reference](https://github.com/NullaLabs/KAPTURA-by-Ethernium)
-
 </td>
 </tr>
 </table>
@@ -123,9 +117,6 @@ third-party npm dependencies.
 - Deterministic SQLite idempotency (40 concurrent replays → 1 record; mutated payload → `409 Conflict`)
 - Chaos-injection harness (`crm-delay`, `api-500`, `api-latency`, `response-lost`)
 - Fail-closed qualification verifier with 89/89 deterministic test assertions
-
-<sub>[WRCP 1.2.1 Engine · Zone Beta Validation Gate]</sub> ·
-[Repository reference](https://github.com/NullaLabs/SCRIBA-by-Ethernium)
 
 </td>
 <td width="42%" valign="middle">
@@ -181,7 +172,6 @@ authorship, safety or semantic truth.
 - Python distributions with explicit edition boundaries
 
 <sub>[Proprietary Core Engine]</sub> ·
-[Published package](https://pypi.org/project/chronolith-pro/)
 
 </td>
 <td width="42%" valign="middle">
@@ -210,9 +200,6 @@ authority.
 - Local and deterministic context selection
 - Explicit findings instead of hidden mutation
 - Zero-runtime-dependency Python package
-
-<sub>[Proprietary Core Engine]</sub> ·
-[Published package](https://pypi.org/project/seneschal/)
 
 </td>
 </tr>
